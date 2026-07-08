@@ -16,8 +16,10 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: empresa } = await supabase.from("companies").select("*").eq("id", id).single();
+  const { data: empresa } = await supabase.from("companies").select("*, profiles(email)").eq("id", id).single();
   if (!empresa) notFound();
+
+  const email = (empresa.profiles as { email?: string } | null)?.email;
 
   const { data: jobs } = await supabase
     .from("jobs")
@@ -34,11 +36,27 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
 
       {/* Info + ações */}
       <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+        {/* Email + WhatsApp em destaque */}
+        <div className="grid grid-cols-2 gap-3 pb-3 border-b border-gray-100">
+          <div>
+            <p className="text-xs text-gray-400">E-mail</p>
+            {email
+              ? <a href={`mailto:${email}`} className="text-sm font-medium text-rose-600 hover:underline break-all">{email}</a>
+              : <p className="text-sm text-gray-400">—</p>}
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">WhatsApp / Telefone</p>
+            {empresa.telefone
+              ? <a href={`https://wa.me/55${empresa.telefone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer"
+                  className="text-sm font-medium text-green-600 hover:underline">{empresa.telefone}</a>
+              : <p className="text-sm text-gray-400">—</p>}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 text-sm">
           {[
             ["CNPJ", empresa.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")],
             ["Responsável", empresa.responsavel],
-            ["Telefone", empresa.telefone],
             ["Cidade", `${empresa.cidade} · ${empresa.estado}`],
             ["Categoria", empresa.categoria_negocio],
             ["Funcionários", empresa.faixa_funcionarios],

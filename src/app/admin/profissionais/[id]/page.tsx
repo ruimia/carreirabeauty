@@ -16,8 +16,10 @@ export default async function AdminProfissionalDetailPage({ params }: { params: 
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: p } = await supabase.from("professionals").select("*").eq("id", id).single();
+  const { data: p } = await supabase.from("professionals").select("*, profiles(email)").eq("id", id).single();
   if (!p) notFound();
+
+  const email = (p.profiles as { email?: string } | null)?.email;
 
   const { data: apps } = await supabase
     .from("applications")
@@ -34,6 +36,23 @@ export default async function AdminProfissionalDetailPage({ params }: { params: 
 
       {/* Info */}
       <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+        {/* Email + WhatsApp em destaque */}
+        <div className="grid grid-cols-2 gap-3 pb-3 border-b border-gray-100">
+          <div>
+            <p className="text-xs text-gray-400">E-mail</p>
+            {email
+              ? <a href={`mailto:${email}`} className="text-sm font-medium text-rose-600 hover:underline break-all">{email}</a>
+              : <p className="text-sm text-gray-400">—</p>}
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">WhatsApp / Telefone</p>
+            {p.telefone
+              ? <a href={`https://wa.me/55${p.telefone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer"
+                  className="text-sm font-medium text-green-600 hover:underline">{p.telefone}</a>
+              : <p className="text-sm text-gray-400">—</p>}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 text-sm">
           {[
             ["Função", FUNCAO_LABEL[p.funcao] ?? p.funcao],
