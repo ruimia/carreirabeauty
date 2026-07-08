@@ -76,14 +76,14 @@ export default function EmpresaOnboarding({
         .from("companies")
         .update(fields)
         .eq("id", companyId);
-      if (error) throw error;
+      if (error) throw new Error(error.message);
     } else {
       const { data, error } = await supabase
         .from("companies")
         .insert({ user_id: userId, ...fields })
         .select("id")
         .single();
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       setCompanyId(data.id);
     }
   }
@@ -123,7 +123,8 @@ export default function EmpresaOnboarding({
       await upsertCompany({ cnpj: raw });
       setStep(2);
     } catch (e) {
-      setError(`Erro ao salvar: ${e instanceof Error ? e.message : String(e)}`);
+      const msg = e instanceof Error ? e.message : JSON.stringify(e);
+      setError(`Erro ao salvar: ${msg}`);
     } finally {
       setLoading(false);
     }
