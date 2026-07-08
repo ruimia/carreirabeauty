@@ -94,10 +94,10 @@ export default function EmpresaOnboarding({
     setError("");
     const raw = cnpj.replace(/\D/g, "");
     try {
-      const res = await fetch(`/api/cnpj/${raw}`);
+      // Chama BrasilAPI diretamente do browser (CORS liberado)
+      const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${raw}`);
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setError(body?.error ?? `Erro ${res.status} ao consultar CNPJ.`);
+        setError("CNPJ não encontrado. Verifique e tente novamente.");
         return;
       }
       const data = await res.json();
@@ -114,11 +114,16 @@ export default function EmpresaOnboarding({
       setCidade(data.municipio || "");
       setEstado(data.uf || "");
       setCep(cepVal);
+    } catch {
+      setError("Erro ao consultar CNPJ. Verifique sua conexão e tente novamente.");
+      return;
+    }
 
+    try {
       await upsertCompany({ cnpj: raw });
       setStep(2);
-    } catch {
-      setError("Erro ao consultar CNPJ. Tente novamente.");
+    } catch (e) {
+      setError(`Erro ao salvar: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setLoading(false);
     }
