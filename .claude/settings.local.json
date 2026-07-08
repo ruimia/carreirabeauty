@@ -5,7 +5,16 @@
       "Read(//private/tmp/**)",
       "Bash(npx create-next-app@latest carreirabeauty --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-git)",
       "Bash(npm install *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git config *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git remote *)",
+      "Bash(npm run *)",
+      "Bash(supabase --version)",
+      "Bash(vercel --version)",
+      "WebFetch(domain:carreirabeauty-black.vercel.app)",
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/api/cnpj/\\\\[cnpj\\\\] \\\\ *)"
     ]
   }
 }
