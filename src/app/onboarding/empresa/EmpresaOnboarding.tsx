@@ -96,7 +96,8 @@ export default function EmpresaOnboarding({
     try {
       const res = await fetch(`/api/cnpj/${raw}`);
       if (!res.ok) {
-        setError("CNPJ não encontrado. Verifique e tente novamente.");
+        const body = await res.json().catch(() => ({}));
+        setError(body?.error ?? `Erro ${res.status} ao consultar CNPJ.`);
         return;
       }
       const data = await res.json();

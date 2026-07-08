@@ -18,7 +18,12 @@
       "Bash(curl -s \"https://brasilapi.com.br/api/cnpj/v1/11222333000181\")",
       "Bash(curl -s \"https://brasilapi.com.br/api/cnpj/v1/18530947000170\")",
       "Bash(vercel --prod)",
-      "Bash(vercel env *)"
+      "Bash(vercel env *)",
+      "Bash(vercel ls *)",
+      "Bash(vercel link *)",
+      "WebFetch(domain:carreirabeauty-d9n5dw39w-ruimias-projects.vercel.app)",
+      "Bash(vercel alias *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://brasilapi.com.br/api/cnpj/v1/18530947000170\" -H \"User-Agent: Vercel-Serverless\")"
     ]
   }
 }
