@@ -64,9 +64,13 @@ export default async function DashboardProfissionalPage() {
             <h1 className="font-bold text-gray-800 truncate">{professional.nome}</h1>
             <p className="text-sm text-rose-500">{funcao}</p>
           </div>
+          <Link href="/dashboard/profissional/perfil"
+            className="text-sm text-gray-400 hover:text-rose-500 transition">
+            Perfil
+          </Link>
           <Link href={`/perfil/${professional.slug}`}
             className="text-sm text-gray-400 hover:text-rose-500 transition">
-            Ver perfil
+            Público
           </Link>
           <LogoutButton compact />
         </div>
