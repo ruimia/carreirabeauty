@@ -1,0 +1,98 @@
+export const dynamic = "force-dynamic";
+import { createClient } from "@/lib/supabase/server";
+import { updateJobStatus } from "../actions";
+
+const FUNCAO_LABEL: Record<string, string> = {
+  cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
+  esteticista: "Esteticista", maquiador: "Maquiador(a)", barbeiro: "Barbeiro",
+  massoterapeuta: "Massoterapeuta", designer_sobrancelha_cilios: "Designer sobrancelha/cílios",
+  depilador: "Depilador(a)", podologo: "Podólogo(a)", recepcionista: "Recepcionista",
+  auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
+};
+
+export default async function AdminVagasPage() {
+  const supabase = await createClient();
+  const { data: vagas } = await supabase
+    .from("jobs")
+    .select("id, funcao, funcao_outro, status, criado_em, applications(count), companies(nome_estabelecimento, cidade)")
+    .order("criado_em", { ascending: false });
+
+  const counts = { ativa: 0, pausada: 0, fechada: 0 };
+  vagas?.forEach((v) => { if (v.status in counts) counts[v.status as keyof typeof counts]++; });
+
+  return (
+    <div className="space-y-4 py-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-gray-800">Vagas</h1>
+        <span className="text-sm text-gray-400">{vagas?.length ?? 0} total</span>
+      </div>
+
+      {/* Mini stats */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Ativas", value: counts.ativa, color: "bg-green-50 text-green-700" },
+          { label: "Pausadas", value: counts.pausada, color: "bg-yellow-50 text-yellow-700" },
+          { label: "Fechadas", value: counts.fechada, color: "bg-gray-50 text-gray-500" },
+        ].map((s) => (
+          <div key={s.label} className={`rounded-xl p-3 ${s.color} text-center`}>
+            <p className="text-2xl font-bold">{s.value}</p>
+            <p className="text-xs opacity-70 mt-0.5">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+              <tr>
+                <th className="text-left px-4 py-3">Vaga</th>
+                <th className="text-left px-4 py-3 hidden sm:table-cell">Empresa</th>
+                <th className="text-left px-4 py-3">Status</th>
+                <th className="text-left px-4 py-3 hidden sm:table-cell">Candidaturas</th>
+                <th className="text-left px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {vagas?.map((v) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const empresa = v.companies as any;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const count = (v.applications as any)?.[0]?.count ?? 0;
+                return (
+                  <tr key={v.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-gray-800">
+                        {v.funcao === "outro" ? v.funcao_outro : FUNCAO_LABEL[v.funcao] ?? v.funcao}
+                      </p>
+                      <p className="text-xs text-gray-400">{new Date(v.criado_em).toLocaleDateString("pt-BR")}</p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">
+                      <p className="truncate max-w-[180px]">{empresa?.nome_estabelecimento}</p>
+                      <p className="text-xs text-gray-400">{empresa?.cidade}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        v.status === "ativa" ? "bg-green-100 text-green-700" :
+                        v.status === "pausada" ? "bg-yellow-100 text-yellow-700" :
+                        "bg-gray-100 text-gray-500"
+                      }`}>{v.status}</span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{count}</td>
+                    <td className="px-4 py-3">
+                      <form action={updateJobStatus.bind(null, v.id, v.status === "ativa" ? "fechada" : "ativa")}>
+                        <button className="text-xs text-rose-500 hover:text-rose-600 font-medium whitespace-nowrap">
+                          {v.status === "ativa" ? "Fechar" : "Reativar"}
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
