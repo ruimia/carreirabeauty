@@ -211,10 +211,6 @@ export default function EmpresaOnboarding({
       setError("Informe o @ do Instagram.");
       return;
     }
-    if (!logoPreview && !initialData.logo_url) {
-      setError("Adicione uma foto do estabelecimento.");
-      return;
-    }
 
     setLoading(true);
     setError("");
@@ -464,13 +460,13 @@ export default function EmpresaOnboarding({
       <StepShell step={7} total={TOTAL_STEPS} title="Foto e Instagram do estabelecimento">
         <div className="space-y-4">
           <p className="text-sm text-gray-500">
-            Obrigatórios para publicar vagas — ajudam candidatos a conhecer seu negócio.
+            O Instagram é obrigatório. A foto é opcional mas ajuda candidatos a conhecer seu negócio.
           </p>
 
           {/* Logo upload */}
           <div>
             <label className="text-sm text-gray-500 mb-2 block">
-              Foto do estabelecimento
+              Foto do estabelecimento <span className="text-gray-300">(opcional)</span>
             </label>
             <div
               onClick={() => fileRef.current?.click()}

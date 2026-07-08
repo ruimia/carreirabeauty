@@ -141,7 +141,7 @@ Cadastro **completo** logo de início (não é só o essencial) — inclui:
 | Endereço completo | Sim | **Crítico** — base do filtro geográfico e do email semanal de candidatos |
 | Categoria do negócio | Sim | Salão / esmalteria / clínica de estética / spa / barbearia / outro |
 | Número de funcionários | Sim | Faixa (ex: 1-5, 6-20, 20+) — ajuda a segmentar depois |
-| Logo/foto do estabelecimento | Opcional no campo, mas **necessário antes da 1ª vaga** | Ver regra de bloqueio abaixo |
+| Logo/foto do estabelecimento | **Opcional** | Não bloqueia cadastro nem publicação de vaga |
 | Instagram | Opcional no campo, mas **necessário antes da 1ª vaga** | Ver regra de bloqueio abaixo |
 
 - [x] **Regra de bloqueio:** publicar a 1ª vaga (início do trial) exige cadastro 100% completo, incluindo logo e Instagram — não é possível publicar com dados parciais
