@@ -27,7 +27,9 @@
       "Bash(git commit *)",
       "Bash(grep -v \"^$\")",
       "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/onboarding/profissional \\\\ *)",
-      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/dashboard/empresa/vagas/\\\\[jobId\\\\]/candidatos)"
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/dashboard/empresa/vagas/\\\\[jobId\\\\]/candidatos)",
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/admin/empresas/\\\\[id\\\\] \\\\ *)",
+      "Bash(unzip -o \"/Users/ruimiadaira/Downloads/Carreira Beauty design system.zip\" -d \"/Users/ruimiadaira/Downloads/carreira-design-system/\")"
     ]
   }
 }
