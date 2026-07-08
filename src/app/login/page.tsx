@@ -105,6 +105,13 @@ export default function LoginPage() {
         <p className="text-xs text-gray-400 text-center mt-4">
           Receba um link por email para entrar sem senha.
         </p>
+
+        <p className="text-xs text-gray-400 text-center mt-2">
+          Ao entrar, você concorda com nossos{" "}
+          <a href="/termos" className="underline hover:text-gray-600">Termos de Serviço</a>
+          {" "}e{" "}
+          <a href="/privacidade" className="underline hover:text-gray-600">Política de Privacidade</a>.
+        </p>
       </div>
     </main>
   );
