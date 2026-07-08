@@ -14,7 +14,11 @@
       "Bash(supabase --version)",
       "Bash(vercel --version)",
       "WebFetch(domain:carreirabeauty-black.vercel.app)",
-      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/api/cnpj/\\\\[cnpj\\\\] \\\\ *)"
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/api/cnpj/\\\\[cnpj\\\\] \\\\ *)",
+      "Bash(curl -s \"https://brasilapi.com.br/api/cnpj/v1/11222333000181\")",
+      "Bash(curl -s \"https://brasilapi.com.br/api/cnpj/v1/18530947000170\")",
+      "Bash(vercel --prod)",
+      "Bash(vercel env *)"
     ]
   }
 }
