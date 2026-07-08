@@ -28,7 +28,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Topbar */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <span className="font-bold text-rose-600">CB Admin</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-square.jpg" alt="CarreiraBeauty" className="w-7 h-7 rounded-md object-cover" />
+          <span className="font-bold text-rose-600 hidden sm:inline">Admin</span>
           <nav className="hidden sm:flex gap-4">
             {nav.map((n) => (
               <Link key={n.href} href={n.href}

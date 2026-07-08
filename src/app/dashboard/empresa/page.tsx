@@ -60,12 +60,14 @@ export default async function DashboardEmpresaPage() {
 
         {/* Header */}
         <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-square.jpg" alt="CarreiraBeauty" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
           {company.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={company.logo_url}
               alt="Logo"
-              className="w-12 h-12 rounded-xl object-cover"
+              className="w-10 h-10 rounded-xl object-cover"
             />
           )}
           <div className="flex-1 min-w-0">

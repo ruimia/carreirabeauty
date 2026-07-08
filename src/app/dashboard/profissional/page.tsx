@@ -60,6 +60,8 @@ export default async function DashboardProfissionalPage() {
 
         {/* Header */}
         <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-square.jpg" alt="CarreiraBeauty" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <h1 className="font-bold text-gray-800 truncate">{professional.nome}</h1>
             <p className="text-sm text-rose-500">{funcao}</p>
