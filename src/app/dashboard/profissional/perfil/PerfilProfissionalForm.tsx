@@ -26,7 +26,7 @@ const EXPERIENCIAS = ["Menos de 1 ano", "1 a 2 anos", "3 a 5 anos", "Mais de 5 a
 const DISPONIBILIDADES = ["Integral", "Meio período", "Freela / por demanda", "Finais de semana"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PerfilProfissionalForm({ professional: p }: { professional: any }) {
+export default function PerfilProfissionalForm({ professional: p, email }: { professional: any; email: string }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -253,6 +253,10 @@ export default function PerfilProfissionalForm({ professional: p }: { profession
                 {Object.entries(VINCULOS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             ) : <Value>{VINCULOS[tipoVinculo] || "—"}</Value>}
+          </Field>
+
+          <Field label="E-mail de acesso" editing={false}>
+            <Value>{email || "—"}</Value>
           </Field>
 
           {p.slug && (

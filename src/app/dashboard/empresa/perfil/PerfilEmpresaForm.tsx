@@ -22,7 +22,7 @@ const FAIXAS: Record<string, string> = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PerfilEmpresaForm({ company }: { company: any }) {
+export default function PerfilEmpresaForm({ company, email }: { company: any; email: string }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -237,6 +237,10 @@ export default function PerfilEmpresaForm({ company }: { company: any }) {
 
           <Field label="CNPJ" editing={false}>
             <Value>{company.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") || "—"}</Value>
+          </Field>
+
+          <Field label="E-mail de acesso" editing={false}>
+            <Value>{email || "—"}</Value>
           </Field>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}

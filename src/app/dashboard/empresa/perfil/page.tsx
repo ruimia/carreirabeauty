@@ -16,5 +16,5 @@ export default async function PerfilEmpresaPage() {
 
   if (!company) redirect("/onboarding/empresa");
 
-  return <PerfilEmpresaForm company={company} />;
+  return <PerfilEmpresaForm company={company} email={user.email ?? ""} />;
 }

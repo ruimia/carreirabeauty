@@ -16,5 +16,5 @@ export default async function PerfilProfissionalPage() {
 
   if (!professional) redirect("/onboarding/profissional");
 
-  return <PerfilProfissionalForm professional={professional} />;
+  return <PerfilProfissionalForm professional={professional} email={user.email ?? ""} />;
 }
