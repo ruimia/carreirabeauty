@@ -35,12 +35,11 @@ export default async function DashboardProfissionalPage() {
   if (!professional) redirect("/onboarding/tipo");
   if (!professional.slug) redirect("/onboarding/profissional");
 
-  // Vagas que combinam com a função do profissional e mesma cidade
+  // Todas as vagas ativas
   const { data: jobs } = await supabase
     .from("jobs")
     .select("*, companies(nome_estabelecimento, cidade, estado, logo_url, instagram)")
     .eq("status", "ativa")
-    .eq("funcao", professional.funcao)
     .order("criado_em", { ascending: false });
 
   // Candidaturas já feitas por este profissional
@@ -75,7 +74,7 @@ export default async function DashboardProfissionalPage() {
         {/* Vagas */}
         <div>
           <p className="text-sm text-gray-500 px-1 mb-3">
-            Vagas para {funcao} perto de você
+            Vagas disponíveis
           </p>
 
           {!jobs || jobs.length === 0 ? (
