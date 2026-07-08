@@ -120,7 +120,10 @@ export default function EmpresaOnboarding({
     }
 
     try {
-      await upsertCompany({ cnpj: raw });
+      await upsertCompany({
+        cnpj: raw,
+        nome_estabelecimento: nome || data.razao_social || "",
+      });
       setStep(2);
     } catch (e) {
       const msg = e instanceof Error ? e.message : JSON.stringify(e);
