@@ -60,9 +60,8 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-rose-50 px-4">
       <div className="bg-white rounded-2xl shadow p-8 max-w-sm w-full">
-        <h1 className="text-2xl font-bold text-rose-600 mb-1">
-          CarreiraBeauty
-        </h1>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="CarreiraBeauty" className="h-14 object-contain mb-4" />
         <p className="text-gray-500 text-sm mb-6">
           Conectando profissionais e estabelecimentos de beleza
         </p>
