@@ -26,7 +26,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://brasilapi.com.br/api/cnpj/v1/18530947000170\" -H \"User-Agent: Vercel-Serverless\")",
       "Bash(git commit *)",
       "Bash(grep -v \"^$\")",
-      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/onboarding/profissional \\\\ *)"
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/onboarding/profissional \\\\ *)",
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/dashboard/empresa/vagas/\\\\[jobId\\\\]/candidatos)"
     ]
   }
 }

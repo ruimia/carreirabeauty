@@ -50,7 +50,7 @@ export default async function DashboardEmpresaPage() {
 
   const { data: jobs } = await supabase
     .from("jobs")
-    .select("*")
+    .select("*, applications(count)")
     .eq("company_id", company.id)
     .order("criado_em", { ascending: false });
 
@@ -139,9 +139,18 @@ export default async function DashboardEmpresaPage() {
                     {job.descricao}
                   </p>
                 )}
-                <p className="text-xs text-gray-300 mt-2">
-                  {new Date(job.criado_em).toLocaleDateString("pt-BR")}
-                </p>
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-gray-300">
+                    {new Date(job.criado_em).toLocaleDateString("pt-BR")}
+                  </p>
+                  <Link
+                    href={`/dashboard/empresa/vagas/${job.id}/candidatos`}
+                    className="text-sm font-medium text-rose-500 hover:text-rose-600 transition"
+                  >
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {(job.applications as any)?.[0]?.count ?? 0} candidato(s) →
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
