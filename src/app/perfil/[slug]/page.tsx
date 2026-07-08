@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 const FUNCAO_LABEL: Record<string, string> = {
@@ -43,13 +43,27 @@ export default async function PerfilPublicoPage(
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: p } = await supabase
+  let { data: p } = await supabase
     .from("professionals")
     .select("*")
     .eq("slug", slug)
     .single();
 
-  if (!p) notFound();
+  if (!p) {
+    // Verifica se é um slug antigo e redireciona para o atual
+    const { data: history } = await supabase
+      .from("professional_slug_history")
+      .select("professional_id, professionals(slug)")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (!history) notFound();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentSlug = (history.professionals as any)?.slug;
+    if (currentSlug) redirect(`/perfil/${currentSlug}`);
+    notFound();
+  }
 
   const funcao = p.funcao === "outro"
     ? (p.funcao_outro || "Outro")

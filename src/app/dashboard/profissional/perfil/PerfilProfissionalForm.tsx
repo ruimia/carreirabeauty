@@ -80,6 +80,14 @@ export default function PerfilProfissionalForm({ professional: p }: { profession
           .neq("id", p.id)
           .maybeSingle();
         if (existing) slug = `${base}-${randomSuffix()}`;
+
+        // Salva slug antigo no histórico para manter URLs antigas funcionando
+        if (p.slug && p.slug !== slug) {
+          await supabase
+            .from("professional_slug_history")
+            .insert({ slug: p.slug, professional_id: p.id })
+            .throwOnError();
+        }
       }
 
       const { error: upErr } = await supabase
