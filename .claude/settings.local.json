@@ -24,7 +24,8 @@
       "WebFetch(domain:carreirabeauty-d9n5dw39w-ruimias-projects.vercel.app)",
       "Bash(vercel alias *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://brasilapi.com.br/api/cnpj/v1/18530947000170\" -H \"User-Agent: Vercel-Serverless\")",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

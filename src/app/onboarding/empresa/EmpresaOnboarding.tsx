@@ -114,20 +114,16 @@ export default function EmpresaOnboarding({
       setCidade(data.municipio || "");
       setEstado(data.uf || "");
       setCep(cepVal);
-    } catch {
-      setError("Erro ao consultar CNPJ. Verifique sua conexão e tente novamente.");
-      return;
-    }
 
-    try {
-      await upsertCompany({
-        cnpj: raw,
-        nome_estabelecimento: nome || data.razao_social || "",
-      });
+      await upsertCompany({ cnpj: raw, nome_estabelecimento: nome });
       setStep(2);
     } catch (e) {
       const msg = e instanceof Error ? e.message : JSON.stringify(e);
-      setError(`Erro ao salvar: ${msg}`);
+      if (msg.includes("not-null") || msg.includes("violates") || msg.includes("duplicate")) {
+        setError(`Erro ao salvar: ${msg}`);
+      } else {
+        setError("Erro ao consultar CNPJ. Verifique sua conexão e tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
