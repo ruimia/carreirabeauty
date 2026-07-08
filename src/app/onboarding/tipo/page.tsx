@@ -23,8 +23,7 @@ export default function EscolhaTipoPage() {
     if (tipo === "empresa") {
       router.push("/onboarding/empresa");
     } else {
-      // Profissional — Fase 2
-      router.push("/dashboard");
+      router.push("/onboarding/profissional");
     }
   }
 
