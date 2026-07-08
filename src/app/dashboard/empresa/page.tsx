@@ -77,13 +77,21 @@ export default async function DashboardEmpresaPage() {
           <LogoutButton compact />
         </div>
 
-        {/* Publicar vaga */}
-        <Link
-          href="/dashboard/empresa/vagas/nova"
-          className="block w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl py-3 text-center transition"
-        >
-          + Publicar nova vaga
-        </Link>
+        {/* Ações */}
+        <div className="flex gap-3">
+          <Link
+            href="/dashboard/empresa/vagas/nova"
+            className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl py-3 text-center transition"
+          >
+            + Nova vaga
+          </Link>
+          <Link
+            href="/dashboard/empresa/perfil"
+            className="flex-1 border border-rose-200 text-rose-600 font-semibold rounded-xl py-3 text-center hover:bg-rose-50 transition"
+          >
+            Perfil
+          </Link>
+        </div>
 
         {/* Lista de vagas */}
         {!jobs || jobs.length === 0 ? (
