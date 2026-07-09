@@ -64,11 +64,11 @@ export async function deleteCategoriaNegocio(id: string) {
   revalidatePath("/admin/config");
 }
 
-export async function addHabilidade(nome: string) {
+export async function addHabilidade(nome: string, profissao: string) {
   const supabase = await assertAdmin();
   const max = await supabase.from("habilidades").select("ordem").order("ordem", { ascending: false }).limit(1).maybeSingle();
   const ordem = (max.data?.ordem ?? 0) + 1;
-  await supabase.from("habilidades").insert({ nome: nome.trim(), ordem });
+  await supabase.from("habilidades").insert({ nome: nome.trim(), profissao: profissao || null, ordem });
   revalidatePath("/admin/config");
 }
 

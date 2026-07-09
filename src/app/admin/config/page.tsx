@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import ConfigList from "./ConfigList";
+import HabilidadesConfig from "./HabilidadesConfig";
 import {
   addProfissao, toggleProfissao, renameProfissao, deleteProfissao,
   addCategoriaNegocio, toggleCategoriaNegocio, renameCategoriaNegocio, deleteCategoriaNegocio,
@@ -15,8 +16,10 @@ export default async function ConfigPage() {
   const [{ data: profissoes }, { data: categorias }, { data: habilidades }] = await Promise.all([
     supabase.from("profissoes").select("id, nome, ativo, ordem").order("ordem"),
     supabase.from("categorias_negocio").select("id, nome, ativo, ordem").order("ordem"),
-    supabase.from("habilidades").select("id, nome, ativo, ordem").order("ordem"),
+    supabase.from("habilidades").select("id, nome, ativo, ordem, profissao").order("profissao, ordem"),
   ]);
+
+  const profissaoNomes = (profissoes ?? []).filter((p) => p.ativo).map((p) => p.nome);
 
   return (
     <div>
@@ -44,9 +47,9 @@ export default async function ConfigPage() {
           onRename={renameCategoriaNegocio}
           onDelete={deleteCategoriaNegocio}
         />
-        <ConfigList
-          title="Habilidades"
+        <HabilidadesConfig
           items={habilidades ?? []}
+          profissoes={profissaoNomes}
           onAdd={addHabilidade}
           onToggle={toggleHabilidade}
           onRename={renameHabilidade}

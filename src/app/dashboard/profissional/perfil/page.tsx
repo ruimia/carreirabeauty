@@ -2,20 +2,27 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import PerfilProfissionalForm from "./PerfilProfissionalForm";
-import { getProfissoes, getHabilidades } from "@/lib/config";
+import { getProfissoes } from "@/lib/config";
 
 export default async function PerfilProfissionalPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: professional }, profissoes, habilidades] = await Promise.all([
+  const [{ data: professional }, profissoes, { data: habilidades }] = await Promise.all([
     supabase.from("professionals").select("*").eq("user_id", user.id).single(),
     getProfissoes(),
-    getHabilidades(),
+    supabase.from("habilidades").select("nome, profissao").eq("ativo", true).order("profissao, ordem"),
   ]);
 
   if (!professional) redirect("/onboarding/profissional");
 
-  return <PerfilProfissionalForm professional={professional} email={user.email ?? ""} profissoes={profissoes} habilidades={habilidades} />;
+  return (
+    <PerfilProfissionalForm
+      professional={professional}
+      email={user.email ?? ""}
+      profissoes={profissoes}
+      habilidades={habilidades ?? []}
+    />
+  );
 }

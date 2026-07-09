@@ -15,8 +15,10 @@ const DISPONIBILIDADES = ["Integral", "Meio período", "Freela / por demanda", "
 interface EduItem { curso: string; instituicao: string; ano: string; }
 interface ExpItem { empresa: string; cargo: string; periodo: string; }
 
+interface HabilidadeItem { nome: string; profissao: string | null; }
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PerfilProfissionalForm({ professional: p, email, profissoes, habilidades }: { professional: any; email: string; profissoes: string[]; habilidades: string[] }) {
+export default function PerfilProfissionalForm({ professional: p, email, profissoes, habilidades }: { professional: any; email: string; profissoes: string[]; habilidades: HabilidadeItem[] }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -60,6 +62,17 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   const [selectedHabilidades, setSelectedHabilidades] = useState<string[]>(p.habilidades ?? []);
 
   const funcaoLabel = funcoes.map((f) => f === OUTRA ? (funcaoOutro || OUTRA) : f).join(", ");
+
+  // Habilidades filtradas pelas profissões selecionadas, agrupadas por profissão
+  const habilidadesFiltradas = habilidades.filter(
+    (h) => !h.profissao || funcoes.includes(h.profissao)
+  );
+  const habilidadesPorProfissao = habilidadesFiltradas.reduce<Record<string, string[]>>((acc, h) => {
+    const key = h.profissao ?? "Geral";
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(h.nome);
+    return acc;
+  }, {});
   const initials = nome?.split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase() ?? "?";
 
   async function handleCepBlur() {
@@ -307,28 +320,48 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
               </div>
             ) : <V>{funcaoLabel || "—"}</V>}
           </F>
-          <F label="Habilidades" editing={editing}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {habilidades.map((h) => {
-                const active = selectedHabilidades.includes(h);
-                return (
-                  <button key={h} onClick={() => editing ? setSelectedHabilidades((prev) =>
-                    prev.includes(h) ? prev.filter((x) => x !== h) : [...prev, h]) : undefined}
-                    style={{
-                      padding: "5px 12px", borderRadius: "var(--radius-pill)", fontSize: 13,
-                      border: `1.5px solid ${active ? "var(--brand-cyan-400)" : "var(--border-default)"}`,
-                      background: active ? "var(--brand-cyan-50)" : "var(--surface-sunken)",
-                      color: active ? "var(--brand-cyan-700)" : "var(--text-tertiary)",
-                      fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400,
-                      cursor: editing ? "pointer" : "default",
-                    }}>
-                    {h}
-                  </button>
-                );
-              })}
-              {!editing && selectedHabilidades.length === 0 && <V>—</V>}
-            </div>
-          </F>
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8,
+              color: editing ? "var(--color-brand-primary)" : "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+              Habilidades
+            </p>
+            {editing && funcoes.filter(f => f !== OUTRA).length === 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Selecione suas funções acima para ver as habilidades disponíveis.</p>
+            )}
+            {editing && habilidadesFiltradas.length === 0 && funcoes.filter(f => f !== OUTRA).length > 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Nenhuma habilidade cadastrada para estas funções. Peça ao admin para adicionar.</p>
+            )}
+            {Object.entries(habilidadesPorProfissao).map(([prof, nomes]) => (
+              <div key={prof} style={{ marginBottom: 12 }}>
+                {Object.keys(habilidadesPorProfissao).length > 1 && (
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", marginBottom: 6, fontFamily: "var(--font-body)" }}>
+                    {prof}
+                  </p>
+                )}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {nomes.map((h) => {
+                    const active = selectedHabilidades.includes(h);
+                    return (
+                      <button key={h}
+                        onClick={() => editing ? setSelectedHabilidades((prev) =>
+                          prev.includes(h) ? prev.filter((x) => x !== h) : [...prev, h]) : undefined}
+                        style={{
+                          padding: "5px 12px", borderRadius: "var(--radius-pill)", fontSize: 13,
+                          border: `1.5px solid ${active ? "var(--brand-cyan-400)" : "var(--border-default)"}`,
+                          background: active ? "var(--brand-cyan-50)" : "var(--surface-sunken)",
+                          color: active ? "var(--brand-cyan-700)" : "var(--text-tertiary)",
+                          fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400,
+                          cursor: editing ? "pointer" : "default",
+                        }}>
+                        {h}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            {!editing && selectedHabilidades.length === 0 && <V>—</V>}
+          </div>
         </div>
 
         {/* Localização e disponibilidade */}
