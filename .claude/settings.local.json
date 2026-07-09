@@ -39,7 +39,9 @@
       "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/empresa/\\\\[slug\\\\] /Users/ruimiadaira/cbeauty/src/app/vaga/\\\\[slug\\\\])",
       "Skill(artifact-design)",
       "Skill(artifact-design:*)",
-      "Bash(mkdir -p \"/Users/ruimiadaira/cbeauty/src/app/dashboard/empresa/vagas/[jobId]/editar\")"
+      "Bash(mkdir -p \"/Users/ruimiadaira/cbeauty/src/app/dashboard/empresa/vagas/[jobId]/editar\")",
+      "Bash(node -e \"const mp = require\\('mercadopago'\\); console.log\\(Object.keys\\(mp\\)\\)\")",
+      "Bash(MP_ACCESS_TOKEN=APP_USR-5647824675260421-092117-b2b4d86b44a132fa40213d8412144a77-85900281 NEXT_PUBLIC_APP_URL=https://beta.carreirabeauty.com node scripts/criar-planos-mp.mjs)"
     ]
   }
 }

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "../LogoutButton";
+import EncerrarVagaButton from "./EncerrarVagaButton";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -66,6 +67,9 @@ export default async function DashboardEmpresaPage() {
         </div>
         <Link href="/dashboard/empresa/perfil" style={{ fontSize: 13, color: "var(--text-tertiary)", fontWeight: 500 }}>
           Perfil
+        </Link>
+        <Link href="/dashboard/empresa/planos" style={{ fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", textDecoration: "none", whiteSpace: "nowrap" }}>
+          Planos
         </Link>
         <a href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty" target="_blank" rel="noopener noreferrer" style={{
           fontSize: 13, color: "#25D366", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap",
@@ -237,19 +241,30 @@ export default async function DashboardEmpresaPage() {
                     </p>
                   )}
 
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
-                    <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
-                      {new Date(job.criado_em).toLocaleDateString("pt-BR")}
-                    </p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12, gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+                        {new Date(job.criado_em).toLocaleDateString("pt-BR")}
+                      </p>
+                      {(job.status === "ativa" || job.status === "fechada") && (
+                        <EncerrarVagaButton jobId={job.id} fechada={job.status === "fechada"} />
+                      )}
+                    </div>
                     {rejeitada ? (
                       <Link href={`/dashboard/empresa/vagas/${job.id}/editar`} style={{
                         fontSize: 13, fontWeight: 700, color: "var(--color-danger-fg)", textDecoration: "none",
                       }}>
                         Editar e reenviar →
                       </Link>
-                    ) : (
+                    ) : job.status !== "fechada" ? (
                       <Link href={`/dashboard/empresa/vagas/${job.id}/candidatos`} style={{
                         fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", textDecoration: "none",
+                      }}>
+                        {count} candidato{count !== 1 ? "s" : ""} →
+                      </Link>
+                    ) : (
+                      <Link href={`/dashboard/empresa/vagas/${job.id}/candidatos`} style={{
+                        fontSize: 13, color: "var(--text-tertiary)", textDecoration: "none",
                       }}>
                         {count} candidato{count !== 1 ? "s" : ""} →
                       </Link>

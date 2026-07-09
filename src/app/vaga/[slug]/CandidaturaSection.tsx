@@ -24,7 +24,8 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
       await candidatar(jobId, mensagem.trim() || null);
       setEnviado(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao enviar.");
+      const msg = e instanceof Error ? e.message : "Erro ao enviar.";
+      setError(msg === "LIMITE_PLANO" ? "LIMITE" : msg);
     } finally {
       setLoading(false);
     }
@@ -90,9 +91,17 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
         }}
       />
 
-      {error && (
+      {error === "LIMITE" ? (
+        <div style={{ marginTop: 10, padding: "12px 14px", background: "var(--brand-magenta-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--brand-magenta-200, #f0abfc)" }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", marginBottom: 4 }}>Limite de candidaturas atingido</p>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>Você usou suas 3 candidaturas do mês. Faça upgrade para o plano Pro e candidate-se sem limites.</p>
+          <a href="/dashboard/profissional/planos" style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "var(--color-brand-primary)", padding: "8px 18px", borderRadius: "var(--radius-pill)", textDecoration: "none", display: "inline-block" }}>
+            Ver plano Pro →
+          </a>
+        </div>
+      ) : error ? (
         <p style={{ fontSize: 13, color: "var(--color-danger-fg)", marginTop: 8 }}>{error}</p>
-      )}
+      ) : null}
 
       <button onClick={handleCandidatar} disabled={loading} style={{ ...btnStyle("#DC00DC"), marginTop: 12 }}>
         {loading ? "Enviando…" : "Enviar candidatura"}

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { emailNovaCandidatura } from "@/lib/email";
+import { limiteCandidaturasMes } from "@/lib/planos";
 
 export async function candidatar(jobId: string, mensagem: string | null) {
   const supabase = await createClient();
@@ -10,10 +11,23 @@ export async function candidatar(jobId: string, mensagem: string | null) {
 
   const { data: prof } = await supabase
     .from("professionals")
-    .select("id, nome")
+    .select("id, nome, plano")
     .eq("user_id", user.id)
     .single();
   if (!prof) throw new Error("Perfil profissional não encontrado");
+
+  // Checa limite de candidaturas do mês
+  const limite = limiteCandidaturasMes(prof.plano ?? "gratis");
+  if (limite !== null) {
+    const inicioMes = new Date();
+    inicioMes.setDate(1); inicioMes.setHours(0, 0, 0, 0);
+    const { count } = await supabase
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("professional_id", prof.id)
+      .gte("criado_em", inicioMes.toISOString());
+    if ((count ?? 0) >= limite) throw new Error("LIMITE_PLANO");
+  }
 
   const { error } = await supabase.from("applications").insert({
     job_id: jobId,

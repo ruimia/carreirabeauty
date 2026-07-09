@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { fetchCep, maskCep } from "@/lib/cep";
-import { buildSlug, randomSuffix } from "@/lib/slug";
+import { criarVaga } from "./actions";
 
 const VINCULOS = [
   { value: "", label: "Não especificado" },
@@ -104,34 +104,25 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
         fotoUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
       }
 
-      const funcaoLabel = funcao === "Outro" ? funcaoOutro : funcao;
-      const slugBase = buildSlug(titulo || funcaoLabel, cidade);
-      const { data: existing } = await supabase.from("jobs").select("id").eq("slug", slugBase).maybeSingle();
-      const slug = existing ? `${slugBase}-${randomSuffix()}` : slugBase;
-
-      const { error: jErr } = await supabase.from("jobs").insert({
-        company_id: company.id,
+      await criarVaga({
         titulo,
-        funcao: funcao === "Outro" ? "outro" : funcao,
-        funcao_outro: funcao === "Outro" ? funcaoOutro : null,
+        funcao,
+        funcaoOutro: funcao === "Outro" ? funcaoOutro : null,
         descricao,
-        tipo_vinculo: tipoVinculo || null,
-        modelo_remuneracao: modeloRemuneracao,
-      faixa_salarial: temFixo ? (faixaSalarial === "Outro" ? faixaOutro : faixaSalarial) : "",
-      comissao: temComissao ? (comissao === "Outro" ? comissaoOutro : comissao) : "",
-        cep: cep.replace(/\D/g, ""),
+        tipoVinculo: tipoVinculo || null,
+        modeloRemuneracao,
+        faixaSalarial: temFixo ? (faixaSalarial === "Outro" ? faixaOutro : faixaSalarial) : "",
+        comissao: temComissao ? (comissao === "Outro" ? comissaoOutro : comissao) : "",
+        cep,
         endereco,
         cidade,
         estado,
-        foto_url: fotoUrl,
-        slug,
-        status: "pendente_moderacao",
+        fotoUrl,
       });
-
-      if (jErr) throw new Error("Erro ao publicar vaga. Tente novamente.");
       router.push("/dashboard/empresa");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao publicar.");
+      const msg = e instanceof Error ? e.message : "Erro ao publicar.";
+      setError(msg.startsWith("LIMITE_PLANO:") ? "LIMITE" : msg);
     } finally {
       setLoading(false);
     }
@@ -318,11 +309,27 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
               </div>
             </F>
 
-            {error && (
+            {error === "LIMITE" ? (
+              <div style={{ background: "var(--brand-magenta-50)", border: "1px solid var(--brand-magenta-200, #f0abfc)", borderRadius: "var(--radius-md)", padding: "14px 16px" }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--color-brand-primary)", marginBottom: 4 }}>
+                  Limite de vagas atingido
+                </p>
+                <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10, lineHeight: 1.5 }}>
+                  Seu plano atual não permite mais vagas ativas. Faça upgrade para publicar mais.
+                </p>
+                <Link href="/dashboard/empresa/planos" style={{
+                  display: "inline-block", fontSize: 13, fontWeight: 700,
+                  color: "#fff", background: "var(--color-brand-primary)",
+                  padding: "8px 18px", borderRadius: "var(--radius-pill)", textDecoration: "none",
+                }}>
+                  Ver planos →
+                </Link>
+              </div>
+            ) : error ? (
               <p style={{ fontSize: 13, color: "var(--color-danger-fg)", background: "var(--color-danger-bg)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
                 {error}
               </p>
-            )}
+            ) : null}
 
             <button type="submit" disabled={loading} style={{
               width: "100%", height: 48, borderRadius: "var(--radius-pill)", border: "none",
