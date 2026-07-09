@@ -219,6 +219,30 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x) 48px" }}>
 
+        {/* Quick links — mobile only (desktop tem sidebar) */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 20 }} className="ds-mobile-only">
+          <Link href="/dashboard/profissional/planos" style={{
+            flex: 1, height: 44, borderRadius: "var(--radius-pill)",
+            background: "var(--color-brand-primary)", color: "#fff",
+            fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            textDecoration: "none", gap: 6,
+          }}>
+            ⭐ Ver planos
+          </Link>
+          <a href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
+            target="_blank" rel="noopener noreferrer"
+            style={{
+              flex: 1, height: 44, borderRadius: "var(--radius-pill)",
+              border: "1px solid #25D366", color: "#25D366",
+              fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              textDecoration: "none", gap: 6,
+            }}>
+            💬 Suporte
+          </a>
+        </div>
+
         {success && (
           <div style={{ background: "var(--color-success-bg)", border: "1px solid var(--color-success-border)", color: "var(--color-success-fg)",
             borderRadius: "var(--radius-md)", padding: "12px 16px", fontSize: 14, marginBottom: 16 }}>

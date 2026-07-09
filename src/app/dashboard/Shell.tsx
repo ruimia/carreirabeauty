@@ -138,6 +138,7 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
           .ds-main { margin-left: 220px; }
           .ds-content { padding-bottom: 0; }
           .ds-bottom-nav { display: none; }
+          .ds-mobile-only { display: none !important; }
         }
       `}</style>
 
