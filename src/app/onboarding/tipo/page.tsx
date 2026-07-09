@@ -1,5 +1,3 @@
-export const metadata = { title: "Criar conta" };
-
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
