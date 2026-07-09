@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import CandidaturaSection from "./CandidaturaSection";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,34 @@ export default async function VagaPage({ params }: Props) {
 
   if (!vaga || vaga.status !== "ativa") notFound();
 
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Busca profissional logado e se já aplicou
+  let professionalId: string | null = null;
+  let nomeProfissional: string | null = null;
+  let jaAplicou = false;
+
+  if (user) {
+    const { data: prof } = await supabase
+      .from("professionals")
+      .select("id, nome")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (prof) {
+      professionalId = prof.id;
+      nomeProfissional = prof.nome;
+      const { data: app } = await supabase
+        .from("applications")
+        .select("id")
+        .eq("job_id", vaga.id)
+        .eq("professional_id", prof.id)
+        .maybeSingle();
+      jaAplicou = !!app;
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const company = vaga.companies as any;
 
   const VINCULOS: Record<string, string> = { clt: "CLT", pj: "PJ", freela: "Freela / autônomo" };
@@ -136,19 +165,13 @@ export default async function VagaPage({ params }: Props) {
           </div>
         )}
 
-        {/* CTA */}
-        <Link href="/login" style={{ textDecoration: "none" }}>
-          <button style={{
-            width: "100%", height: 52, borderRadius: "var(--radius-pill)", border: "none",
-            background: "var(--color-brand-primary)", color: "#fff",
-            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, cursor: "pointer",
-          }}>
-            Quero me candidatar
-          </button>
-        </Link>
-        <p style={{ textAlign: "center", fontSize: 13, color: "var(--text-tertiary)", marginTop: 10 }}>
-          Crie sua conta ou entre para enviar sua candidatura
-        </p>
+        {/* CTA / Candidatura */}
+        <CandidaturaSection
+          jobId={vaga.id}
+          professionalId={professionalId}
+          jaAplicou={jaAplicou}
+          nomeProfissional={nomeProfissional}
+        />
       </main>
     </div>
   );
