@@ -72,9 +72,9 @@ export default async function DashboardEmpresaPage() {
           Planos
         </Link>
         <a href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty" target="_blank" rel="noopener noreferrer" style={{
-          fontSize: 13, color: "#25D366", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap",
-        }}>
-          Suporte
+          fontSize: 20, color: "#25D366", textDecoration: "none", lineHeight: 1, flexShrink: 0,
+        }} title="Suporte WhatsApp">
+          💬
         </a>
         <LogoutButton compact />
       </header>
