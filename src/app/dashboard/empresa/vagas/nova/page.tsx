@@ -1,5 +1,7 @@
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Nova vaga" };
+
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import NovaVagaForm from "./NovaVagaForm";

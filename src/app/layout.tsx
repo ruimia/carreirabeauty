@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CarreiraBeauty",
+  title: {
+    template: "%s | CarreiraBeauty",
+    default: "CarreiraBeauty — Empregos em beleza",
+  },
   description: "Conectando profissionais e estabelecimentos de beleza",
   icons: { icon: "/logo-square.jpg" },
 };

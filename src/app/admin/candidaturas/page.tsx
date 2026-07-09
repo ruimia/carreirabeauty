@@ -1,4 +1,6 @@
 export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Candidaturas — Admin" };
 import { createClient } from "@/lib/supabase/server";
 
 const FUNCAO_LABEL: Record<string, string> = {

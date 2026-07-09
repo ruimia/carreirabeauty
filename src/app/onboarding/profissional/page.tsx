@@ -1,3 +1,5 @@
+export const metadata = { title: "Cadastro — Profissional" };
+
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import ProfissionalOnboarding from "./ProfissionalOnboarding";

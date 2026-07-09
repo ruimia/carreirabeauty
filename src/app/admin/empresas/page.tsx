@@ -1,4 +1,6 @@
 export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Empresas — Admin" };
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 

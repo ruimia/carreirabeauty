@@ -1,4 +1,6 @@
 export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Perfil da empresa" };
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import PerfilEmpresaForm from "./PerfilEmpresaForm";

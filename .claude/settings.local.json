@@ -43,7 +43,9 @@
       "Bash(node -e \"const mp = require\\('mercadopago'\\); console.log\\(Object.keys\\(mp\\)\\)\")",
       "Bash(MP_ACCESS_TOKEN=APP_USR-5647824675260421-092117-b2b4d86b44a132fa40213d8412144a77-85900281 NEXT_PUBLIC_APP_URL=https://beta.carreirabeauty.com node scripts/criar-planos-mp.mjs)",
       "Bash(npx next *)",
-      "Bash(MP_ACCESS_TOKEN=APP_USR-5647824675260421-092117-b2b4d86b44a132fa40213d8412144a77-85900281 node -e ' *)"
+      "Bash(MP_ACCESS_TOKEN=APP_USR-5647824675260421-092117-b2b4d86b44a132fa40213d8412144a77-85900281 node -e ' *)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget"
     ]
   }
 }

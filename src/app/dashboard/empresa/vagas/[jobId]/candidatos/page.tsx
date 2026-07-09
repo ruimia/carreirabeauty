@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Candidatos" };
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";

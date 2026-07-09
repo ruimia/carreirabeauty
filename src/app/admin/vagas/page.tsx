@@ -1,4 +1,6 @@
 export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Moderação de vagas — Admin" };
 import { createClient } from "@/lib/supabase/server";
 import { updateJobStatus } from "../actions";
 import ModeracaoActions from "./ModeracaoActions";

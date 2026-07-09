@@ -2,10 +2,22 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import CandidaturaSection from "./CandidaturaSection";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 interface Props { params: Promise<{ slug: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data: vaga } = await supabase
+    .from("jobs").select("titulo, funcao, companies(nome_estabelecimento)").eq("slug", slug).single();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const empresa = (vaga?.companies as any)?.nome_estabelecimento ?? "";
+  const titulo = vaga?.titulo || vaga?.funcao || "Vaga";
+  return { title: empresa ? `${titulo} — ${empresa}` : titulo };
+}
 
 export default async function VagaPage({ params }: Props) {
   const { slug } = await params;

@@ -1,5 +1,7 @@
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Planos — Pro" };
+
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PLANOS_PROFISSIONAL, PlanoProfissional } from "@/lib/planos";

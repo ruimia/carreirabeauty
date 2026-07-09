@@ -1,10 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 interface Props { params: Promise<{ slug: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data } = await supabase.from("companies").select("nome_estabelecimento").eq("slug", slug).single();
+  return { title: data?.nome_estabelecimento ?? "Empresa" };
+}
 
 export default async function EmpresaPage({ params }: Props) {
   const { slug } = await params;

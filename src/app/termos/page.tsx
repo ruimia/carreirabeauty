@@ -1,3 +1,5 @@
+export const metadata = { title: "Termos de uso" };
+
 export default function TermosPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-12">

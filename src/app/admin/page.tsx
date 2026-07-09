@@ -1,4 +1,6 @@
 export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Admin" };
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminPage() {

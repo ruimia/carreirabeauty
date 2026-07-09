@@ -1,3 +1,5 @@
+export const metadata = { title: "Cadastro — Empresa" };
+
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import EmpresaOnboarding from "./EmpresaOnboarding";

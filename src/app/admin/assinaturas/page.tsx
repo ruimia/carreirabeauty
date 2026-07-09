@@ -1,5 +1,7 @@
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Assinaturas — Admin" };
+
 import { createClient } from "@/lib/supabase/server";
 import { PLANOS_EMPRESA, PLANOS_PROFISSIONAL } from "@/lib/planos";
 import PlanoSelect from "./PlanoSelect";
