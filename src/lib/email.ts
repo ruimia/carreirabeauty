@@ -113,7 +113,45 @@ export async function emailVagaAprovada({
   });
 }
 
-// ─── 3. Vaga rejeitada → empresa ─────────────────────────────────────────────
+// ─── 3. Nova vaga compatível → profissional ──────────────────────────────────
+export async function emailNovaVagaProfissional({
+  profissionalEmail,
+  profissionalNome,
+  tituloVaga,
+  funcaoVaga,
+  empresaNome,
+  cidade,
+  vagaSlug,
+}: {
+  profissionalEmail: string;
+  profissionalNome: string;
+  tituloVaga: string;
+  funcaoVaga: string;
+  empresaNome: string;
+  cidade: string | null;
+  vagaSlug: string;
+}) {
+  const link = `${APP_URL}/vaga/${vagaSlug}`;
+  const html = base(`
+    ${h1("Nova vaga para você! 🎯")}
+    ${p(`Olá, <strong>${profissionalNome}</strong>! Uma vaga que combina com o seu perfil acabou de ser publicada.`)}
+    ${destaque(`
+      <strong>${tituloVaga || funcaoVaga}</strong><br>
+      ${empresaNome}${cidade ? ` · ${cidade}` : ""}
+    `)}
+    ${p("Candidate-se agora — os primeiros a se candidatar têm mais visibilidade.")}
+    ${btn("Ver vaga e se candidatar", link)}
+  `);
+
+  await resend.emails.send({
+    from: FROM,
+    to: profissionalEmail,
+    subject: `Nova vaga: ${tituloVaga || funcaoVaga} em ${empresaNome}`,
+    html,
+  });
+}
+
+// ─── 4. Vaga rejeitada → empresa ─────────────────────────────────────────────
 export async function emailVagaRejeitada({
   empresaEmail,
   empresaNome,

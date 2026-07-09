@@ -92,17 +92,47 @@ export default async function DashboardProfissionalPage() {
 
         {/* Empty state */}
         {!jobs || jobs.length === 0 ? (
-          <div style={{
-            background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
-            boxShadow: "var(--shadow-sm)", padding: "48px 24px", textAlign: "center",
-          }}>
-            <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: "var(--text-primary)", marginBottom: 8 }}>
-              Nenhuma vaga no momento
-            </p>
-            <p style={{ fontSize: 14, color: "var(--text-secondary)" }}>
-              Volte em breve — novas vagas aparecem aqui assim que são publicadas.
-            </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {/* Card principal de espera */}
+            <div style={{
+              background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+              border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+              padding: "28px 24px", textAlign: "center",
+            }}>
+              <div style={{ fontSize: 40, marginBottom: 14 }}>✉️</div>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)", marginBottom: 8 }}>
+                Seu perfil está ativo
+              </p>
+              <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 300, margin: "0 auto" }}>
+                Assim que uma vaga compatível com suas especialidades for publicada, você receberá um email.
+              </p>
+            </div>
+
+            {/* Especialidades configuradas */}
+            {(professional.funcoes?.length ?? 0) > 0 && (
+              <div style={{
+                background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+                border: "1px solid var(--border-default)", padding: "16px 20px",
+              }}>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-tertiary)", marginBottom: 10 }}>
+                  Você receberá vagas de
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {(professional.funcoes as string[]).map((f: string) => (
+                    <span key={f} style={{
+                      background: "var(--brand-cyan-50)", color: "var(--brand-cyan-700)",
+                      fontSize: 13, fontWeight: 600, padding: "5px 14px",
+                      borderRadius: "var(--radius-pill)", border: "1px solid var(--brand-cyan-100)",
+                    }}>
+                      {f}
+                    </span>
+                  ))}
+                </div>
+                <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 10 }}>
+                  Não é isso? <Link href="/dashboard/profissional/perfil" style={{ color: "var(--color-brand-primary)", fontWeight: 600, textDecoration: "none" }}>Edite seu perfil</Link>
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

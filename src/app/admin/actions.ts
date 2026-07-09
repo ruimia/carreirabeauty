@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { emailVagaAprovada, emailVagaRejeitada } from "@/lib/email";
+import { emailVagaAprovada, emailVagaRejeitada, emailNovaVagaProfissional } from "@/lib/email";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -54,6 +54,40 @@ export async function aprovarVaga(id: string) {
         tituloVaga: job.titulo || job.funcao || "Vaga",
         vagaSlug: job.slug ?? id,
       }).catch(() => {});
+    }
+
+    // Notifica profissionais com funcao compatível
+    if (job.funcao) {
+      const { data: profissionais } = await supabase
+        .from("professionals")
+        .select("id, nome, cidade, user_id, funcoes")
+        .contains("funcoes", [job.funcao]);
+
+      if (profissionais?.length) {
+        const userIds = profissionais.map((p) => p.user_id);
+        const { data: perfis } = await supabase
+          .from("profiles")
+          .select("id, email")
+          .in("id", userIds);
+
+        const emailPorUserId = Object.fromEntries((perfis ?? []).map((p) => [p.id, p.email]));
+
+        await Promise.allSettled(
+          profissionais.map((prof) => {
+            const email = emailPorUserId[prof.user_id];
+            if (!email) return Promise.resolve();
+            return emailNovaVagaProfissional({
+              profissionalEmail: email,
+              profissionalNome: prof.nome ?? "",
+              tituloVaga: job.titulo || job.funcao || "Vaga",
+              funcaoVaga: job.funcao ?? "",
+              empresaNome: comp?.nome_estabelecimento ?? "",
+              cidade: prof.cidade ?? null,
+              vagaSlug: job.slug ?? id,
+            });
+          })
+        );
+      }
     }
   }
 }

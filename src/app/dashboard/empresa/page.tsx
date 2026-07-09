@@ -40,6 +40,8 @@ export default async function DashboardEmpresaPage() {
     return sum + ((j.applications as any)?.[0]?.count ?? 0);
   }, 0);
 
+  const todasPendentes = (jobs ?? []).length > 0 && (jobs ?? []).every((j) => j.status === "pendente_moderacao");
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--surface-page)", display: "flex", flexDirection: "column" }}>
 
@@ -115,18 +117,46 @@ export default async function DashboardEmpresaPage() {
           Suas vagas
         </p>
 
+        {todasPendentes && (
+          <div style={{
+            background: "#FFF7ED", border: "1px solid #FED7AA",
+            borderRadius: "var(--radius-lg)", padding: "14px 16px", marginBottom: 14,
+            display: "flex", gap: 12, alignItems: "flex-start",
+          }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>⏳</span>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#9A3412", marginBottom: 2 }}>
+                Vaga em análise
+              </p>
+              <p style={{ fontSize: 13, color: "#9A3412", lineHeight: 1.5 }}>
+                Nossa equipe está revisando sua vaga. Você receberá um email assim que for aprovada — e outro a cada nova candidatura.
+              </p>
+            </div>
+          </div>
+        )}
+
         {!jobs || jobs.length === 0 ? (
           <div style={{
             background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
-            boxShadow: "var(--shadow-sm)", padding: "48px 24px", textAlign: "center",
+            border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+            padding: "36px 24px", textAlign: "center",
           }}>
-            <p style={{ fontSize: 32, marginBottom: 12 }}>📋</p>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: "var(--text-primary)", marginBottom: 8 }}>
+            <p style={{ fontSize: 36, marginBottom: 12 }}>📋</p>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)", marginBottom: 8 }}>
               Publique sua primeira vaga
             </p>
-            <p style={{ fontSize: 14, color: "var(--text-secondary)" }}>
-              Em minutos você começa a receber candidatos qualificados.
+            <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 280, margin: "0 auto 20px" }}>
+              Em minutos você começa a receber candidatos. A vaga passa por uma análise rápida antes de ser publicada.
             </p>
+            <Link href="/dashboard/empresa/vagas/nova" style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              height: 44, padding: "0 24px", borderRadius: "var(--radius-pill)",
+              background: "var(--color-brand-primary)", color: "#fff",
+              fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
+              textDecoration: "none",
+            }}>
+              + Criar vaga
+            </Link>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
