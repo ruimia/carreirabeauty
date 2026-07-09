@@ -7,16 +7,6 @@ import StepShell from "@/components/ui/StepShell";
 
 const TOTAL_STEPS = 7;
 
-const CATEGORIAS = [
-  { value: "salao_beleza", label: "Salão de beleza / cabeleireiro" },
-  { value: "esmalteria", label: "Esmalteria / nail designer" },
-  { value: "clinica_estetica", label: "Clínica de estética" },
-  { value: "barbearia", label: "Barbearia" },
-  { value: "spa_massoterapia", label: "Spa / massoterapia" },
-  { value: "estudio_sobrancelha_cilios", label: "Estúdio de sobrancelha/cílios" },
-  { value: "outro", label: "Outro" },
-] as const;
-
 const FAIXAS = [
   { value: "1_5", label: "1 a 5 funcionários" },
   { value: "6_20", label: "6 a 20 funcionários" },
@@ -26,8 +16,10 @@ const FAIXAS = [
 interface Props {
   companyId: string | null;
   initialStep: number;
-  initialData: Record<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  initialData: Record<string, any>;
   userId: string;
+  categorias: string[];
 }
 
 function formatCnpj(v: string) {
@@ -39,7 +31,7 @@ function formatCnpj(v: string) {
     .replace(/(\d{4})(\d)/, "$1-$2");
 }
 
-export default function EmpresaOnboarding({ companyId: initialCompanyId, initialStep, initialData, userId }: Props) {
+export default function EmpresaOnboarding({ companyId: initialCompanyId, initialStep, initialData, userId, categorias }: Props) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -58,6 +50,8 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
   const [responsavel, setResponsavel] = useState(initialData.responsavel ?? "");
   const [telefone, setTelefone] = useState(initialData.telefone ?? "");
   const [categoria, setCategoria] = useState(initialData.categoria_negocio ?? "");
+  const [categoriaOutro, setCategoriaOutro] = useState(initialData.categoria_outro ?? "");
+  const outraCategoria = "Outro";
   const [faixaFuncionarios, setFaixaFuncionarios] = useState(initialData.faixa_funcionarios ?? "");
   const [instagram, setInstagram] = useState(initialData.instagram ?? "");
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData.logo_url ?? null);
@@ -235,9 +229,16 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
   if (step === 5) return (
     <StepShell step={5} total={TOTAL_STEPS} title="Que tipo de estabelecimento é o seu?">
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {CATEGORIAS.map((c) => choiceBtn(c.value, c.label, categoria, setCategoria))}
+        {[...categorias, outraCategoria].map((nome) => choiceBtn(nome, nome, categoria, setCategoria))}
+        {categoria === outraCategoria && (
+          <input placeholder="Qual tipo de negócio?" value={categoriaOutro} onChange={(e) => setCategoriaOutro(e.target.value)}
+            autoFocus style={inputStyle} />
+        )}
         {errBox}
-        {btn("Continuar", () => save({ categoria_negocio: categoria }, 6), !categoria)}
+        {btn("Continuar", () => save({
+          categoria_negocio: categoria,
+          categoria_outro: categoria === outraCategoria ? categoriaOutro || null : null,
+        }, 6), !categoria || (categoria === outraCategoria && !categoriaOutro.trim()))}
       </div>
     </StepShell>
   );

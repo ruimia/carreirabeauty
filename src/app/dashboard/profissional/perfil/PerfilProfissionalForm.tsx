@@ -6,20 +6,13 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 
-const FUNCOES: Record<string, string> = {
-  cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
-  esteticista: "Esteticista", maquiador: "Maquiador(a)", barbeiro: "Barbeiro",
-  massoterapeuta: "Massoterapeuta", designer_sobrancelha_cilios: "Designer de sobrancelha/cílios",
-  depilador: "Depilador(a)", podologo: "Podólogo(a)", recepcionista: "Recepcionista",
-  auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
-};
-
 const VINCULOS: Record<string, string> = { clt: "CLT", pj: "PJ", freela: "Freela / autônomo" };
+const OUTRA = "Outro";
 const EXPERIENCIAS = ["Menos de 1 ano", "1 a 2 anos", "3 a 5 anos", "Mais de 5 anos"];
 const DISPONIBILIDADES = ["Integral", "Meio período", "Freela / por demanda", "Finais de semana"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PerfilProfissionalForm({ professional: p, email }: { professional: any; email: string }) {
+export default function PerfilProfissionalForm({ professional: p, email, profissoes }: { professional: any; email: string; profissoes: string[] }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -31,8 +24,11 @@ export default function PerfilProfissionalForm({ professional: p, email }: { pro
 
   const [nome, setNome] = useState(p.nome ?? "");
   const [telefone, setTelefone] = useState(p.telefone ?? "");
-  const [funcao, setFuncao] = useState(p.funcao ?? "");
+  const [funcoes, setFuncoes] = useState<string[]>(p.funcoes?.length ? p.funcoes : []);
   const [funcaoOutro, setFuncaoOutro] = useState(p.funcao_outro ?? "");
+  function toggleFuncao(nome: string) {
+    setFuncoes((prev) => prev.includes(nome) ? prev.filter((x) => x !== nome) : [...prev, nome]);
+  }
   const [cidade, setCidade] = useState(p.cidade ?? "");
   const [estado, setEstado] = useState(p.estado ?? "");
   const [experiencia, setExperiencia] = useState(p.experiencia ?? "");
@@ -42,7 +38,7 @@ export default function PerfilProfissionalForm({ professional: p, email }: { pro
   const [tipoVinculo, setTipoVinculo] = useState(p.tipo_vinculo ?? "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(p.foto_perfil_url ?? null);
 
-  const funcaoLabel = funcao === "outro" ? (funcaoOutro || "Outro") : (FUNCOES[funcao] ?? funcao);
+  const funcaoLabel = funcoes.map((f) => f === OUTRA ? (funcaoOutro || OUTRA) : f).join(", ");
   const initials = nome?.split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase() ?? "?";
 
   async function handleSave() {
@@ -68,7 +64,7 @@ export default function PerfilProfissionalForm({ professional: p, email }: { pro
         }
       }
       const { error: upErr } = await supabase.from("professionals").update({
-        nome, telefone, funcao, funcao_outro: funcao === "outro" ? funcaoOutro : null,
+        nome, telefone, funcoes, funcao_outro: funcoes.includes(OUTRA) ? funcaoOutro : null,
         cidade, estado, localizacao: `${cidade} - ${estado}`,
         experiencia, disponibilidade, pretensao_salarial: pretensao,
         educacao_basica: educacao, tipo_vinculo: tipoVinculo || null,
@@ -81,7 +77,7 @@ export default function PerfilProfissionalForm({ professional: p, email }: { pro
   }
 
   function handleCancel() {
-    setNome(p.nome ?? ""); setTelefone(p.telefone ?? ""); setFuncao(p.funcao ?? "");
+    setNome(p.nome ?? ""); setTelefone(p.telefone ?? ""); setFuncoes(p.funcoes?.length ? p.funcoes : []);
     setFuncaoOutro(p.funcao_outro ?? ""); setCidade(p.cidade ?? ""); setEstado(p.estado ?? "");
     setExperiencia(p.experiencia ?? ""); setDisponibilidade(p.disponibilidade ?? "");
     setPretensao(p.pretensao_salarial ?? ""); setEducacao(p.educacao_basica ?? "");
@@ -179,15 +175,29 @@ export default function PerfilProfissionalForm({ professional: p, email }: { pro
           <F label="WhatsApp" editing={editing}>
             {editing ? <input type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inp} /> : <V>{telefone || "—"}</V>}
           </F>
-          <F label="Especialidade" editing={editing}>
+          <F label="Especialidades" editing={editing}>
             {editing ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <select value={funcao} onChange={(e) => setFuncao(e.target.value)} style={sel}>
-                  <option value="">Selecione</option>
-                  {Object.entries(FUNCOES).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-                {funcao === "outro" && (
-                  <input value={funcaoOutro} onChange={(e) => setFuncaoOutro(e.target.value)} placeholder="Qual especialidade?" style={inp} />
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {[...profissoes, OUTRA].map((nome) => {
+                    const active = funcoes.includes(nome);
+                    return (
+                      <button key={nome} onClick={() => toggleFuncao(nome)} style={{
+                        padding: "7px 14px", borderRadius: "var(--radius-pill)", cursor: "pointer",
+                        border: `2px solid ${active ? "var(--color-brand-primary)" : "var(--border-default)"}`,
+                        background: active ? "var(--brand-magenta-50)" : "var(--surface-card)",
+                        color: active ? "var(--brand-magenta-700)" : "var(--text-primary)",
+                        fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400, fontSize: 13,
+                        transition: "all var(--duration-fast)",
+                      }}>
+                        {active ? "✓ " : ""}{nome}
+                      </button>
+                    );
+                  })}
+                </div>
+                {funcoes.includes(OUTRA) && (
+                  <input value={funcaoOutro} onChange={(e) => setFuncaoOutro(e.target.value)}
+                    placeholder="Qual especialidade?" style={inp} />
                 )}
               </div>
             ) : <V>{funcaoLabel || "—"}</V>}

@@ -29,7 +29,13 @@
       "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/onboarding/profissional \\\\ *)",
       "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/dashboard/empresa/vagas/\\\\[jobId\\\\]/candidatos)",
       "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/admin/empresas/\\\\[id\\\\] \\\\ *)",
-      "Bash(unzip -o \"/Users/ruimiadaira/Downloads/Carreira Beauty design system.zip\" -d \"/Users/ruimiadaira/Downloads/carreira-design-system/\")"
+      "Bash(unzip -o \"/Users/ruimiadaira/Downloads/Carreira Beauty design system.zip\" -d \"/Users/ruimiadaira/Downloads/carreira-design-system/\")",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__claude-in-chrome__computer",
+      "Bash(open -a Safari /Users/ruimiadaira/Downloads/Home-standalone.html)",
+      "mcp__claude-in-chrome__javascript_tool",
+      "Bash(python3)",
+      "Bash(npx tsc *)"
     ]
   }
 }

@@ -8,21 +8,6 @@ import { buildSlug, randomSuffix } from "@/lib/slug";
 
 const TOTAL_STEPS = 9;
 
-const FUNCOES = [
-  { value: "cabeleireiro", label: "Cabeleireiro(a)" },
-  { value: "manicure_pedicure", label: "Manicure/pedicure" },
-  { value: "esteticista", label: "Esteticista" },
-  { value: "maquiador", label: "Maquiador(a)" },
-  { value: "barbeiro", label: "Barbeiro" },
-  { value: "massoterapeuta", label: "Massoterapeuta" },
-  { value: "designer_sobrancelha_cilios", label: "Designer de sobrancelha/cílios" },
-  { value: "depilador", label: "Depilador(a)" },
-  { value: "podologo", label: "Podólogo(a)" },
-  { value: "recepcionista", label: "Recepcionista" },
-  { value: "auxiliar_assistente", label: "Auxiliar/assistente" },
-  { value: "outro", label: "Outro" },
-] as const;
-
 const VINCULOS = [
   { value: "clt", label: "CLT" },
   { value: "pj", label: "PJ" },
@@ -32,11 +17,13 @@ const VINCULOS = [
 interface Props {
   professionalId: string | null;
   initialStep: number;
-  initialData: Record<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  initialData: Record<string, any>;
   userId: string;
+  profissoes: string[];
 }
 
-export default function ProfissionalOnboarding({ professionalId: initialId, initialStep, initialData, userId }: Props) {
+export default function ProfissionalOnboarding({ professionalId: initialId, initialStep, initialData, userId, profissoes }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -48,8 +35,12 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
 
   const [nome, setNome] = useState(initialData.nome ?? "");
   const [telefone, setTelefone] = useState(initialData.telefone ?? "");
-  const [funcao, setFuncao] = useState(initialData.funcao ?? "");
+  const [funcoes, setFuncoes] = useState<string[]>(initialData.funcoes?.length ? initialData.funcoes : []);
   const [funcaoOutro, setFuncaoOutro] = useState(initialData.funcao_outro ?? "");
+  const outroProfissao = "Outro";
+  function toggleFuncao(nome: string) {
+    setFuncoes((prev) => prev.includes(nome) ? prev.filter((x) => x !== nome) : [...prev, nome]);
+  }
   const [cidade, setCidade] = useState(initialData.cidade ?? "");
   const [estado, setEstado] = useState(initialData.estado ?? "");
   const [experiencia, setExperiencia] = useState(initialData.experiencia ?? "");
@@ -181,16 +172,34 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
   );
 
   if (step === 2) return (
-    <StepShell step={2} total={TOTAL_STEPS} title="Qual é a sua especialidade?">
+    <StepShell step={2} total={TOTAL_STEPS} title="Quais são suas especialidades?" subtitle="Pode escolher mais de uma.">
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {FUNCOES.map((f) => <ChoiceBtn key={f.value} value={f.value} label={f.label} current={funcao} onSelect={setFuncao} />)}
-        {funcao === "outro" && (
+        {[...profissoes, outroProfissao].map((nome) => {
+          const active = funcoes.includes(nome);
+          return (
+            <button key={nome} onClick={() => toggleFuncao(nome)} style={{
+              width: "100%", textAlign: "left", padding: "14px 16px",
+              borderRadius: "var(--radius-md)",
+              border: `2px solid ${active ? "var(--color-brand-primary)" : "var(--border-default)"}`,
+              background: active ? "var(--brand-magenta-50)" : "var(--surface-card)",
+              color: active ? "var(--brand-magenta-700)" : "var(--text-primary)",
+              fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400, fontSize: 15,
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between",
+              transition: "all var(--duration-fast) var(--ease-standard)",
+            }}>
+              {nome}
+              {active && <span style={{ fontSize: 18, color: "var(--color-brand-primary)" }}>✓</span>}
+            </button>
+          );
+        })}
+        {funcoes.includes(outroProfissao) && (
           <input placeholder="Qual especialidade?" value={funcaoOutro} onChange={(e) => setFuncaoOutro(e.target.value)}
-            style={{ ...inputStyle, marginTop: 4 }} />
+            autoFocus style={{ ...inputStyle, marginTop: 4 }} />
         )}
         {errBox}
-        <PrimaryBtn label="Continuar" onClick={() => go({ funcao, funcao_outro: funcaoOutro || null }, 3)}
-          disabled={!funcao || (funcao === "outro" && !funcaoOutro.trim())} />
+        <PrimaryBtn label="Continuar"
+          onClick={() => go({ funcoes, funcao_outro: funcoes.includes(outroProfissao) ? funcaoOutro || null : null }, 3)}
+          disabled={!funcoes.length || (funcoes.includes(outroProfissao) && !funcaoOutro.trim())} />
       </div>
     </StepShell>
   );

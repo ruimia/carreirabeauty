@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import EmpresaOnboarding from "./EmpresaOnboarding";
+import { getCategorias } from "@/lib/config";
 
-function getInitialStep(company: Record<string, string | null> | null): number {
+function getInitialStep(company: Record<string, unknown> | null): number {
   if (!company) return 1;
   if (!company.cnpj) return 1;
   if (!company.nome_estabelecimento || !company.endereco) return 2;
@@ -15,29 +16,23 @@ function getInitialStep(company: Record<string, string | null> | null): number {
 
 export default async function OnboardingEmpresaPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: company } = await supabase
-    .from("companies")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [{ data: company }, categorias] = await Promise.all([
+    supabase.from("companies").select("*").eq("user_id", user.id).maybeSingle(),
+    getCategorias(),
+  ]);
 
-  if (company?.status_cadastro === "completo") {
-    redirect("/dashboard/empresa");
-  }
-
-  const initialStep = getInitialStep(company as Record<string, string | null> | null);
+  if (company?.status_cadastro === "completo") redirect("/dashboard/empresa");
 
   return (
     <EmpresaOnboarding
       companyId={company?.id ?? null}
-      initialStep={initialStep}
+      initialStep={getInitialStep(company as Record<string, unknown> | null)}
       initialData={company ?? {}}
       userId={user.id}
+      categorias={categorias}
     />
   );
 }

@@ -5,24 +5,16 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
-const CATEGORIAS: Record<string, string> = {
-  salao_beleza: "Salão de beleza / cabeleireiro",
-  esmalteria: "Esmalteria / nail designer",
-  clinica_estetica: "Clínica de estética",
-  barbearia: "Barbearia",
-  spa_massoterapia: "Spa / massoterapia",
-  estudio_sobrancelha_cilios: "Estúdio de sobrancelha/cílios",
-  outro: "Outro",
-};
-
 const FAIXAS: Record<string, string> = {
   "1_5": "1 a 5 funcionários",
   "6_20": "6 a 20 funcionários",
   "20_mais": "Mais de 20 funcionários",
 };
 
+const OUTRA_CATEGORIA = "Outro";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PerfilEmpresaForm({ company, email }: { company: any; email: string }) {
+export default function PerfilEmpresaForm({ company, email, categorias }: { company: any; email: string; categorias: string[] }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -40,247 +32,234 @@ export default function PerfilEmpresaForm({ company, email }: { company: any; em
   const [estado, setEstado] = useState(company.estado ?? "");
   const [cep, setCep] = useState(company.cep ?? "");
   const [categoria, setCategoria] = useState(company.categoria_negocio ?? "");
+  const [categoriaOutro, setCategoriaOutro] = useState(company.categoria_outro ?? "");
   const [faixa, setFaixa] = useState(company.faixa_funcionarios ?? "");
   const [instagram, setInstagram] = useState(company.instagram ?? "");
   const [logoPreview, setLogoPreview] = useState<string | null>(company.logo_url ?? null);
 
   async function handleSave() {
-    setLoading(true);
-    setError("");
-    setSuccess(false);
-
+    setLoading(true); setError(""); setSuccess(false);
     try {
       let logoUrl = company.logo_url ?? null;
-
       if (fileRef.current?.files?.[0]) {
         const file = fileRef.current.files[0];
         const ext = file.name.split(".").pop();
         const path = `${company.user_id}/logo.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("logos")
-          .upload(path, file, { upsert: true });
+        const { error: upErr } = await supabase.storage.from("logos").upload(path, file, { upsert: true });
         if (upErr) throw new Error(upErr.message);
-        const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
-        logoUrl = urlData.publicUrl;
+        logoUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
       }
-
-      const { error: upErr } = await supabase
-        .from("companies")
-        .update({
-          nome_estabelecimento: nome,
-          responsavel,
-          telefone,
-          endereco,
-          cidade,
-          estado,
-          cep,
-          categoria_negocio: categoria || null,
-          faixa_funcionarios: faixa || null,
-          instagram: instagram.replace(/^@/, ""),
-          logo_url: logoUrl,
-        })
-        .eq("id", company.id);
-
+      const { error: upErr } = await supabase.from("companies").update({
+        nome_estabelecimento: nome, responsavel, telefone, endereco, cidade, estado, cep,
+        categoria_negocio: categoria || null,
+        categoria_outro: categoria === OUTRA_CATEGORIA ? categoriaOutro || null : null,
+        faixa_funcionarios: faixa || null,
+        instagram: instagram.replace(/^@/, ""), logo_url: logoUrl,
+      }).eq("id", company.id);
       if (upErr) throw new Error(upErr.message);
-
-      setSuccess(true);
-      setEditing(false);
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao salvar.");
-    } finally {
-      setLoading(false);
-    }
+      setSuccess(true); setEditing(false); router.refresh();
+    } catch (e) { setError(e instanceof Error ? e.message : "Erro ao salvar."); }
+    finally { setLoading(false); }
   }
 
   function handleCancel() {
-    setNome(company.nome_estabelecimento ?? "");
-    setResponsavel(company.responsavel ?? "");
-    setTelefone(company.telefone ?? "");
-    setEndereco(company.endereco ?? "");
-    setCidade(company.cidade ?? "");
-    setEstado(company.estado ?? "");
-    setCep(company.cep ?? "");
-    setCategoria(company.categoria_negocio ?? "");
-    setFaixa(company.faixa_funcionarios ?? "");
-    setInstagram(company.instagram ?? "");
-    setLogoPreview(company.logo_url ?? null);
-    setEditing(false);
-    setError("");
+    setNome(company.nome_estabelecimento ?? ""); setResponsavel(company.responsavel ?? "");
+    setTelefone(company.telefone ?? ""); setEndereco(company.endereco ?? "");
+    setCidade(company.cidade ?? ""); setEstado(company.estado ?? ""); setCep(company.cep ?? "");
+    setCategoria(company.categoria_negocio ?? ""); setFaixa(company.faixa_funcionarios ?? "");
+    setInstagram(company.instagram ?? ""); setLogoPreview(company.logo_url ?? null);
+    setEditing(false); setError("");
   }
 
-  return (
-    <main className="min-h-screen bg-rose-50 px-4 py-8">
-      <div className="max-w-md mx-auto space-y-4">
+  const inp: React.CSSProperties = {
+    width: "100%", height: 46, padding: "0 14px",
+    borderRadius: "var(--radius-md)", border: "1px solid var(--border-default)",
+    background: "var(--surface-card)", fontFamily: "var(--font-body)", fontSize: 15,
+    color: "var(--text-primary)", outline: "none",
+  };
 
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard/empresa" className="text-gray-400 hover:text-gray-600 text-2xl leading-none">←</Link>
-          <h1 className="text-xl font-bold text-gray-800 flex-1">Perfil da empresa</h1>
-          {!editing && (
-            <button
-              onClick={() => { setEditing(true); setSuccess(false); }}
-              className="text-rose-500 font-medium text-sm"
-            >
-              Editar
-            </button>
-          )}
-        </div>
+  const sel: React.CSSProperties = { ...inp, height: 46, cursor: "pointer" };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "var(--surface-page)" }}>
+      {/* Top bar */}
+      <header style={{
+        background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
+        padding: "0 var(--space-page-x)", height: 56,
+        display: "flex", alignItems: "center", gap: 12,
+        position: "sticky", top: 0, zIndex: 10,
+      }}>
+        <Link href="/dashboard/empresa" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+        <p style={{ flex: 1, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
+          Perfil da empresa
+        </p>
+        {!editing && (
+          <button onClick={() => { setEditing(true); setSuccess(false); }} style={{
+            height: 34, padding: "0 16px", borderRadius: "var(--radius-pill)",
+            border: "1px solid var(--color-brand-primary)", background: "transparent",
+            color: "var(--color-brand-primary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, cursor: "pointer",
+          }}>
+            Editar
+          </button>
+        )}
+      </header>
+
+      <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x) 48px" }}>
 
         {success && (
-          <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-700 text-sm">
+          <div style={{ background: "var(--color-success-bg)", border: "1px solid var(--color-success-border)", color: "var(--color-success-fg)",
+            borderRadius: "var(--radius-md)", padding: "12px 16px", fontSize: 14, marginBottom: 16 }}>
             Dados salvos com sucesso.
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow p-6 space-y-5">
-
-          {/* Logo */}
-          <div className="flex items-center gap-4">
-            <div
-              onClick={() => editing && fileRef.current?.click()}
-              className={`w-20 h-20 rounded-xl overflow-hidden border-2 flex items-center justify-center bg-gray-50 ${editing ? "cursor-pointer border-dashed border-rose-300 hover:border-rose-400" : "border-gray-100"}`}
-            >
+        {/* Logo + nome */}
+        <div style={{
+          background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+          border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+          padding: 20, marginBottom: 12,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+            <div onClick={() => editing && fileRef.current?.click()} style={{
+              width: 72, height: 72, borderRadius: "var(--radius-md)", overflow: "hidden", flexShrink: 0,
+              border: editing ? "2px dashed var(--color-brand-primary)" : "1px solid var(--border-default)",
+              background: "var(--surface-sunken)", cursor: editing ? "pointer" : "default",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28,
+            }}>
               {logoPreview
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
-                : <span className="text-2xl">{editing ? "📷" : "🏪"}</span>
+                ? <img src={logoPreview} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : (editing ? "📷" : "🏪")
               }
             </div>
             <div>
-              <p className="font-semibold text-gray-800">{nome || "—"}</p>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)" }}>{nome || "—"}</p>
+              <p style={{ fontSize: 13, color: "var(--text-tertiary)", marginTop: 2 }}>{cidade} · {estado}</p>
               {editing && (
-                <button onClick={() => fileRef.current?.click()} className="text-rose-500 text-sm mt-1">
+                <button onClick={() => fileRef.current?.click()} style={{
+                  marginTop: 6, fontSize: 13, color: "var(--color-brand-primary)", fontWeight: 600,
+                  background: "none", border: "none", padding: 0, cursor: "pointer",
+                }}>
                   {logoPreview ? "Trocar foto" : "Adicionar foto"}
                 </button>
               )}
             </div>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setLogoPreview(URL.createObjectURL(f));
-              }}
-            />
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) setLogoPreview(URL.createObjectURL(f)); }} />
           </div>
+        </div>
 
-          <hr className="border-gray-100" />
-
-          {/* Campos */}
-          <Field label="Nome do estabelecimento" editing={editing}>
-            {editing
-              ? <Input value={nome} onChange={setNome} />
-              : <Value>{nome || "—"}</Value>}
-          </Field>
-
-          <Field label="Responsável" editing={editing}>
-            {editing
-              ? <Input value={responsavel} onChange={setResponsavel} />
-              : <Value>{responsavel || "—"}</Value>}
-          </Field>
-
-          <Field label="WhatsApp" editing={editing}>
-            {editing
-              ? <Input value={telefone} onChange={setTelefone} type="tel" />
-              : <Value>{telefone || "—"}</Value>}
-          </Field>
-
-          <Field label="Instagram" editing={editing}>
-            {editing
-              ? (
-                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-rose-300">
-                  <span className="px-3 text-gray-400 bg-gray-50 py-2.5 border-r border-gray-200">@</span>
-                  <input value={instagram} onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
-                    className="flex-1 py-2.5 px-3 focus:outline-none text-sm" />
+        {/* Campos */}
+        <div style={{
+          background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+          border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+          padding: 20, display: "flex", flexDirection: "column", gap: 18,
+        }}>
+          <F label="Nome do estabelecimento" editing={editing}>
+            {editing ? <input value={nome} onChange={(e) => setNome(e.target.value)} style={inp} /> : <V>{nome || "—"}</V>}
+          </F>
+          <F label="Responsável" editing={editing}>
+            {editing ? <input value={responsavel} onChange={(e) => setResponsavel(e.target.value)} style={inp} /> : <V>{responsavel || "—"}</V>}
+          </F>
+          <F label="WhatsApp" editing={editing}>
+            {editing ? <input type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inp} /> : <V>{telefone || "—"}</V>}
+          </F>
+          <F label="Instagram" editing={editing}>
+            {editing ? (
+              <div style={{ display: "flex", alignItems: "center", height: 46, border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+                <span style={{ padding: "0 12px", background: "var(--surface-sunken)", borderRight: "1px solid var(--border-default)", color: "var(--text-tertiary)", height: "100%", display: "flex", alignItems: "center", fontSize: 15, fontWeight: 600 }}>@</span>
+                <input value={instagram} onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
+                  style={{ flex: 1, height: "100%", padding: "0 14px", border: "none", outline: "none", fontFamily: "var(--font-body)", fontSize: 15, background: "transparent", color: "var(--text-primary)" }} />
+              </div>
+            ) : <V>{instagram ? `@${instagram}` : "—"}</V>}
+          </F>
+          <F label="Endereço" editing={editing}>
+            {editing ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Logradouro e número" style={inp} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 8 }}>
+                  <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
+                  <input value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2} style={{ ...inp, textTransform: "uppercase", textAlign: "center" }} />
                 </div>
-              )
-              : <Value>{instagram ? `@${instagram}` : "—"}</Value>}
-          </Field>
-
-          <Field label="Endereço" editing={editing}>
-            {editing
-              ? (
-                <div className="space-y-2">
-                  <Input value={endereco} onChange={setEndereco} placeholder="Logradouro e número" />
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input value={cidade} onChange={setCidade} placeholder="Cidade" />
-                    <Input value={estado} onChange={setEstado} placeholder="UF" maxLength={2} />
-                  </div>
-                  <Input value={cep} onChange={setCep} placeholder="CEP" />
-                </div>
-              )
-              : <Value>{[endereco, cidade, estado].filter(Boolean).join(", ") || "—"}</Value>}
-          </Field>
-
-          <Field label="Tipo de estabelecimento" editing={editing}>
-            {editing
-              ? (
-                <select value={categoria} onChange={(e) => setCategoria(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                <input value={cep} onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))} placeholder="CEP" style={inp} />
+              </div>
+            ) : <V>{[endereco, cidade, estado].filter(Boolean).join(", ") || "—"}</V>}
+          </F>
+          <F label="Tipo de estabelecimento" editing={editing}>
+            {editing ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <select value={categoria} onChange={(e) => setCategoria(e.target.value)} style={sel}>
                   <option value="">Selecione</option>
-                  {Object.entries(CATEGORIAS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  {[...categorias, OUTRA_CATEGORIA].map((nome) => <option key={nome} value={nome}>{nome}</option>)}
                 </select>
-              )
-              : <Value>{CATEGORIAS[categoria] || "—"}</Value>}
-          </Field>
+                {categoria === OUTRA_CATEGORIA && (
+                  <input value={categoriaOutro} onChange={(e) => setCategoriaOutro(e.target.value)}
+                    placeholder="Qual tipo de negócio?" style={inp} />
+                )}
+              </div>
+            ) : <V>{categoria === OUTRA_CATEGORIA ? (categoriaOutro || "Outro") : (categoria || "—")}</V>}
+          </F>
+          <F label="Funcionários" editing={editing}>
+            {editing ? (
+              <select value={faixa} onChange={(e) => setFaixa(e.target.value)} style={sel}>
+                <option value="">Selecione</option>
+                {Object.entries(FAIXAS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            ) : <V>{FAIXAS[faixa] || "—"}</V>}
+          </F>
 
-          <Field label="Funcionários" editing={editing}>
-            {editing
-              ? (
-                <select value={faixa} onChange={(e) => setFaixa(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
-                  <option value="">Selecione</option>
-                  {Object.entries(FAIXAS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              )
-              : <Value>{FAIXAS[faixa] || "—"}</Value>}
-          </Field>
+          <div style={{ height: 1, background: "var(--border-default)" }} />
 
-          <Field label="CNPJ" editing={false}>
-            <Value>{company.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") || "—"}</Value>
-          </Field>
+          <F label="CNPJ" editing={false}>
+            <V>{company.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") || "—"}</V>
+          </F>
+          <F label="E-mail de acesso" editing={false}>
+            <V>{email || "—"}</V>
+          </F>
 
-          <Field label="E-mail de acesso" editing={false}>
-            <Value>{email || "—"}</Value>
-          </Field>
-
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <p style={{ fontSize: 13, color: "var(--color-danger-fg)", background: "var(--color-danger-bg)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+              {error}
+            </p>
+          )}
 
           {editing && (
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleCancel} disabled={loading}
-                className="flex-1 border border-gray-200 text-gray-600 font-medium rounded-xl py-3 hover:bg-gray-50 transition disabled:opacity-40">
+            <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
+              <button onClick={handleCancel} disabled={loading} style={{
+                flex: 1, height: 48, borderRadius: "var(--radius-pill)",
+                border: "1px solid var(--border-default)", background: "transparent",
+                color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15, cursor: "pointer",
+              }}>
                 Cancelar
               </button>
-              <button onClick={handleSave} disabled={loading}
-                className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl py-3 transition disabled:opacity-40">
-                {loading ? "Salvando..." : "Salvar"}
+              <button onClick={handleSave} disabled={loading} style={{
+                flex: 1, height: 48, borderRadius: "var(--radius-pill)", border: "none",
+                background: "var(--color-brand-primary)", color: "#fff",
+                fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15, cursor: "pointer",
+                opacity: loading ? 0.6 : 1,
+              }}>
+                {loading ? "Salvando…" : "Salvar"}
               </button>
             </div>
           )}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
 
-function Field({ label, editing, children }: { label: string; editing: boolean; children: React.ReactNode }) {
+function F({ label, editing, children }: { label: string; editing: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <p className={`text-xs font-medium mb-1 ${editing ? "text-rose-500" : "text-gray-400"}`}>{label}</p>
+      <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6,
+        color: editing ? "var(--color-brand-primary)" : "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+        {label}
+      </p>
       {children}
     </div>
   );
 }
 
-function Value({ children }: { children: React.ReactNode }) {
-  return <p className="text-gray-800 text-sm">{children}</p>;
-}
-
-function Input({ value, onChange, type = "text", placeholder, maxLength }:
-  { value: string; onChange: (v: string) => void; type?: string; placeholder?: string; maxLength?: number }) {
-  return (
-    <input type={type} value={value} onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder} maxLength={maxLength}
-      className="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
-  );
+function V({ children }: { children: React.ReactNode }) {
+  return <p style={{ fontSize: 15, color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>{children}</p>;
 }
