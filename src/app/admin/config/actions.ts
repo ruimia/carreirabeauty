@@ -14,7 +14,7 @@ async function assertAdmin() {
 
 export async function addProfissao(nome: string) {
   const supabase = await assertAdmin();
-  const max = await supabase.from("profissoes").select("ordem").order("ordem", { ascending: false }).limit(1).single();
+  const max = await supabase.from("profissoes").select("ordem").order("ordem", { ascending: false }).limit(1).maybeSingle();
   const ordem = (max.data?.ordem ?? 0) + 1;
   await supabase.from("profissoes").insert({ nome: nome.trim(), ordem });
   revalidatePath("/admin/config");
@@ -40,7 +40,7 @@ export async function deleteProfissao(id: string) {
 
 export async function addCategoriaNegocio(nome: string) {
   const supabase = await assertAdmin();
-  const max = await supabase.from("categorias_negocio").select("ordem").order("ordem", { ascending: false }).limit(1).single();
+  const max = await supabase.from("categorias_negocio").select("ordem").order("ordem", { ascending: false }).limit(1).maybeSingle();
   const ordem = (max.data?.ordem ?? 0) + 1;
   await supabase.from("categorias_negocio").insert({ nome: nome.trim(), ordem });
   revalidatePath("/admin/config");
