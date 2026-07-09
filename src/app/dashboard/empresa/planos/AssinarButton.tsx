@@ -25,7 +25,7 @@ export default function AssinarButton({ planoKey, label, destaque }: Props) {
       if (data.init_point) {
         window.location.href = data.init_point;
       } else {
-        setErro("Erro ao iniciar pagamento. Tente novamente.");
+        setErro(`Erro: ${data.detail ?? data.error ?? JSON.stringify(data)}`);
         setLoading(false);
       }
     } catch {
