@@ -183,7 +183,7 @@ export default async function Home() {
       </main>
 
       {/* ── Footer ── */}
-      <footer style={{ background: "var(--surface-inverse)", padding: "40px 24px 24px" }}>
+      <footer style={{ background: "var(--neutral-900)", padding: "40px 24px 24px" }}>
         <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Image src="/logo-square.jpg" alt="" width={28} height={28} style={{ borderRadius: 6, objectFit: "cover" }} />
