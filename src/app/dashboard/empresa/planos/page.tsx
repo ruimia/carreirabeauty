@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { PLANOS_EMPRESA, PlanoEmpresa } from "@/lib/planos";
 import AssinarButton from "./AssinarButton";
 
@@ -22,20 +21,11 @@ export default async function PlanosEmpresaPage() {
   const planoAtual = (company.plano ?? "gratis") as PlanoEmpresa;
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--surface-page)" }}>
-      <header style={{
-        background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
-        padding: "0 var(--space-page-x)", height: 56,
-        display: "flex", alignItems: "center", gap: 12,
-        position: "sticky", top: 0, zIndex: 10,
-      }}>
-        <Link href="/dashboard/empresa" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>‹</Link>
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
+    <div>
+      <main style={{ maxWidth: 600, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--text-primary)", marginBottom: 6 }}>
           Planos
-        </p>
-      </header>
-
-      <main style={{ maxWidth: 480, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
+        </h1>
         <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 28 }}>
           Escolha o plano ideal para o tamanho da sua equipe. Cancele quando quiser.
         </p>

@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import LogoutButton from "../LogoutButton";
 import EncerrarVagaButton from "./EncerrarVagaButton";
 
 const FUNCAO_LABEL: Record<string, string> = {
@@ -44,42 +43,8 @@ export default async function DashboardEmpresaPage() {
   const todasPendentes = (jobs ?? []).length > 0 && (jobs ?? []).every((j) => j.status === "pendente_moderacao");
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--surface-page)", display: "flex", flexDirection: "column" }}>
-
-      {/* Top bar */}
-      <header style={{
-        background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
-        padding: "0 var(--space-page-x)", height: 56,
-        display: "flex", alignItems: "center", gap: 12,
-        position: "sticky", top: 0, zIndex: 10,
-      }}>
-        {company.logo_url
-          // eslint-disable-next-line @next/next/no-img-element
-          ? <img src={company.logo_url} alt="Logo" style={{ width: 32, height: 32, borderRadius: "var(--radius-sm)", objectFit: "cover", flexShrink: 0 }} />
-          // eslint-disable-next-line @next/next/no-img-element
-          : <img src="/logo-square.jpg" alt="CarreiraBeauty" style={{ width: 32, height: 32, borderRadius: "var(--radius-sm)", objectFit: "cover", flexShrink: 0 }} />
-        }
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>
-            {company.nome_estabelecimento}
-          </p>
-          <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{company.cidade} · {company.estado}</p>
-        </div>
-        <Link href="/dashboard/empresa/perfil" style={{ fontSize: 13, color: "var(--text-tertiary)", fontWeight: 500 }}>
-          Perfil
-        </Link>
-        <Link href="/dashboard/empresa/planos" style={{ fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", textDecoration: "none", whiteSpace: "nowrap" }}>
-          Planos
-        </Link>
-        <a href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty" target="_blank" rel="noopener noreferrer" style={{
-          fontSize: 20, color: "#25D366", textDecoration: "none", lineHeight: 1, flexShrink: 0,
-        }} title="Suporte WhatsApp">
-          💬
-        </a>
-        <LogoutButton compact />
-      </header>
-
-      <main style={{ flex: 1, padding: "20px var(--space-page-x)", maxWidth: 480, width: "100%", margin: "0 auto" }}>
+    <div>
+      <main style={{ padding: "20px var(--space-page-x)", maxWidth: 600, width: "100%", margin: "0 auto" }}>
 
         {/* Stats row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
@@ -279,3 +244,4 @@ export default async function DashboardEmpresaPage() {
     </div>
   );
 }
+
