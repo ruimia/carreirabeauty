@@ -11,3 +11,9 @@ export async function getCategorias(): Promise<string[]> {
   const { data } = await supabase.from("categorias_negocio").select("nome").eq("ativo", true).order("ordem");
   return data?.map((r) => r.nome) ?? [];
 }
+
+export async function getHabilidades(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("habilidades").select("nome").eq("ativo", true).order("ordem");
+  return data?.map((r) => r.nome) ?? [];
+}

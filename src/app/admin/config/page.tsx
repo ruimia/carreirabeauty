@@ -4,6 +4,7 @@ import ConfigList from "./ConfigList";
 import {
   addProfissao, toggleProfissao, renameProfissao, deleteProfissao,
   addCategoriaNegocio, toggleCategoriaNegocio, renameCategoriaNegocio, deleteCategoriaNegocio,
+  addHabilidade, toggleHabilidade, renameHabilidade, deleteHabilidade,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -11,9 +12,10 @@ export const dynamic = "force-dynamic";
 export default async function ConfigPage() {
   const supabase = await createClient();
 
-  const [{ data: profissoes }, { data: categorias }] = await Promise.all([
+  const [{ data: profissoes }, { data: categorias }, { data: habilidades }] = await Promise.all([
     supabase.from("profissoes").select("id, nome, ativo, ordem").order("ordem"),
     supabase.from("categorias_negocio").select("id, nome, ativo, ordem").order("ordem"),
+    supabase.from("habilidades").select("id, nome, ativo, ordem").order("ordem"),
   ]);
 
   return (
@@ -41,6 +43,14 @@ export default async function ConfigPage() {
           onToggle={toggleCategoriaNegocio}
           onRename={renameCategoriaNegocio}
           onDelete={deleteCategoriaNegocio}
+        />
+        <ConfigList
+          title="Habilidades"
+          items={habilidades ?? []}
+          onAdd={addHabilidade}
+          onToggle={toggleHabilidade}
+          onRename={renameHabilidade}
+          onDelete={deleteHabilidade}
         />
       </div>
     </div>

@@ -63,3 +63,29 @@ export async function deleteCategoriaNegocio(id: string) {
   await supabase.from("categorias_negocio").delete().eq("id", id);
   revalidatePath("/admin/config");
 }
+
+export async function addHabilidade(nome: string) {
+  const supabase = await assertAdmin();
+  const max = await supabase.from("habilidades").select("ordem").order("ordem", { ascending: false }).limit(1).maybeSingle();
+  const ordem = (max.data?.ordem ?? 0) + 1;
+  await supabase.from("habilidades").insert({ nome: nome.trim(), ordem });
+  revalidatePath("/admin/config");
+}
+
+export async function toggleHabilidade(id: string, ativo: boolean) {
+  const supabase = await assertAdmin();
+  await supabase.from("habilidades").update({ ativo }).eq("id", id);
+  revalidatePath("/admin/config");
+}
+
+export async function renameHabilidade(id: string, nome: string) {
+  const supabase = await assertAdmin();
+  await supabase.from("habilidades").update({ nome: nome.trim() }).eq("id", id);
+  revalidatePath("/admin/config");
+}
+
+export async function deleteHabilidade(id: string) {
+  const supabase = await assertAdmin();
+  await supabase.from("habilidades").delete().eq("id", id);
+  revalidatePath("/admin/config");
+}
