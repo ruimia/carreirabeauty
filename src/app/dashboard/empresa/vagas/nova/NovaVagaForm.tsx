@@ -12,7 +12,20 @@ const VINCULOS = [
   { value: "clt", label: "CLT" },
   { value: "pj", label: "PJ" },
   { value: "freela", label: "Freela / autônomo" },
-] as const;
+  { value: "estagio", label: "Estágio" },
+  { value: "menor_aprendiz", label: "Menor Aprendiz" },
+];
+
+const FAIXAS_SALARIAIS = [
+  "A combinar",
+  "Até R$ 1.500",
+  "R$ 1.500 – R$ 2.000",
+  "R$ 2.000 – R$ 3.000",
+  "R$ 3.000 – R$ 4.000",
+  "R$ 4.000 – R$ 6.000",
+  "Acima de R$ 6.000",
+  "Outro",
+];
 
 interface Props {
   company: { id: string; endereco: string; cidade: string; estado: string; cep: string; logo_url: string | null };
@@ -30,6 +43,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
   const [descricao, setDescricao] = useState("");
   const [tipoVinculo, setTipoVinculo] = useState("");
   const [faixaSalarial, setFaixaSalarial] = useState("");
+  const [faixaOutro, setFaixaOutro] = useState("");
   const [cep, setCep] = useState(company.cep ?? "");
   const [endereco, setEndereco] = useState(company.endereco ?? "");
   const [cidade, setCidade] = useState(company.cidade ?? "");
@@ -79,7 +93,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
         funcao_outro: funcao === "Outro" ? funcaoOutro : null,
         descricao,
         tipo_vinculo: tipoVinculo || null,
-        faixa_salarial: faixaSalarial,
+        faixa_salarial: faixaSalarial === "Outro" ? faixaOutro : faixaSalarial,
         cep: cep.replace(/\D/g, ""),
         endereco,
         cidade,
@@ -196,8 +210,16 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
             </F>
 
             <F label="Faixa salarial *">
-              <input required value={faixaSalarial} onChange={(e) => setFaixaSalarial(e.target.value)}
-                placeholder="Ex: R$ 2.000 – R$ 3.000 / mês ou a combinar" style={inp} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <select required value={faixaSalarial} onChange={(e) => setFaixaSalarial(e.target.value)} style={sel}>
+                  <option value="">Selecione</option>
+                  {FAIXAS_SALARIAIS.map((f) => <option key={f} value={f}>{f}</option>)}
+                </select>
+                {faixaSalarial === "Outro" && (
+                  <input required value={faixaOutro} onChange={(e) => setFaixaOutro(e.target.value)}
+                    placeholder="Ex: R$ 1.800 + comissão" style={inp} autoFocus />
+                )}
+              </div>
             </F>
 
             <div style={{ height: 1, background: "var(--border-default)" }} />
