@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 
 const FAIXAS: Record<string, string> = {
   "1_5": "1 a 5 funcionários",
@@ -31,6 +32,20 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
   const [cidade, setCidade] = useState(company.cidade ?? "");
   const [estado, setEstado] = useState(company.estado ?? "");
   const [cep, setCep] = useState(company.cep ?? "");
+  const [cepLoading, setCepLoading] = useState(false);
+
+  async function handleCepBlur() {
+    const raw = cep.replace(/\D/g, "");
+    if (raw.length !== 8) return;
+    setCepLoading(true);
+    const data = await fetchCep(raw);
+    if (data) {
+      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setCidade(data.city ?? "");
+      setEstado(data.state ?? "");
+    }
+    setCepLoading(false);
+  }
   const [categoria, setCategoria] = useState(company.categoria_negocio ?? "");
   const [categoriaOutro, setCategoriaOutro] = useState(company.categoria_outro ?? "");
   const [faixa, setFaixa] = useState(company.faixa_funcionarios ?? "");
@@ -50,7 +65,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
         logoUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
       }
       const { error: upErr } = await supabase.from("companies").update({
-        nome_estabelecimento: nome, responsavel, telefone, endereco, cidade, estado, cep,
+        nome_estabelecimento: nome, responsavel, telefone, endereco, cidade, estado, cep: cep.replace(/\D/g, ""),
         categoria_negocio: categoria || null,
         categoria_outro: categoria === OUTRA_CATEGORIA ? categoriaOutro || null : null,
         faixa_funcionarios: faixa || null,
@@ -161,8 +176,9 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
           <F label="Responsável" editing={editing}>
             {editing ? <input value={responsavel} onChange={(e) => setResponsavel(e.target.value)} style={inp} /> : <V>{responsavel || "—"}</V>}
           </F>
-          <F label="WhatsApp" editing={editing}>
-            {editing ? <input type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inp} /> : <V>{telefone || "—"}</V>}
+          <F label="WhatsApp *" editing={editing}>
+            {editing ? <input type="tel" inputMode="numeric" placeholder="(11) 99999-9999" value={telefone}
+              onChange={(e) => setTelefone(maskPhone(e.target.value))} style={inp} /> : <V>{telefone || "—"}</V>}
           </F>
           <F label="Instagram" editing={editing}>
             {editing ? (
@@ -173,7 +189,17 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
               </div>
             ) : <V>{instagram ? `@${instagram}` : "—"}</V>}
           </F>
-          <F label="Endereço" editing={editing}>
+          <F label="CEP *" editing={editing}>
+            {editing ? (
+              <div style={{ position: "relative" }}>
+                <input type="text" inputMode="numeric" placeholder="00000-000" value={maskCep(cep)}
+                  onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  onBlur={handleCepBlur} style={inp} />
+                {cepLoading && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>buscando…</span>}
+              </div>
+            ) : <V>{maskCep(cep) || "—"}</V>}
+          </F>
+          <F label="Endereço *" editing={editing}>
             {editing ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <input value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Logradouro e número" style={inp} />
@@ -181,7 +207,6 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
                   <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
                   <input value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2} style={{ ...inp, textTransform: "uppercase", textAlign: "center" }} />
                 </div>
-                <input value={cep} onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))} placeholder="CEP" style={inp} />
               </div>
             ) : <V>{[endereco, cidade, estado].filter(Boolean).join(", ") || "—"}</V>}
           </F>

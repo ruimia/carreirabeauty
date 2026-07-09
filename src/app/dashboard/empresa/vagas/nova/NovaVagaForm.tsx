@@ -4,21 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-
-const FUNCOES = [
-  { value: "cabeleireiro", label: "Cabeleireiro(a)" },
-  { value: "manicure_pedicure", label: "Manicure/pedicure" },
-  { value: "esteticista", label: "Esteticista" },
-  { value: "maquiador", label: "Maquiador(a)" },
-  { value: "barbeiro", label: "Barbeiro" },
-  { value: "massoterapeuta", label: "Massoterapeuta" },
-  { value: "designer_sobrancelha_cilios", label: "Designer de sobrancelha/cílios" },
-  { value: "depilador", label: "Depilador(a)" },
-  { value: "podologo", label: "Podólogo(a)" },
-  { value: "recepcionista", label: "Recepcionista" },
-  { value: "auxiliar_assistente", label: "Auxiliar/assistente" },
-  { value: "outro", label: "Outro" },
-] as const;
+import { fetchCep, maskCep } from "@/lib/cep";
 
 const VINCULOS = [
   { value: "", label: "Não especificado" },
@@ -27,7 +13,13 @@ const VINCULOS = [
   { value: "freela", label: "Freela / autônomo" },
 ] as const;
 
-export default function NovaVagaPage() {
+interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  company: { id: string; endereco: string; cidade: string; estado: string; cep: string };
+  profissoes: string[];
+}
+
+export default function NovaVagaForm({ company, profissoes }: Props) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -36,155 +28,163 @@ export default function NovaVagaPage() {
   const [descricao, setDescricao] = useState("");
   const [tipoVinculo, setTipoVinculo] = useState("");
   const [faixaSalarial, setFaixaSalarial] = useState("");
+  const [cep, setCep] = useState(company.cep ?? "");
+  const [endereco, setEndereco] = useState(company.endereco ?? "");
+  const [cidade, setCidade] = useState(company.cidade ?? "");
+  const [estado, setEstado] = useState(company.estado ?? "");
+  const [cepLoading, setCepLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  async function handleCepBlur() {
+    const raw = cep.replace(/\D/g, "");
+    if (raw.length !== 8) return;
+    setCepLoading(true);
+    const data = await fetchCep(raw);
+    if (data) {
+      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setCidade(data.city ?? "");
+      setEstado(data.state ?? "");
+    }
+    setCepLoading(false);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/login"); return; }
-
-    const { data: company, error: cErr } = await supabase
-      .from("companies")
-      .select("id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (cErr || !company) {
-      setError("Empresa não encontrada.");
-      setLoading(false);
-      return;
-    }
+    setLoading(true); setError("");
 
     const { error: jErr } = await supabase.from("jobs").insert({
       company_id: company.id,
-      funcao,
-      funcao_outro: funcao === "outro" ? funcaoOutro : null,
+      funcao: funcao === "Outro" ? "outro" : funcao,
+      funcao_outro: funcao === "Outro" ? funcaoOutro : null,
       descricao,
       tipo_vinculo: tipoVinculo || null,
       faixa_salarial: faixaSalarial,
+      cep: cep.replace(/\D/g, ""),
+      endereco,
+      cidade,
+      estado,
       status: "ativa",
     });
 
-    if (jErr) {
-      setError("Erro ao publicar vaga. Tente novamente.");
-    } else {
-      router.push("/dashboard/empresa");
-    }
+    if (jErr) setError("Erro ao publicar vaga. Tente novamente.");
+    else router.push("/dashboard/empresa");
     setLoading(false);
   }
 
+  const inp: React.CSSProperties = {
+    width: "100%", height: 46, padding: "0 14px",
+    borderRadius: "var(--radius-md)", border: "1px solid var(--border-default)",
+    background: "var(--surface-card)", fontFamily: "var(--font-body)", fontSize: 15,
+    color: "var(--text-primary)", outline: "none",
+  };
+  const sel: React.CSSProperties = { ...inp, cursor: "pointer" };
+
   return (
-    <main className="min-h-screen bg-rose-50 px-4 py-8">
-      <div className="max-w-md mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link
-            href="/dashboard/empresa"
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-          >
-            ←
-          </Link>
-          <h1 className="text-xl font-bold text-gray-800">Nova vaga</h1>
-        </div>
+    <div style={{ minHeight: "100vh", background: "var(--surface-page)" }}>
+      <header style={{
+        background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
+        padding: "0 var(--space-page-x)", height: 56,
+        display: "flex", alignItems: "center", gap: 12,
+        position: "sticky", top: 0, zIndex: 10,
+      }}>
+        <Link href="/dashboard/empresa" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
+          Nova vaga
+        </p>
+      </header>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow p-6 space-y-5">
+      <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x) 48px" }}>
+        <form onSubmit={handleSubmit}>
+          <div style={{
+            background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+            border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+            padding: 20, display: "flex", flexDirection: "column", gap: 18,
+          }}>
+            <F label="Função *">
+              <select required value={funcao} onChange={(e) => setFuncao(e.target.value)} style={sel}>
+                <option value="">Selecione uma função</option>
+                {[...profissoes, "Outro"].map((f) => <option key={f} value={f}>{f}</option>)}
+              </select>
+            </F>
 
-          {/* Função */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Função *
-            </label>
-            <select
-              required
-              value={funcao}
-              onChange={(e) => setFuncao(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
-            >
-              <option value="">Selecione uma função</option>
-              {FUNCOES.map((f) => (
-                <option key={f.value} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
+            {funcao === "Outro" && (
+              <F label="Qual função? *">
+                <input required value={funcaoOutro} onChange={(e) => setFuncaoOutro(e.target.value)}
+                  placeholder="Ex: Podólogo especializado" style={inp} />
+              </F>
+            )}
+
+            <F label="Descrição da vaga *">
+              <textarea required rows={4} value={descricao} onChange={(e) => setDescricao(e.target.value)}
+                placeholder="Descreva o que o profissional vai fazer, requisitos, diferenciais…"
+                style={{ ...inp, height: "auto", padding: "12px 14px", resize: "none", lineHeight: 1.5 }} />
+            </F>
+
+            <F label="Tipo de vínculo">
+              <select value={tipoVinculo} onChange={(e) => setTipoVinculo(e.target.value)} style={sel}>
+                {VINCULOS.map((v) => <option key={v.value} value={v.value}>{v.label}</option>)}
+              </select>
+            </F>
+
+            <F label="Faixa salarial *">
+              <input required value={faixaSalarial} onChange={(e) => setFaixaSalarial(e.target.value)}
+                placeholder="Ex: R$ 2.000 – R$ 3.000 / mês ou a combinar" style={inp} />
+            </F>
+
+            <div style={{ height: 1, background: "var(--border-default)" }} />
+
+            <F label="CEP *">
+              <div style={{ position: "relative" }}>
+                <input type="text" inputMode="numeric" placeholder="00000-000" required value={maskCep(cep)}
+                  onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  onBlur={handleCepBlur} style={inp} />
+                {cepLoading && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>buscando…</span>}
+              </div>
+            </F>
+
+            <F label="Endereço *">
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input required value={endereco} onChange={(e) => setEndereco(e.target.value)}
+                  placeholder="Logradouro e número" style={inp} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 8 }}>
+                  <input required value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
+                  <input required value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2}
+                    style={{ ...inp, textTransform: "uppercase", textAlign: "center" }} />
+                </div>
+              </div>
+            </F>
+
+            {error && (
+              <p style={{ fontSize: 13, color: "var(--color-danger-fg)", background: "var(--color-danger-bg)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                {error}
+              </p>
+            )}
+
+            <button type="submit" disabled={loading} style={{
+              width: "100%", height: 48, borderRadius: "var(--radius-pill)", border: "none",
+              background: loading ? "var(--neutral-200)" : "var(--color-brand-primary)",
+              color: loading ? "var(--text-tertiary)" : "#fff",
+              fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 16, cursor: loading ? "not-allowed" : "pointer",
+              marginTop: 4,
+            }}>
+              {loading ? "Publicando…" : "Publicar vaga"}
+            </button>
           </div>
-
-          {funcao === "outro" && (
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Qual função? *
-              </label>
-              <input
-                required
-                value={funcaoOutro}
-                onChange={(e) => setFuncaoOutro(e.target.value)}
-                placeholder="Ex: Podólogo especializado"
-                className="w-full border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-rose-300"
-              />
-            </div>
-          )}
-
-          {/* Descrição */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Descrição da vaga *
-            </label>
-            <textarea
-              required
-              rows={4}
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Descreva o que o profissional vai fazer, requisitos, diferenciais..."
-              className="w-full border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
-            />
-          </div>
-
-          {/* Tipo de vínculo */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Tipo de vínculo
-            </label>
-            <select
-              value={tipoVinculo}
-              onChange={(e) => setTipoVinculo(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
-            >
-              {VINCULOS.map((v) => (
-                <option key={v.value} value={v.value}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Faixa salarial */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Faixa salarial *
-            </label>
-            <input
-              required
-              value={faixaSalarial}
-              onChange={(e) => setFaixaSalarial(e.target.value)}
-              placeholder="Ex: R$ 2.000 – R$ 3.000 / mês ou a combinar"
-              className="w-full border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-rose-300"
-            />
-          </div>
-
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl py-3 transition disabled:opacity-40"
-          >
-            {loading ? "Publicando..." : "Publicar vaga"}
-          </button>
         </form>
-      </div>
-    </main>
+      </main>
+    </div>
+  );
+}
+
+function F({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6,
+        color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+        {label}
+      </p>
+      {children}
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import StepShell from "@/components/ui/StepShell";
 import { buildSlug, randomSuffix } from "@/lib/slug";
+import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 
 const TOTAL_STEPS = 9;
 
@@ -41,8 +42,24 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
   function toggleFuncao(nome: string) {
     setFuncoes((prev) => prev.includes(nome) ? prev.filter((x) => x !== nome) : [...prev, nome]);
   }
+  const [cep, setCep] = useState(initialData.cep ?? "");
+  const [endereco, setEndereco] = useState(initialData.endereco ?? "");
   const [cidade, setCidade] = useState(initialData.cidade ?? "");
   const [estado, setEstado] = useState(initialData.estado ?? "");
+  const [cepLoading, setCepLoading] = useState(false);
+
+  async function handleCepBlur() {
+    const raw = cep.replace(/\D/g, "");
+    if (raw.length !== 8) return;
+    setCepLoading(true);
+    const data = await fetchCep(raw);
+    if (data) {
+      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setCidade(data.city ?? "");
+      setEstado(data.state ?? "");
+    }
+    setCepLoading(false);
+  }
   const [experiencia, setExperiencia] = useState(initialData.experiencia ?? "");
   const [disponibilidade, setDisponibilidade] = useState(initialData.disponibilidade ?? "");
   const [pretensao, setPretensao] = useState(initialData.pretensao_salarial ?? "");
@@ -164,7 +181,8 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
     <StepShell step={1} total={TOTAL_STEPS} title="Como você se chama?" subtitle="Seu nome aparece no perfil público e nas candidaturas.">
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <input placeholder="Seu nome completo" value={nome} onChange={(e) => setNome(e.target.value)} style={inputStyle} />
-        <input type="tel" placeholder="WhatsApp (só para contato)" value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inputStyle} />
+        <input type="tel" inputMode="numeric" placeholder="WhatsApp (11) 99999-9999" value={telefone}
+          onChange={(e) => setTelefone(maskPhone(e.target.value))} style={inputStyle} />
         {errBox}
         <PrimaryBtn label="Continuar" onClick={() => go({ nome, telefone }, 2)} disabled={!nome.trim() || !telefone.trim()} />
       </div>
@@ -205,14 +223,24 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
   );
 
   if (step === 3) return (
-    <StepShell step={3} total={TOTAL_STEPS} title="Onde você trabalha?" subtitle="Usamos para mostrar vagas perto de você.">
+    <StepShell step={3} total={TOTAL_STEPS} title="Qual é o seu endereço?" subtitle="Usado para encontrar vagas perto de você.">
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input placeholder="Cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} style={inputStyle} />
-        <input placeholder="Estado (UF)" value={estado} maxLength={2} onChange={(e) => setEstado(e.target.value.toUpperCase())}
-          style={{ ...inputStyle, textTransform: "uppercase" }} />
+        <div style={{ position: "relative" }}>
+          <input type="text" inputMode="numeric" placeholder="CEP (00000-000)" value={maskCep(cep)}
+            onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            onBlur={handleCepBlur} style={inputStyle} />
+          {cepLoading && <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>buscando…</span>}
+        </div>
+        <input placeholder="Logradouro e número" value={endereco} onChange={(e) => setEndereco(e.target.value)} style={inputStyle} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 10 }}>
+          <input placeholder="Cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} style={inputStyle} />
+          <input placeholder="UF" value={estado} maxLength={2} onChange={(e) => setEstado(e.target.value.toUpperCase())}
+            style={{ ...inputStyle, textTransform: "uppercase", textAlign: "center" }} />
+        </div>
         {errBox}
-        <PrimaryBtn label="Continuar" onClick={() => go({ localizacao: `${cidade} - ${estado}`, cidade, estado }, 4)}
-          disabled={!cidade.trim() || !estado.trim()} />
+        <PrimaryBtn label="Continuar"
+          onClick={() => go({ cep: cep.replace(/\D/g, ""), endereco, localizacao: `${cidade} - ${estado}`, cidade, estado }, 4)}
+          disabled={!cep.replace(/\D/g, "") || !endereco.trim() || !cidade.trim() || !estado.trim()} />
       </div>
     </StepShell>
   );

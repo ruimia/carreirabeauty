@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import StepShell from "@/components/ui/StepShell";
+import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 
 const TOTAL_STEPS = 7;
 
@@ -47,6 +48,20 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
   const [cidade, setCidade] = useState(initialData.cidade ?? "");
   const [estado, setEstado] = useState(initialData.estado ?? "");
   const [cep, setCep] = useState(initialData.cep ?? "");
+  const [cepLoading, setCepLoading] = useState(false);
+
+  async function handleCepBlur() {
+    const raw = cep.replace(/\D/g, "");
+    if (raw.length !== 8) return;
+    setCepLoading(true);
+    const data = await fetchCep(raw);
+    if (data) {
+      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setCidade(data.municipio ?? data.city ?? "");
+      setEstado(data.state ?? "");
+    }
+    setCepLoading(false);
+  }
   const [responsavel, setResponsavel] = useState(initialData.responsavel ?? "");
   const [telefone, setTelefone] = useState(initialData.telefone ?? "");
   const [categoria, setCategoria] = useState(initialData.categoria_negocio ?? "");
@@ -182,6 +197,14 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
         <label style={labelStyle}>Nome do estabelecimento
           <input value={nomeEstabelecimento} onChange={(e) => setNomeEstabelecimento(e.target.value)} style={inputStyle} />
         </label>
+        <label style={labelStyle}>CEP
+          <div style={{ position: "relative" }}>
+            <input type="text" inputMode="numeric" placeholder="00000-000" value={maskCep(cep)}
+              onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              onBlur={handleCepBlur} style={inputStyle} />
+            {cepLoading && <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>buscando…</span>}
+          </div>
+        </label>
         <label style={labelStyle}>Endereço (logradouro e número)
           <input value={endereco} onChange={(e) => setEndereco(e.target.value)} style={inputStyle} />
         </label>
@@ -194,11 +217,8 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
               style={{ ...inputStyle, textTransform: "uppercase", textAlign: "center" }} />
           </label>
         </div>
-        <label style={labelStyle}>CEP
-          <input value={cep} onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))} style={inputStyle} />
-        </label>
         {errBox}
-        {btn("Continuar", () => save({ nome_estabelecimento: nomeEstabelecimento, endereco, cidade, estado, cep }, 3),
+        {btn("Continuar", () => save({ nome_estabelecimento: nomeEstabelecimento, endereco, cidade, estado, cep: cep.replace(/\D/g, "") }, 3),
           !nomeEstabelecimento || !endereco || !cidade || !estado)}
       </div>
     </StepShell>
@@ -219,7 +239,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
       subtitle="Usado para os candidatos entrarem em contato. Não é para login.">
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <input type="tel" inputMode="numeric" placeholder="(11) 99999-9999"
-          value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inputStyle} />
+          value={telefone} onChange={(e) => setTelefone(maskPhone(e.target.value))} style={inputStyle} />
         {errBox}
         {btn("Continuar", () => save({ telefone }, 5), !telefone.trim())}
       </div>

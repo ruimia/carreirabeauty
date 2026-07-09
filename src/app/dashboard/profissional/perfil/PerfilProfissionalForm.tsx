@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { buildSlug, randomSuffix } from "@/lib/slug";
+import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 
 const VINCULOS: Record<string, string> = { clt: "CLT", pj: "PJ", freela: "Freela / autônomo" };
 const OUTRA = "Outro";
@@ -29,8 +30,27 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   function toggleFuncao(nome: string) {
     setFuncoes((prev) => prev.includes(nome) ? prev.filter((x) => x !== nome) : [...prev, nome]);
   }
+  const [cep, setCep] = useState(p.cep ?? "");
+  const [endereco, setEndereco] = useState(p.endereco ?? "");
   const [cidade, setCidade] = useState(p.cidade ?? "");
   const [estado, setEstado] = useState(p.estado ?? "");
+  const [dataNascimento, setDataNascimento] = useState(p.data_nascimento ?? "");
+  const [genero, setGenero] = useState(p.genero ?? "");
+  const [instagram, setInstagram] = useState(p.instagram ?? "");
+  const [cepLoading, setCepLoading] = useState(false);
+
+  async function handleCepBlur() {
+    const raw = cep.replace(/\D/g, "");
+    if (raw.length !== 8) return;
+    setCepLoading(true);
+    const data = await fetchCep(raw);
+    if (data) {
+      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setCidade(data.city ?? "");
+      setEstado(data.state ?? "");
+    }
+    setCepLoading(false);
+  }
   const [experiencia, setExperiencia] = useState(p.experiencia ?? "");
   const [disponibilidade, setDisponibilidade] = useState(p.disponibilidade ?? "");
   const [pretensao, setPretensao] = useState(p.pretensao_salarial ?? "");
@@ -65,9 +85,12 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
       }
       const { error: upErr } = await supabase.from("professionals").update({
         nome, telefone, funcoes, funcao_outro: funcoes.includes(OUTRA) ? funcaoOutro : null,
+        cep: cep.replace(/\D/g, ""), endereco,
         cidade, estado, localizacao: `${cidade} - ${estado}`,
         experiencia, disponibilidade, pretensao_salarial: pretensao,
         educacao_basica: educacao, tipo_vinculo: tipoVinculo || null,
+        data_nascimento: dataNascimento || null, genero: genero || null,
+        instagram: instagram.replace(/^@/, "") || null,
         foto_perfil_url: fotoUrl, slug,
       }).eq("id", p.id);
       if (upErr) throw new Error(upErr.message);
@@ -78,10 +101,12 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
   function handleCancel() {
     setNome(p.nome ?? ""); setTelefone(p.telefone ?? ""); setFuncoes(p.funcoes?.length ? p.funcoes : []);
-    setFuncaoOutro(p.funcao_outro ?? ""); setCidade(p.cidade ?? ""); setEstado(p.estado ?? "");
+    setFuncaoOutro(p.funcao_outro ?? ""); setCep(p.cep ?? ""); setEndereco(p.endereco ?? "");
+    setCidade(p.cidade ?? ""); setEstado(p.estado ?? "");
     setExperiencia(p.experiencia ?? ""); setDisponibilidade(p.disponibilidade ?? "");
     setPretensao(p.pretensao_salarial ?? ""); setEducacao(p.educacao_basica ?? "");
     setTipoVinculo(p.tipo_vinculo ?? ""); setAvatarPreview(p.foto_perfil_url ?? null);
+    setDataNascimento(p.data_nascimento ?? ""); setGenero(p.genero ?? ""); setInstagram(p.instagram ?? "");
     setEditing(false); setError("");
   }
 
@@ -172,8 +197,9 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
           <F label="Nome completo" editing={editing}>
             {editing ? <input value={nome} onChange={(e) => setNome(e.target.value)} style={inp} /> : <V>{nome || "—"}</V>}
           </F>
-          <F label="WhatsApp" editing={editing}>
-            {editing ? <input type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inp} /> : <V>{telefone || "—"}</V>}
+          <F label="WhatsApp *" editing={editing}>
+            {editing ? <input type="tel" inputMode="numeric" placeholder="(11) 99999-9999" value={telefone}
+              onChange={(e) => setTelefone(maskPhone(e.target.value))} style={inp} /> : <V>{telefone || "—"}</V>}
           </F>
           <F label="Especialidades" editing={editing}>
             {editing ? (
@@ -202,14 +228,27 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
               </div>
             ) : <V>{funcaoLabel || "—"}</V>}
           </F>
-          <F label="Localização" editing={editing}>
+          <F label="CEP *" editing={editing}>
             {editing ? (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 8 }}>
-                <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
-                <input value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2}
-                  style={{ ...inp, textTransform: "uppercase", textAlign: "center" }} />
+              <div style={{ position: "relative" }}>
+                <input type="text" inputMode="numeric" placeholder="00000-000" value={maskCep(cep)}
+                  onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  onBlur={handleCepBlur} style={inp} />
+                {cepLoading && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>buscando…</span>}
               </div>
-            ) : <V>{[cidade, estado].filter(Boolean).join(" · ") || "—"}</V>}
+            ) : <V>{maskCep(cep) || "—"}</V>}
+          </F>
+          <F label="Endereço *" editing={editing}>
+            {editing ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Logradouro e número" style={inp} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 8 }}>
+                  <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
+                  <input value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2}
+                    style={{ ...inp, textTransform: "uppercase", textAlign: "center" }} />
+                </div>
+              </div>
+            ) : <V>{[endereco, cidade, estado].filter(Boolean).join(", ") || "—"}</V>}
           </F>
           <F label="Experiência" editing={editing}>
             {editing ? (
@@ -243,6 +282,30 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
                 {Object.entries(VINCULOS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             ) : <V>{VINCULOS[tipoVinculo] || "—"}</V>}
+          </F>
+
+          <F label="Data de nascimento" editing={editing}>
+            {editing ? <input type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} style={inp} /> : <V>{dataNascimento || "—"}</V>}
+          </F>
+          <F label="Gênero" editing={editing}>
+            {editing ? (
+              <select value={genero} onChange={(e) => setGenero(e.target.value)} style={sel}>
+                <option value="">Prefiro não informar</option>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+                <option value="nao_binario">Não binário</option>
+                <option value="outro">Outro</option>
+              </select>
+            ) : <V>{genero || "—"}</V>}
+          </F>
+          <F label="Instagram" editing={editing}>
+            {editing ? (
+              <div style={{ display: "flex", alignItems: "center", height: 46, border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+                <span style={{ padding: "0 12px", background: "var(--surface-sunken)", borderRight: "1px solid var(--border-default)", color: "var(--text-tertiary)", height: "100%", display: "flex", alignItems: "center", fontSize: 15, fontWeight: 600 }}>@</span>
+                <input value={instagram} onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
+                  style={{ flex: 1, height: "100%", padding: "0 14px", border: "none", outline: "none", fontFamily: "var(--font-body)", fontSize: 15, background: "transparent", color: "var(--text-primary)" }} />
+              </div>
+            ) : <V>{instagram ? `@${instagram}` : "—"}</V>}
           </F>
 
           <div style={{ height: 1, background: "var(--border-default)" }} />
