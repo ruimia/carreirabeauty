@@ -25,16 +25,24 @@ export async function POST(req: NextRequest) {
     const preApproval = new PreApproval(mp);
     const subscription = await preApproval.get({ id: preapprovalId });
 
-    // external_reference = "tipo:userId:planoKey"
-    const ref = subscription.external_reference ?? "";
-    const [tipo, userId, planoKey] = ref.split(":");
-    if (!tipo || !userId || !planoKey) return NextResponse.json({ ok: true });
+    const planId = subscription.preapproval_plan_id ?? "";
+    const payerEmail = subscription.payer_email ?? "";
+    const status = subscription.status;
+    const ativo = status === "authorized";
+
+    // Descobre qual plano pelo plan_id
+    const MP_PLAN_IDS: Record<string, string> = {
+      [process.env.MP_PLAN_EMPRESA_BASIC    ?? ""]: "empresa_basic",
+      [process.env.MP_PLAN_EMPRESA_PLUS     ?? ""]: "empresa_plus",
+      [process.env.MP_PLAN_EMPRESA_PREMIUM  ?? ""]: "empresa_premium",
+      [process.env.MP_PLAN_PROFISSIONAL_PRO ?? ""]: "profissional_pro",
+    };
+
+    const planoKey = MP_PLAN_IDS[planId];
+    if (!planoKey) return NextResponse.json({ ok: true });
 
     const mapa = PLANO_KEY_MAP[planoKey];
     if (!mapa) return NextResponse.json({ ok: true });
-
-    const status = subscription.status; // authorized | paused | cancelled
-    const ativo = status === "authorized";
 
     const validade = ativo ? (() => {
       const d = new Date(); d.setMonth(d.getMonth() + 1); return d.toISOString();
@@ -42,27 +50,20 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createClient();
 
-    if (mapa.tabela === "companies") {
-      await supabase
-        .from("companies")
-        .update({
-          plano: ativo ? mapa.plano : "gratis",
-          plano_status: ativo ? "ativo" : "cancelado",
-          plano_validade: validade,
-          mp_subscription_id: preapprovalId,
-        })
-        .eq("user_id", userId);
-    } else {
-      await supabase
-        .from("professionals")
-        .update({
-          plano: ativo ? mapa.plano : "gratis",
-          plano_status: ativo ? "ativo" : "cancelado",
-          plano_validade: validade,
-          mp_subscription_id: preapprovalId,
-        })
-        .eq("user_id", userId);
-    }
+    // Encontra user_id pelo email
+    const { data: profile } = await supabase
+      .from("profiles").select("id").eq("email", payerEmail).maybeSingle();
+    if (!profile) return NextResponse.json({ ok: true });
+
+    await supabase
+      .from(mapa.tabela)
+      .update({
+        plano: ativo ? mapa.plano : "gratis",
+        plano_status: ativo ? "ativo" : "cancelado",
+        plano_validade: validade,
+        mp_subscription_id: preapprovalId,
+      })
+      .eq("user_id", profile.id);
 
     return NextResponse.json({ ok: true });
   } catch (e) {
