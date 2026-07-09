@@ -36,7 +36,9 @@
       "mcp__claude-in-chrome__javascript_tool",
       "Bash(python3)",
       "Bash(npx tsc *)",
-      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/empresa/\\\\[slug\\\\] /Users/ruimiadaira/cbeauty/src/app/vaga/\\\\[slug\\\\])"
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/empresa/\\\\[slug\\\\] /Users/ruimiadaira/cbeauty/src/app/vaga/\\\\[slug\\\\])",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)"
     ]
   }
 }

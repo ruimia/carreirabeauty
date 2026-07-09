@@ -134,17 +134,18 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
     finally { setLoading(false); }
   }
 
-  const btn = (label: string, onClick: () => void, disabled: boolean) => (
+  const btn = (label: string, onClick: () => void, disabled: boolean, ghost = false) => (
     <button onClick={onClick} disabled={disabled || loading} style={{
-      width: "100%", height: 52, borderRadius: "var(--radius-pill)",
-      border: "none", background: (disabled || loading) ? "var(--neutral-200)" : "var(--color-brand-primary)",
-      color: (disabled || loading) ? "var(--text-tertiary)" : "#fff",
+      flex: 1, height: 52, borderRadius: "var(--radius-pill)",
+      border: ghost ? "1.5px solid var(--border-default)" : "none",
+      background: ghost ? "transparent" : (disabled || loading) ? "var(--neutral-200)" : "var(--color-brand-primary)",
+      color: ghost ? "var(--text-secondary)" : (disabled || loading) ? "var(--text-tertiary)" : "#fff",
       fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 16,
       cursor: (disabled || loading) ? "not-allowed" : "pointer",
       transition: "background var(--duration-fast) var(--ease-standard)",
       marginTop: 8,
     }}>
-      {loading ? "Salvando…" : label}
+      {loading && !ghost ? "Salvando…" : label}
     </button>
   );
 
@@ -268,11 +269,14 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
   );
 
   if (step === 6) return (
-    <StepShell step={6} total={TOTAL_STEPS} title="Quantos funcionários trabalham com você?">
+    <StepShell step={6} total={TOTAL_STEPS} title="Quantos funcionários trabalham com você?" subtitle="Opcional.">
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {FAIXAS.map((f) => choiceBtn(f.value, f.label, faixaFuncionarios, setFaixaFuncionarios))}
         {errBox}
-        {btn("Continuar", () => save({ faixa_funcionarios: faixaFuncionarios }, 7), !faixaFuncionarios)}
+        <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+          {btn("Pular", () => save({ faixa_funcionarios: null }, 7), false, true)}
+          {btn("Continuar", () => save({ faixa_funcionarios: faixaFuncionarios }, 7), !faixaFuncionarios)}
+        </div>
       </div>
     </StepShell>
   );

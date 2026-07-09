@@ -261,11 +261,14 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
   if (step === 5) {
     const opcoes = ["Integral", "Meio período", "Freela / por demanda", "Finais de semana"];
     return (
-      <StepShell step={5} total={TOTAL_STEPS} title="Qual a sua disponibilidade?">
+      <StepShell step={5} total={TOTAL_STEPS} title="Qual a sua disponibilidade?" subtitle="Opcional.">
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {opcoes.map((o) => <ChoiceBtn key={o} value={o} label={o} current={disponibilidade} onSelect={setDisponibilidade} />)}
           {errBox}
-          <PrimaryBtn label="Continuar" onClick={() => go({ disponibilidade }, 6)} disabled={!disponibilidade} />
+          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+            <GhostBtn label="Pular" onClick={() => go({ disponibilidade: null }, 6)} />
+            <PrimaryBtn label="Continuar" onClick={() => go({ disponibilidade }, 6)} disabled={!disponibilidade} />
+          </div>
         </div>
       </StepShell>
     );

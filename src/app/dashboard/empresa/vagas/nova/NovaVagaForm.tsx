@@ -203,13 +203,12 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) setFotoPreview(URL.createObjectURL(f)); }} />
             </F>
 
-            <F label="Título da vaga">
-              <input value={titulo} onChange={(e) => setTitulo(e.target.value)}
-                placeholder="Ex: Cabeleireiro(a) para salão no centro" style={inp} />
-            </F>
-
             <F label="Função *">
-              <select required value={funcao} onChange={(e) => setFuncao(e.target.value)} style={sel}>
+              <select required value={funcao} onChange={(e) => {
+                const val = e.target.value;
+                setFuncao(val);
+                if (!titulo.trim() && val && val !== "Outro") setTitulo(val);
+              }} style={sel}>
                 <option value="">Selecione uma função</option>
                 {[...profissoes, "Outro"].map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
@@ -221,6 +220,11 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
                   placeholder="Ex: Podólogo especializado" style={inp} />
               </F>
             )}
+
+            <F label="Título da vaga *">
+              <input required value={titulo} onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Ex: Cabeleireiro(a) para salão no centro" style={inp} />
+            </F>
 
             <F label="Descrição da vaga *">
               <textarea required rows={4} value={descricao} onChange={(e) => setDescricao(e.target.value)}
