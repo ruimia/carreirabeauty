@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { fetchCep, maskCep } from "@/lib/cep";
+import { buildSlug, randomSuffix } from "@/lib/slug";
 
 const VINCULOS = [
   { value: "", label: "Não especificado" },
@@ -53,6 +54,11 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
     e.preventDefault();
     setLoading(true); setError("");
 
+    const funcaoLabel = funcao === "Outro" ? funcaoOutro : funcao;
+    const baseSlug = buildSlug(funcaoLabel, cidade);
+    const { data: existing } = await supabase.from("jobs").select("id").eq("slug", baseSlug).maybeSingle();
+    const slug = existing ? `${baseSlug}-${randomSuffix()}` : baseSlug;
+
     const { error: jErr } = await supabase.from("jobs").insert({
       company_id: company.id,
       funcao: funcao === "Outro" ? "outro" : funcao,
@@ -64,6 +70,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
       endereco,
       cidade,
       estado,
+      slug,
       status: "ativa",
     });
 

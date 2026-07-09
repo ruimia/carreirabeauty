@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { buildSlug, randomSuffix } from "@/lib/slug";
 
 const FAIXAS: Record<string, string> = {
   "1_5": "1 a 5 funcionários",
@@ -64,8 +65,14 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
         if (upErr) throw new Error(upErr.message);
         logoUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
       }
+      let slug = company.slug as string | null;
+      if (!slug || nome !== company.nome_estabelecimento || cidade !== company.cidade) {
+        const base = buildSlug(nome, cidade);
+        const { data: existing } = await supabase.from("companies").select("id").eq("slug", base).neq("id", company.id).maybeSingle();
+        slug = existing ? `${base}-${randomSuffix()}` : base;
+      }
       const { error: upErr } = await supabase.from("companies").update({
-        nome_estabelecimento: nome, responsavel, telefone, endereco, cidade, estado, cep: cep.replace(/\D/g, ""),
+        nome_estabelecimento: nome, responsavel, telefone, endereco, cidade, estado, cep: cep.replace(/\D/g, ""), slug,
         categoria_negocio: categoria || null,
         categoria_outro: categoria === OUTRA_CATEGORIA ? categoriaOutro || null : null,
         faixa_funcionarios: faixa || null,

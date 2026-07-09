@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import StepShell from "@/components/ui/StepShell";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { buildSlug, randomSuffix } from "@/lib/slug";
 
 const TOTAL_STEPS = 7;
 
@@ -124,7 +125,10 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
         if (upErr) throw upErr;
         logoUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
       }
-      await upsertCompany({ instagram: instagram.replace(/^@/, ""), logo_url: logoUrl, status_cadastro: "completo" });
+      const base = buildSlug(nomeEstabelecimento, cidade);
+      const { data: existing } = await supabase.from("companies").select("id").eq("slug", base).neq("id", companyId ?? "").maybeSingle();
+      const slug = existing ? `${base}-${randomSuffix()}` : base;
+      await upsertCompany({ instagram: instagram.replace(/^@/, ""), logo_url: logoUrl, slug, status_cadastro: "completo" });
       router.push("/dashboard/empresa");
     } catch { setError("Erro ao salvar. Tente novamente."); }
     finally { setLoading(false); }
