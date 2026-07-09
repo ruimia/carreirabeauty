@@ -79,6 +79,11 @@ export default async function DashboardProfissionalPage() {
         <Link href={`/perfil/${professional.slug}`} style={{ fontSize: 13, color: "var(--text-tertiary)", fontWeight: 500 }}>
           Público
         </Link>
+        <a href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty" target="_blank" rel="noopener noreferrer" style={{
+          fontSize: 13, color: "#25D366", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap",
+        }}>
+          Suporte
+        </a>
         <LogoutButton compact />
       </header>
 

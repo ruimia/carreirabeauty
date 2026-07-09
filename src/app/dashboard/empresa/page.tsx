@@ -67,6 +67,11 @@ export default async function DashboardEmpresaPage() {
         <Link href="/dashboard/empresa/perfil" style={{ fontSize: 13, color: "var(--text-tertiary)", fontWeight: 500 }}>
           Perfil
         </Link>
+        <a href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty" target="_blank" rel="noopener noreferrer" style={{
+          fontSize: 13, color: "#25D366", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap",
+        }}>
+          Suporte
+        </a>
         <LogoutButton compact />
       </header>
 
