@@ -37,12 +37,16 @@ const EMPRESA_TABS: Tab[] = [
     isActive: (p) => p.startsWith("/dashboard/empresa/vagas/nova"),
   },
   {
+    label: "Planos",
+    icon: "⭐",
+    href: "/dashboard/empresa/planos",
+    isActive: (p) => p.startsWith("/dashboard/empresa/planos"),
+  },
+  {
     label: "Perfil",
     icon: "👤",
     href: "/dashboard/empresa/perfil",
-    isActive: (p) =>
-      p.startsWith("/dashboard/empresa/perfil") ||
-      p.startsWith("/dashboard/empresa/planos"),
+    isActive: (p) => p.startsWith("/dashboard/empresa/perfil"),
   },
 ];
 
@@ -54,12 +58,16 @@ const PROFISSIONAL_TABS: Tab[] = [
     isActive: (p) => p === "/dashboard/profissional",
   },
   {
+    label: "Planos",
+    icon: "⭐",
+    href: "/dashboard/profissional/planos",
+    isActive: (p) => p.startsWith("/dashboard/profissional/planos"),
+  },
+  {
     label: "Perfil",
     icon: "👤",
     href: "/dashboard/profissional/perfil",
-    isActive: (p) =>
-      p.startsWith("/dashboard/profissional/perfil") ||
-      p.startsWith("/dashboard/profissional/planos"),
+    isActive: (p) => p.startsWith("/dashboard/profissional/perfil"),
   },
 ];
 

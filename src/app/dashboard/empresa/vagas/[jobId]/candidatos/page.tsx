@@ -31,12 +31,6 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
     .eq("job_id", jobId)
     .order("criado_em", { ascending: false });
 
-  if (appError) console.error("[candidatos] erro query:", JSON.stringify(appError));
-
-  // Debug temporário
-  if (appError) {
-    return <pre style={{ padding: 24, fontSize: 13 }}>ERRO: {JSON.stringify(appError, null, 2)}</pre>;
-  }
 
   const funcaoVaga = job.titulo || job.funcao || "Vaga";
   const count = applications?.length ?? 0;
