@@ -20,7 +20,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((job.companies as any).user_id !== user.id) notFound();
 
-  const { data: applications } = await supabase
+  const { data: applications, error: appError } = await supabase
     .from("applications")
     .select(`id, criado_em, mensagem, professionals(
       id, nome, telefone, funcoes, funcao, funcao_outro,
@@ -30,6 +30,13 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
     )`)
     .eq("job_id", jobId)
     .order("criado_em", { ascending: false });
+
+  if (appError) console.error("[candidatos] erro query:", JSON.stringify(appError));
+
+  // Debug temporário
+  if (appError) {
+    return <pre style={{ padding: 24, fontSize: 13 }}>ERRO: {JSON.stringify(appError, null, 2)}</pre>;
+  }
 
   const funcaoVaga = job.titulo || job.funcao || "Vaga";
   const count = applications?.length ?? 0;
