@@ -23,7 +23,7 @@ export default function AssinarButton({ planoKey, label, destaque }: Props) {
       });
       const data = await res.json();
       if (data.init_point) {
-        window.location.href = data.init_point;
+        window.open(data.init_point, "_blank");
       } else {
         setErro(`Erro: ${data.detail ?? data.error ?? JSON.stringify(data)}`);
         setLoading(false);
