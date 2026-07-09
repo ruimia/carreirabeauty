@@ -35,7 +35,8 @@
       "Bash(open -a Safari /Users/ruimiadaira/Downloads/Home-standalone.html)",
       "mcp__claude-in-chrome__javascript_tool",
       "Bash(python3)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/empresa/\\\\[slug\\\\] /Users/ruimiadaira/cbeauty/src/app/vaga/\\\\[slug\\\\])"
     ]
   }
 }

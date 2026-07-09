@@ -413,9 +413,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
               </select>
             ) : <V>{experiencia || "—"}</V>}
           </F>
-          <F label="Pretensão salarial" editing={editing}>
-            {editing ? <input value={pretensao} onChange={(e) => setPretensao(e.target.value)} placeholder="Ex: R$ 2.000 – R$ 3.000" style={inp} /> : <V>{pretensao || "—"}</V>}
-          </F>
+
         </div>
 
         {/* Educação */}

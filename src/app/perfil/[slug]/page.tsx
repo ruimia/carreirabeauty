@@ -165,7 +165,6 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
             {[
               { label: "Experiência", value: p.experiencia },
               { label: "Disponibilidade", value: p.disponibilidade },
-              { label: "Pretensão salarial", value: p.pretensao_salarial },
               { label: "Tipo de vínculo", value: p.tipo_vinculo },
               { label: "Formação", value: p.educacao_basica },
             ].filter((r) => r.value).map((r) => (
