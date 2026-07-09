@@ -25,8 +25,10 @@ export async function POST(req: NextRequest) {
     const preApproval = new PreApproval(mp);
     const subscription = await preApproval.get({ id: preapprovalId });
 
-    const planId = subscription.preapproval_plan_id ?? "";
-    const payerEmail = subscription.payer_email ?? "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sub = subscription as any;
+    const planId: string = sub.preapproval_plan_id ?? "";
+    const payerEmail: string = sub.payer_email ?? "";
     const status = subscription.status;
     const ativo = status === "authorized";
 
