@@ -270,7 +270,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
                 onChange={(e) => setApresentacao(e.target.value)}
                 placeholder="Quem sou eu? Em poucas palavras, conte sobre você e sua trajetória…"
                 style={{ ...inp, height: "auto", padding: "10px 14px", resize: "none", lineHeight: 1.6 }} />
-            ) : <V style={{ whiteSpace: "pre-wrap" }}>{apresentacao || "—"}</V>}
+            ) : <V><span style={{ whiteSpace: "pre-wrap" }}>{apresentacao || "—"}</span></V>}
           </F>
           <F label="WhatsApp *" editing={editing}>
             {editing ? <input type="tel" inputMode="numeric" placeholder="(11) 99999-9999" value={telefone}

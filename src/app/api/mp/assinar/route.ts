@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
         preapproval_plan_id: planId,
         payer_email: profile?.email ?? "",
         back_url: backUrl,
-        notification_url: `${APP_URL}/api/webhooks/mercadopago`,
         external_reference: `${tipo}:${user.id}:${planoKey}`,
         auto_recurring: {
           frequency: 1,
