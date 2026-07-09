@@ -31,3 +31,15 @@ export async function updateJobStatus(id: string, status: string) {
   await supabase.from("jobs").update({ status }).eq("id", id);
   revalidatePath("/admin/vagas");
 }
+
+export async function aprovarVaga(id: string) {
+  const supabase = await assertAdmin();
+  await supabase.from("jobs").update({ status: "ativa", motivo_rejeicao: null }).eq("id", id);
+  revalidatePath("/admin/vagas");
+}
+
+export async function rejeitarVaga(id: string, motivo: string) {
+  const supabase = await assertAdmin();
+  await supabase.from("jobs").update({ status: "rejeitada", motivo_rejeicao: motivo }).eq("id", id);
+  revalidatePath("/admin/vagas");
+}

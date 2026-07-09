@@ -12,10 +12,12 @@ const FUNCAO_LABEL: Record<string, string> = {
 };
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  ativa:               { bg: "var(--color-success-bg)",  color: "var(--color-success-fg)",  label: "Ativa" },
-  pausada:             { bg: "var(--color-warning-bg)",  color: "var(--color-warning-fg)",  label: "Pausada" },
-  fechada:             { bg: "var(--neutral-100)",        color: "var(--text-tertiary)",     label: "Fechada" },
-  bloqueada_pos_trial: { bg: "var(--color-danger-bg)",   color: "var(--color-danger-fg)",   label: "Bloqueada" },
+  ativa:                { bg: "var(--color-success-bg)",  color: "var(--color-success-fg)",  label: "Ativa" },
+  pausada:              { bg: "var(--color-warning-bg)",  color: "var(--color-warning-fg)",  label: "Pausada" },
+  fechada:              { bg: "var(--neutral-100)",        color: "var(--text-tertiary)",     label: "Fechada" },
+  bloqueada_pos_trial:  { bg: "var(--color-danger-bg)",   color: "var(--color-danger-fg)",   label: "Bloqueada" },
+  pendente_moderacao:   { bg: "#FFF7ED",                  color: "#C2410C",                  label: "Em análise" },
+  rejeitada:            { bg: "var(--color-danger-bg)",   color: "var(--color-danger-fg)",   label: "Rejeitada" },
 };
 
 export default async function DashboardEmpresaPage() {
@@ -134,15 +136,19 @@ export default async function DashboardEmpresaPage() {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const count = (job.applications as any)?.[0]?.count ?? 0;
 
+              const rejeitada = job.status === "rejeitada";
+              const emAnalise = job.status === "pendente_moderacao";
+
               return (
                 <div key={job.id} style={{
                   background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
-                  border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)", padding: 16,
+                  border: `1px solid ${rejeitada ? "var(--color-danger-border, #FECACA)" : "var(--border-default)"}`,
+                  boxShadow: "var(--shadow-xs)", padding: 16,
                 }}>
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, color: "var(--text-primary)" }}>
-                        {title}
+                        {job.titulo || title}
                       </p>
                       {job.faixa_salarial && (
                         <p style={{ fontSize: 13, color: "var(--brand-cyan-700)", fontWeight: 600, marginTop: 2 }}>
@@ -164,7 +170,30 @@ export default async function DashboardEmpresaPage() {
                     </span>
                   </div>
 
-                  {job.descricao && (
+                  {/* Motivo de rejeição */}
+                  {rejeitada && job.motivo_rejeicao && (
+                    <div style={{
+                      marginTop: 10, padding: "10px 12px",
+                      background: "var(--color-danger-bg)", borderRadius: "var(--radius-md)",
+                      borderLeft: "3px solid var(--color-danger-fg)",
+                    }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: "var(--color-danger-fg)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        Motivo da rejeição
+                      </p>
+                      <p style={{ fontSize: 13, color: "var(--color-danger-fg)", lineHeight: 1.5 }}>
+                        {job.motivo_rejeicao}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Aviso em análise */}
+                  {emAnalise && (
+                    <p style={{ fontSize: 12, color: "#C2410C", marginTop: 10 }}>
+                      ⏳ Aguardando aprovação — sua vaga será publicada em breve.
+                    </p>
+                  )}
+
+                  {job.descricao && !rejeitada && !emAnalise && (
                     <p style={{
                       fontSize: 13, color: "var(--text-secondary)", marginTop: 10, lineHeight: 1.5,
                       display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
@@ -177,11 +206,19 @@ export default async function DashboardEmpresaPage() {
                     <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
                       {new Date(job.criado_em).toLocaleDateString("pt-BR")}
                     </p>
-                    <Link href={`/dashboard/empresa/vagas/${job.id}/candidatos`} style={{
-                      fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", textDecoration: "none",
-                    }}>
-                      {count} candidato{count !== 1 ? "s" : ""} →
-                    </Link>
+                    {rejeitada ? (
+                      <Link href={`/dashboard/empresa/vagas/${job.id}/editar`} style={{
+                        fontSize: 13, fontWeight: 700, color: "var(--color-danger-fg)", textDecoration: "none",
+                      }}>
+                        Editar e reenviar →
+                      </Link>
+                    ) : (
+                      <Link href={`/dashboard/empresa/vagas/${job.id}/candidatos`} style={{
+                        fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", textDecoration: "none",
+                      }}>
+                        {count} candidato{count !== 1 ? "s" : ""} →
+                      </Link>
+                    )}
                   </div>
                 </div>
               );

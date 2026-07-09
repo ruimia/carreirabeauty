@@ -38,7 +38,8 @@
       "Bash(npx tsc *)",
       "Bash(mkdir -p /Users/ruimiadaira/cbeauty/src/app/empresa/\\\\[slug\\\\] /Users/ruimiadaira/cbeauty/src/app/vaga/\\\\[slug\\\\])",
       "Skill(artifact-design)",
-      "Skill(artifact-design:*)"
+      "Skill(artifact-design:*)",
+      "Bash(mkdir -p \"/Users/ruimiadaira/cbeauty/src/app/dashboard/empresa/vagas/[jobId]/editar\")"
     ]
   }
 }
