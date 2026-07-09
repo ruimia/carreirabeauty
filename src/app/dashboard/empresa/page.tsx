@@ -4,160 +4,191 @@ import Link from "next/link";
 import LogoutButton from "../LogoutButton";
 
 const FUNCAO_LABEL: Record<string, string> = {
-  cabeleireiro: "Cabeleireiro(a)",
-  manicure_pedicure: "Manicure/pedicure",
-  esteticista: "Esteticista",
-  maquiador: "Maquiador(a)",
-  barbeiro: "Barbeiro",
-  massoterapeuta: "Massoterapeuta",
-  designer_sobrancelha_cilios: "Designer de sobrancelha/cílios",
-  depilador: "Depilador(a)",
-  podologo: "Podólogo(a)",
-  recepcionista: "Recepcionista",
-  auxiliar_assistente: "Auxiliar/assistente",
-  outro: "Outro",
+  cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
+  esteticista: "Esteticista", maquiador: "Maquiador(a)", barbeiro: "Barbeiro",
+  massoterapeuta: "Massoterapeuta", designer_sobrancelha_cilios: "Designer de sobrancelha/cílios",
+  depilador: "Depilador(a)", podologo: "Podólogo(a)", recepcionista: "Recepcionista",
+  auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  ativa: "Ativa",
-  pausada: "Pausada",
-  fechada: "Fechada",
-  bloqueada_pos_trial: "Bloqueada",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  ativa: "bg-green-100 text-green-700",
-  pausada: "bg-yellow-100 text-yellow-700",
-  fechada: "bg-gray-100 text-gray-500",
-  bloqueada_pos_trial: "bg-red-100 text-red-600",
+const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
+  ativa:               { bg: "var(--color-success-bg)",  color: "var(--color-success-fg)",  label: "Ativa" },
+  pausada:             { bg: "var(--color-warning-bg)",  color: "var(--color-warning-fg)",  label: "Pausada" },
+  fechada:             { bg: "var(--neutral-100)",        color: "var(--text-tertiary)",     label: "Fechada" },
+  bloqueada_pos_trial: { bg: "var(--color-danger-bg)",   color: "var(--color-danger-fg)",   label: "Bloqueada" },
 };
 
 export default async function DashboardEmpresaPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: company } = await supabase
-    .from("companies")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
+    .from("companies").select("*").eq("user_id", user.id).maybeSingle();
 
   if (!company) redirect("/onboarding/tipo");
   if (company.status_cadastro !== "completo") redirect("/onboarding/empresa");
 
   const { data: jobs } = await supabase
-    .from("jobs")
-    .select("*, applications(count)")
-    .eq("company_id", company.id)
-    .order("criado_em", { ascending: false });
+    .from("jobs").select("*, applications(count)")
+    .eq("company_id", company.id).order("criado_em", { ascending: false });
+
+  const totalCandidatos = (jobs ?? []).reduce((sum, j) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return sum + ((j.applications as any)?.[0]?.count ?? 0);
+  }, 0);
 
   return (
-    <main className="min-h-screen bg-rose-50 px-4 py-8">
-      <div className="max-w-md mx-auto space-y-4">
+    <div style={{ minHeight: "100vh", background: "var(--surface-page)", display: "flex", flexDirection: "column" }}>
 
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-square.jpg" alt="CarreiraBeauty" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
-          {company.logo_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={company.logo_url}
-              alt="Logo"
-              className="w-10 h-10 rounded-xl object-cover"
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-gray-800 truncate">
-              {company.nome_estabelecimento}
-            </h1>
-            <p className="text-sm text-gray-500">{company.cidade} · {company.estado}</p>
-          </div>
-          <LogoutButton compact />
+      {/* Top bar */}
+      <header style={{
+        background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
+        padding: "0 var(--space-page-x)", height: 56,
+        display: "flex", alignItems: "center", gap: 12,
+        position: "sticky", top: 0, zIndex: 10,
+      }}>
+        {company.logo_url
+          // eslint-disable-next-line @next/next/no-img-element
+          ? <img src={company.logo_url} alt="Logo" style={{ width: 32, height: 32, borderRadius: "var(--radius-sm)", objectFit: "cover", flexShrink: 0 }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          : <img src="/logo-square.jpg" alt="CarreiraBeauty" style={{ width: 32, height: 32, borderRadius: "var(--radius-sm)", objectFit: "cover", flexShrink: 0 }} />
+        }
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>
+            {company.nome_estabelecimento}
+          </p>
+          <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{company.cidade} · {company.estado}</p>
+        </div>
+        <Link href="/dashboard/empresa/perfil" style={{ fontSize: 13, color: "var(--text-tertiary)", fontWeight: 500 }}>
+          Perfil
+        </Link>
+        <LogoutButton compact />
+      </header>
+
+      <main style={{ flex: 1, padding: "20px var(--space-page-x)", maxWidth: 480, width: "100%", margin: "0 auto" }}>
+
+        {/* Stats row */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+          {[
+            { label: "Vagas publicadas", value: jobs?.length ?? 0, color: "var(--color-brand-primary)" },
+            { label: "Candidatos recebidos", value: totalCandidatos, color: "var(--color-brand-secondary)" },
+          ].map((s) => (
+            <div key={s.label} style={{
+              background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
+              border: "1px solid var(--border-default)", padding: "16px",
+              boxShadow: "var(--shadow-xs)",
+            }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, color: s.color, lineHeight: 1 }}>
+                {s.value}
+              </p>
+              <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 4 }}>{s.label}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Ações */}
-        <div className="flex gap-3">
-          <Link
-            href="/dashboard/empresa/vagas/nova"
-            className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl py-3 text-center transition"
-          >
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
+          <Link href="/dashboard/empresa/vagas/nova" style={{
+            flex: 1, height: 48, borderRadius: "var(--radius-pill)",
+            background: "var(--color-brand-primary)", color: "#fff",
+            fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            textDecoration: "none", gap: 6,
+          }}>
             + Nova vaga
           </Link>
-          <Link
-            href="/dashboard/empresa/perfil"
-            className="flex-1 border border-rose-200 text-rose-600 font-semibold rounded-xl py-3 text-center hover:bg-rose-50 transition"
-          >
-            Perfil
+          <Link href="/dashboard/empresa/perfil" style={{
+            flex: 1, height: 48, borderRadius: "var(--radius-pill)",
+            border: "1px solid var(--border-default)", background: "var(--surface-card)",
+            color: "var(--text-primary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15,
+            display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none",
+          }}>
+            Editar perfil
           </Link>
         </div>
 
-        {/* Lista de vagas */}
+        {/* Jobs list */}
+        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 12 }}>
+          Suas vagas
+        </p>
+
         {!jobs || jobs.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow p-6 text-center text-gray-400">
-            <p className="text-lg mb-1">Nenhuma vaga publicada ainda</p>
-            <p className="text-sm">
-              Publique sua primeira vaga e comece a receber candidatos.
+          <div style={{
+            background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+            boxShadow: "var(--shadow-sm)", padding: "48px 24px", textAlign: "center",
+          }}>
+            <p style={{ fontSize: 32, marginBottom: 12 }}>📋</p>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: "var(--text-primary)", marginBottom: 8 }}>
+              Publique sua primeira vaga
+            </p>
+            <p style={{ fontSize: 14, color: "var(--text-secondary)" }}>
+              Em minutos você começa a receber candidatos qualificados.
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            <h2 className="text-sm font-medium text-gray-500 px-1">
-              Suas vagas ({jobs.length})
-            </h2>
-            {jobs.map((job) => (
-              <div key={job.id} className="bg-white rounded-2xl shadow p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      {job.funcao === "outro"
-                        ? job.funcao_outro || "Outro"
-                        : FUNCAO_LABEL[job.funcao] ?? job.funcao}
-                    </p>
-                    {job.faixa_salarial && (
-                      <p className="text-sm text-gray-500 mt-0.5">
-                        {job.faixa_salarial}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {jobs.map((job) => {
+              const status = STATUS_STYLE[job.status] ?? STATUS_STYLE.fechada;
+              const title = job.funcao === "outro" ? (job.funcao_outro || "Outro") : (FUNCAO_LABEL[job.funcao] ?? job.funcao);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const count = (job.applications as any)?.[0]?.count ?? 0;
+
+              return (
+                <div key={job.id} style={{
+                  background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
+                  border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)", padding: 16,
+                }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, color: "var(--text-primary)" }}>
+                        {title}
                       </p>
-                    )}
-                    {job.tipo_vinculo && (
-                      <p className="text-xs text-gray-400 mt-0.5 uppercase">
-                        {job.tipo_vinculo}
-                      </p>
-                    )}
+                      {job.faixa_salarial && (
+                        <p style={{ fontSize: 13, color: "var(--brand-cyan-700)", fontWeight: 600, marginTop: 2 }}>
+                          {job.faixa_salarial}
+                        </p>
+                      )}
+                      {job.tipo_vinculo && (
+                        <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginTop: 2 }}>
+                          {job.tipo_vinculo}
+                        </p>
+                      )}
+                    </div>
+                    <span style={{
+                      background: status.bg, color: status.color,
+                      fontSize: 11, fontWeight: 700, padding: "4px 10px",
+                      borderRadius: "var(--radius-pill)", whiteSpace: "nowrap",
+                    }}>
+                      {status.label}
+                    </span>
                   </div>
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${
-                      STATUS_COLOR[job.status] ?? "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {STATUS_LABEL[job.status] ?? job.status}
-                  </span>
+
+                  {job.descricao && (
+                    <p style={{
+                      fontSize: 13, color: "var(--text-secondary)", marginTop: 10, lineHeight: 1.5,
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                    }}>
+                      {job.descricao}
+                    </p>
+                  )}
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
+                    <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+                      {new Date(job.criado_em).toLocaleDateString("pt-BR")}
+                    </p>
+                    <Link href={`/dashboard/empresa/vagas/${job.id}/candidatos`} style={{
+                      fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", textDecoration: "none",
+                    }}>
+                      {count} candidato{count !== 1 ? "s" : ""} →
+                    </Link>
+                  </div>
                 </div>
-                {job.descricao && (
-                  <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                    {job.descricao}
-                  </p>
-                )}
-                <div className="flex items-center justify-between mt-3">
-                  <p className="text-xs text-gray-300">
-                    {new Date(job.criado_em).toLocaleDateString("pt-BR")}
-                  </p>
-                  <Link
-                    href={`/dashboard/empresa/vagas/${job.id}/candidatos`}
-                    className="text-sm font-medium text-rose-500 hover:text-rose-600 transition"
-                  >
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(job.applications as any)?.[0]?.count ?? 0} candidato(s) →
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
