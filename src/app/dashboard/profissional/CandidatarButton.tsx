@@ -26,7 +26,11 @@ export default function CandidatarButton({ jobId, professionalId, alreadyApplied
 
   if (applied) {
     return (
-      <span className="text-sm text-green-600 font-medium whitespace-nowrap">
+      <span style={{
+        fontSize: 13, fontWeight: 600, color: "var(--color-success-fg)",
+        background: "var(--color-success-bg)", borderRadius: "var(--radius-pill)",
+        padding: "0 14px", height: 36, display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
+      }}>
         ✓ Candidatura enviada
       </span>
     );
@@ -36,9 +40,16 @@ export default function CandidatarButton({ jobId, professionalId, alreadyApplied
     <button
       onClick={handleApply}
       disabled={loading}
-      className="bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold rounded-xl px-4 py-2 transition disabled:opacity-40 whitespace-nowrap"
+      style={{
+        height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
+        border: "none", background: loading ? "var(--brand-magenta-400)" : "var(--color-brand-primary)",
+        color: "#fff", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14,
+        cursor: loading ? "not-allowed" : "pointer", whiteSpace: "nowrap",
+        transition: "background var(--duration-fast) var(--ease-standard)",
+        opacity: loading ? 0.7 : 1,
+      }}
     >
-      {loading ? "Enviando..." : "Candidatar"}
+      {loading ? "Enviando…" : "Candidatar"}
     </button>
   );
 }
