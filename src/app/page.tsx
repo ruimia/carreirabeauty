@@ -8,157 +8,284 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (user) redirect("/dashboard");
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--surface-page)", fontFamily: "var(--font-body)" }}>
-      {/* Header */}
+    <div style={{ minHeight: "100vh", fontFamily: "var(--font-body)" }}>
+      {/* ── Header ── */}
       <header style={{
-        background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)",
-        borderBottom: "1px solid var(--border-default)",
         position: "sticky", top: 0, zIndex: 10,
-        padding: "0 24px", height: 60,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        maxWidth: "100%",
+        background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Image src="/logo-square.jpg" alt="CarreiraBeauty" width={32} height={32}
-            style={{ borderRadius: 8, objectFit: "cover" }} />
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)" }}>
-            CarreiraBeauty
-          </span>
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <a href="#top" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <Image src="/logo-square.jpg" alt="CarreiraBeauty" width={32} height={32} style={{ borderRadius: 8, objectFit: "cover" }} />
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)" }}>CarreiraBeauty</span>
+          </a>
+          <Link href="/login" style={{
+            height: 40, padding: "0 18px", borderRadius: "var(--radius-pill)",
+            border: "1px solid var(--border-default)", background: "transparent",
+            color: "var(--text-primary)", fontWeight: 600, fontSize: 14,
+            display: "flex", alignItems: "center", textDecoration: "none",
+          }}>Entrar</Link>
         </div>
-        <Link href="/login" style={{
-          height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
-          border: "1px solid var(--border-default)", background: "transparent",
-          color: "var(--text-primary)", fontWeight: 600, fontSize: 14,
-          display: "flex", alignItems: "center", textDecoration: "none",
-        }}>
-          Entrar
-        </Link>
       </header>
 
-      {/* Hero */}
-      <section style={{
-        background: "linear-gradient(160deg, #f8e8f8 0%, #e8f4f8 50%, #f8e8f0 100%)",
-        padding: "64px 24px 48px",
-        textAlign: "center",
-        position: "relative", overflow: "hidden",
-      }}>
-        {/* Decorative blobs */}
-        <div style={{ position: "absolute", top: -60, left: -60, width: 200, height: 200, borderRadius: "50%", background: "rgba(220,0,220,0.06)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(0,170,200,0.07)", pointerEvents: "none" }} />
-
-        <div style={{ maxWidth: 680, margin: "0 auto", position: "relative" }}>
-          <h1 style={{
-            fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(28px, 6vw, 48px)",
-            color: "var(--text-primary)", lineHeight: 1.15, marginBottom: 20,
-          }}>
-            O maior site de empregos de beleza, estética e bem-estar do Brasil
-          </h1>
-          <p style={{ fontSize: "clamp(15px, 2.5vw, 18px)", color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 48 }}>
-            Salões, clínicas e profissionais se encontram perto de casa.<br />
-            Simples, rápido e feito para o seu bairro.
-          </p>
-
-          {/* Category cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, textAlign: "left", marginBottom: 40 }}>
-            <CategoryCard
-              color="var(--color-brand-primary)"
-              bg="#fdf0ff"
-              icon="✂️"
-              title="Beleza"
-              desc="Salões, esmalterias e barbearias"
-              tags={["Cabeleireiro(a)", "Manicure/Pedicure", "Barbeiro(a)", "Maquiador(a)", "Depiladora", "Recepcionista"]}
-            />
-            <CategoryCard
-              color="var(--color-brand-secondary)"
-              bg="#f0fbff"
-              icon="✨"
-              title="Estética"
-              desc="Clínicas de estética"
-              tags={["Esteticista", "Biomédico(a)", "Recepcionista"]}
-            />
-            <CategoryCard
-              color="var(--brand-blush-500)"
-              bg="#fff0f6"
-              icon="🌿"
-              title="Saúde e bem-estar"
-              desc="Spas e clínicas de terapia"
-              tags={["Fisioterapeuta", "Massoterapeuta", "Podólogo(a)", "Recepcionista"]}
-            />
-          </div>
-
-          {/* Cities */}
-          <div style={{ marginBottom: 40 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "var(--text-tertiary)", textTransform: "uppercase", marginBottom: 12 }}>
-              📍 Sua praça está aqui
+      <main id="top">
+        {/* ── Hero ── */}
+        <section style={{ background: "var(--surface-accent)", padding: "60px 24px 48px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 20, textAlign: "center" }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "clamp(28px, 5vw, 40px)", color: "var(--text-primary)", maxWidth: 720, lineHeight: 1.2 }}>
+              O maior site de empregos de beleza, estética e bem-estar do Brasil
+            </h1>
+            <p style={{ fontSize: 17, color: "var(--text-secondary)", maxWidth: 560, lineHeight: 1.5 }}>
+              Salões, clínicas e profissionais se encontram perto de casa. Simples, rápido e feito para o seu bairro.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 20px", justifyContent: "center", fontSize: 14, color: "var(--text-secondary)", fontWeight: 500 }}>
-              {["São Paulo, SP", "Campinas, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG", "Curitiba, PR"].map((c) => (
-                <span key={c}>{c}</span>
+
+            {/* Categoria cards */}
+            <div style={{ width: "100%", maxWidth: 960, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, textAlign: "left" }}>
+              <CategoryCard accent="var(--brand-magenta-500)" icon="✂️" title="Beleza" desc="Salões, esmalterias e barbearias"
+                tags={["Cabeleireiro(a)", "Manicure/Pedicure", "Barbeiro(a)", "Maquiador(a)", "Depiladora", "Recepcionista"]} />
+              <CategoryCard accent="var(--brand-cyan-500)" icon="✨" title="Estética" desc="Clínicas de estética"
+                tags={["Esteticista", "Biomédico(a)", "Recepcionista"]} />
+              <CategoryCard accent="var(--brand-blush-500)" icon="🌿" title="Saúde e bem-estar" desc="Spas e clínicas de terapia"
+                tags={["Fisioterapeuta", "Massoterapeuta", "Podólogo(a)", "Recepcionista"]} />
+            </div>
+
+            {/* Praça */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-tertiary)" }}>
+                📍 Sua praça está aqui
+              </span>
+              <div style={{ display: "flex", gap: "6px 16px", flexWrap: "wrap", justifyContent: "center" }}>
+                {["São Paulo, SP", "Campinas, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG", "Curitiba, PR"].map((c) => (
+                  <Pill key={c}>{c}</Pill>
+                ))}
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 12 }}>
+              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
+                👤 Sou profissional
+              </Link>
+              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
+                🏪 Sou empresa
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Como funciona — profissionais ── */}
+        <section id="profissionais" style={{ padding: "56px 24px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-cyan-600)" }}>Para profissionais</span>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 24px" }}>
+              Sua próxima vaga está perto de casa
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
+              <Step num={1} title="Cadastre-se em minutos" desc="Conte sua função, experiência e onde você está." accent="var(--brand-cyan-500)" />
+              <Step num={2} title="Ganhe uma página pública" desc="Seu currículo online, indexado no Google, de graça." accent="var(--brand-cyan-500)" />
+              <Step num={3} title="Receba vagas perto de você" desc="Filtro geográfico fino — nada de vaga do outro lado da cidade." accent="var(--brand-cyan-500)" />
+            </div>
+            <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)" }}>
+              Criar meu perfil profissional
+            </Link>
+          </div>
+        </section>
+
+        {/* ── Como funciona — empresas ── */}
+        <section id="empresas" style={{ background: "var(--surface-sunken)", padding: "56px 24px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-magenta-600)" }}>Para empresas</span>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 24px" }}>
+              Encontre profissionais qualificados no seu bairro
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
+              <Step num={1} title="Cadastre seu CNPJ" desc="Validamos e puxamos os dados do seu negócio automaticamente." accent="var(--color-brand-primary)" />
+              <Step num={2} title="Publique sua primeira vaga" desc="7 dias grátis para testar — sem cartão de crédito." accent="var(--color-brand-primary)" />
+              <Step num={3} title="Converse com candidatos" desc="Veja quem se candidatou e fale direto pelo WhatsApp." accent="var(--color-brand-primary)" />
+            </div>
+            <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>
+              Cadastrar minha empresa
+            </Link>
+          </div>
+        </section>
+
+        {/* ── Categorias populares ── */}
+        <section style={{ padding: "56px 24px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 24, color: "var(--text-primary)", marginBottom: 24, textAlign: "center" }}>
+              Categorias populares
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }}>
+              {[
+                { icon: "✂️", label: "Manicure", color: "var(--brand-magenta-500)" },
+                { icon: "💇", label: "Cabeleireiro(a)", color: "var(--brand-cyan-500)" },
+                { icon: "✨", label: "Esteticista", color: "var(--brand-blush-500)" },
+                { icon: "💄", label: "Maquiador(a)", color: "var(--brand-magenta-500)" },
+                { icon: "💈", label: "Barbeiro(a)", color: "var(--brand-cyan-500)" },
+                { icon: "👤", label: "Recepcionista", color: "var(--brand-blush-500)" },
+              ].map(({ icon, label, color }) => (
+                <div key={label} style={{
+                  background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
+                  border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+                  padding: "16px 12px", display: "flex", flexDirection: "column",
+                  alignItems: "center", gap: 8, textAlign: "center",
+                }}>
+                  <span style={{ fontSize: 26, color }}>{icon}</span>
+                  <span style={{ fontWeight: 600, fontSize: 13, color: "var(--text-primary)" }}>{label}</span>
+                </div>
               ))}
             </div>
           </div>
+        </section>
 
-          {/* CTAs */}
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/onboarding/profissional" style={{
-              height: 52, padding: "0 28px", borderRadius: "var(--radius-pill)",
-              background: "var(--color-brand-secondary)", color: "#fff",
-              fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8,
-              textDecoration: "none", boxShadow: "0 4px 16px rgba(0,170,200,0.3)",
-            }}>
-              <span>🎨</span> Sou profissional
-            </Link>
-            <Link href="/onboarding/empresa" style={{
-              height: 52, padding: "0 28px", borderRadius: "var(--radius-pill)",
-              background: "var(--color-brand-primary)", color: "#fff",
-              fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8,
-              textDecoration: "none", boxShadow: "0 4px 16px rgba(220,0,220,0.3)",
-            }}>
-              <span>🏪</span> Sou empresa
-            </Link>
+        {/* ── Depoimentos ── */}
+        <section style={{ background: "var(--surface-sunken)", padding: "56px 24px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 24, color: "var(--text-primary)", marginBottom: 24, textAlign: "center" }}>
+              Quem já usa o CarreiraBeauty
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
+              <Testimonial initials="RA" avatarBg="var(--brand-cyan-500)"
+                quote="Achei uma vaga de manicure a duas ruas de casa. Nunca foi tão rápido."
+                name="Renata" role="Manicure em Campinas, SP" />
+              <Testimonial initials="MS" avatarBg="var(--brand-blush-500)"
+                quote="Publiquei a vaga e no mesmo dia já tinha candidatos do bairro."
+                name="Marcos" role="Dono do Studio Bella, SP" />
+              <Testimonial initials="JS" avatarBg="var(--color-brand-primary)"
+                quote="Minha página pública virou meu currículo — mando o link direto pro cliente."
+                name="Joana" role="Esteticista em Campinas, SP" />
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA final ── */}
+        <section style={{ background: "var(--color-brand-primary)", padding: "56px 24px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28, color: "#fff" }}>
+              Pronto para começar?
+            </h2>
+            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", maxWidth: 480, lineHeight: 1.5 }}>
+              Leva menos de 5 minutos para criar sua conta.
+            </p>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "#fff", color: "var(--color-brand-primary)" }}>
+                Criar meu perfil profissional
+              </Link>
+              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.5)" }}>
+                Cadastrar minha empresa
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer style={{ background: "var(--surface-inverse)", padding: "40px 24px 24px" }}>
+        <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Image src="/logo-square.jpg" alt="" width={28} height={28} style={{ borderRadius: 6, objectFit: "cover" }} />
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "#fff" }}>CarreiraBeauty</span>
+          </div>
+          <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
+            <FooterCol title="Produto" links={[{ label: "Para profissionais", href: "#profissionais" }, { label: "Para empresas", href: "#empresas" }]} />
+            <FooterCol title="Legal" links={[{ label: "Termos de uso", href: "/termos" }, { label: "Privacidade", href: "/privacidade" }]} />
+          </div>
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 20, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
+            © {new Date().getFullYear()} CarreiraBeauty. Todos os direitos reservados.
           </div>
         </div>
-      </section>
-
-      {/* Footer mínimo */}
-      <footer style={{ padding: "20px 24px", textAlign: "center", fontSize: 12, color: "var(--text-tertiary)" }}>
-        <span>© {new Date().getFullYear()} CarreiraBeauty · </span>
-        <Link href="/privacidade" style={{ color: "var(--text-tertiary)", textDecoration: "underline" }}>Privacidade</Link>
-        <span> · </span>
-        <Link href="/termos" style={{ color: "var(--text-tertiary)", textDecoration: "underline" }}>Termos</Link>
       </footer>
     </div>
   );
 }
 
-function CategoryCard({ color, bg, icon, title, desc, tags }: {
-  color: string; bg: string; icon: string; title: string; desc: string; tags: string[];
-}) {
+const btnStyle: React.CSSProperties = {
+  height: 48, padding: "0 24px", borderRadius: "var(--radius-pill)",
+  border: "none", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700,
+  fontSize: 15, display: "inline-flex", alignItems: "center", gap: 8,
+  textDecoration: "none", cursor: "pointer",
+};
+
+function CategoryCard({ accent, icon, title, desc, tags }: { accent: string; icon: string; title: string; desc: string; tags: string[] }) {
   return (
     <div style={{
-      background: "#fff", borderRadius: "var(--radius-lg)",
-      border: `2px solid ${color}`, padding: "18px 16px",
-      boxShadow: "var(--shadow-xs)",
+      background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
+      border: "1px solid var(--border-default)", borderTop: `4px solid ${accent}`,
+      boxShadow: "var(--shadow-sm)", padding: 20,
+      display: "flex", flexDirection: "column", gap: 12,
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 8, background: bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>
-          {icon}
-        </div>
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>{title}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ fontSize: 22, color: accent }}>{icon}</span>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, color: "var(--text-primary)" }}>{title}</span>
       </div>
-      <p style={{ fontSize: 13, color: "var(--text-tertiary)", marginBottom: 12 }}>{desc}</p>
+      <p style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.4 }}>{desc}</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {tags.map((t) => (
-          <span key={t} style={{
-            fontSize: 12, fontWeight: 500, padding: "4px 10px",
-            borderRadius: "var(--radius-pill)", background: bg, color,
-          }}>{t}</span>
-        ))}
+        {tags.map((t) => <Pill key={t}>{t}</Pill>)}
       </div>
+    </div>
+  );
+}
+
+function Step({ num, title, desc, accent }: { num: number; title: string; desc: string; accent: string }) {
+  return (
+    <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+      <span style={{
+        width: 32, height: 32, borderRadius: "50%", background: accent, color: "#fff",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, flexShrink: 0,
+      }}>{num}</span>
+      <div>
+        <div style={{ fontWeight: 600, fontSize: 16, color: "var(--text-primary)" }}>{title}</div>
+        <div style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.5, marginTop: 2 }}>{desc}</div>
+      </div>
+    </div>
+  );
+}
+
+function Testimonial({ initials, avatarBg, quote, name, role }: { initials: string; avatarBg: string; quote: string; name: string; role: string }) {
+  return (
+    <div style={{
+      background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
+      border: "1px solid var(--border-default)", padding: 20,
+      display: "flex", flexDirection: "column", gap: 14,
+    }}>
+      <span style={{ fontSize: 22, color: "var(--brand-magenta-300)" }}>"</span>
+      <p style={{ fontSize: 15, color: "var(--text-primary)", lineHeight: 1.5, flex: 1 }}>{quote}</p>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{
+          width: 36, height: 36, borderRadius: "50%", background: avatarBg, color: "#fff",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, flexShrink: 0,
+        }}>{initials}</span>
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 13, color: "var(--text-primary)" }}>{name}</div>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{role}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    <span style={{
+      fontSize: 13, fontWeight: 500, padding: "4px 10px",
+      borderRadius: "var(--radius-pill)",
+      background: "var(--neutral-100)", color: "var(--text-secondary)",
+    }}>{children}</span>
+  );
+}
+
+function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{title}</span>
+      {links.map((l) => (
+        <Link key={l.href} href={l.href} style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{l.label}</Link>
+      ))}
     </div>
   );
 }
