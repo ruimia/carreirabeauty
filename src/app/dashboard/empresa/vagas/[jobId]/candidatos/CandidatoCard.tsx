@@ -7,6 +7,7 @@ interface Props {
   app: {
     id: string;
     criado_em: string;
+    mensagem: string | null;
     professional: {
       id: string;
       nome: string;
@@ -147,6 +148,21 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
             </a>
           )}
         </div>
+
+        {app.mensagem && (
+          <div style={{
+            marginTop: 12, padding: "10px 12px",
+            background: "var(--surface-sunken)", borderRadius: "var(--radius-md)",
+            borderLeft: "3px solid var(--border-default)",
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+              Mensagem
+            </p>
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+              {app.mensagem}
+            </p>
+          </div>
+        )}
 
         <p style={{ fontSize: 11, color: "var(--neutral-400)", marginTop: 10 }}>
           Candidatou-se em {new Date(app.criado_em).toLocaleDateString("pt-BR")}

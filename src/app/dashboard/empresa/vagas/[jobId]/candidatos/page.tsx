@@ -22,7 +22,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
 
   const { data: applications } = await supabase
     .from("applications")
-    .select(`id, criado_em, professionals(
+    .select(`id, criado_em, mensagem, professionals(
       id, nome, telefone, funcoes, funcao, funcao_outro,
       cidade, estado, experiencia, disponibilidade, tipo_vinculo,
       foto_perfil_url, slug, educacao_basica, habilidades,
@@ -79,7 +79,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
               return (
                 <CandidatoCard
                   key={app.id}
-                  app={{ id: app.id, criado_em: app.criado_em, professional: p }}
+                  app={{ id: app.id, criado_em: app.criado_em, mensagem: app.mensagem ?? null, professional: p }}
                   funcaoVaga={funcaoVaga}
                 />
               );
