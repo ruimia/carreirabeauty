@@ -47,10 +47,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ init_point: result.init_point });
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : String(e);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const detail = (e as any)?.cause ?? (e as any)?.message ?? msg;
+    const detail = JSON.stringify(e, Object.getOwnPropertyNames(e as object));
     console.error("[MP assinar] erro:", detail);
-    return NextResponse.json({ error: "Erro ao criar assinatura", detail: msg }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao criar assinatura", detail }, { status: 500 });
   }
 }
