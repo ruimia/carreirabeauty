@@ -37,18 +37,20 @@ export async function POST(req: NextRequest) {
         payer_email: profile?.email ?? "",
         back_url: backUrl,
         external_reference: `${tipo}:${user.id}:${planoKey}`,
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: "months",
-          transaction_amount: undefined,
-          currency_id: "BRL",
-        },
       },
     });
 
+    if (!result.init_point) {
+      console.error("[MP assinar] sem init_point:", JSON.stringify(result));
+      return NextResponse.json({ error: "Erro ao criar assinatura" }, { status: 500 });
+    }
+
     return NextResponse.json({ init_point: result.init_point });
-  } catch (e) {
-    console.error("[MP assinar]", e);
-    return NextResponse.json({ error: "Erro ao criar assinatura" }, { status: 500 });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const detail = (e as any)?.cause ?? (e as any)?.message ?? msg;
+    console.error("[MP assinar] erro:", detail);
+    return NextResponse.json({ error: "Erro ao criar assinatura", detail: msg }, { status: 500 });
   }
 }
