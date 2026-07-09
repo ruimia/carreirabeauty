@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { candidatar } from "./actions";
 
 interface Props {
   jobId: string;
@@ -17,21 +17,11 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const supabase = createClient();
-
   async function handleCandidatar() {
     if (!professionalId) return;
     setLoading(true); setError("");
     try {
-      const { error: err } = await supabase.from("applications").insert({
-        job_id: jobId,
-        professional_id: professionalId,
-        mensagem: mensagem.trim() || null,
-      });
-      if (err) {
-        if (err.code === "23505") { setEnviado(true); return; } // já aplicou
-        throw new Error(err.message);
-      }
+      await candidatar(jobId, mensagem.trim() || null);
       setEnviado(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao enviar.");

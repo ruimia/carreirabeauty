@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { emailVagaAprovada, emailVagaRejeitada } from "@/lib/email";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -36,10 +37,49 @@ export async function aprovarVaga(id: string) {
   const supabase = await assertAdmin();
   await supabase.from("jobs").update({ status: "ativa", motivo_rejeicao: null }).eq("id", id);
   revalidatePath("/admin/vagas");
+
+  const { data: job } = await supabase
+    .from("jobs")
+    .select("titulo, funcao, slug, company_id, companies(nome_estabelecimento, user_id)")
+    .eq("id", id).single();
+
+  if (job) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const comp = job.companies as any;
+    const { data: profile } = await supabase.from("profiles").select("email").eq("id", comp?.user_id ?? "").single();
+    if (profile?.email) {
+      await emailVagaAprovada({
+        empresaEmail: profile.email,
+        empresaNome: comp?.nome_estabelecimento ?? "",
+        tituloVaga: job.titulo || job.funcao || "Vaga",
+        vagaSlug: job.slug ?? id,
+      }).catch(() => {});
+    }
+  }
 }
 
 export async function rejeitarVaga(id: string, motivo: string) {
   const supabase = await assertAdmin();
   await supabase.from("jobs").update({ status: "rejeitada", motivo_rejeicao: motivo }).eq("id", id);
   revalidatePath("/admin/vagas");
+
+  const { data: job } = await supabase
+    .from("jobs")
+    .select("titulo, funcao, company_id, companies(nome_estabelecimento, user_id)")
+    .eq("id", id).single();
+
+  if (job) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const comp = job.companies as any;
+    const { data: profile } = await supabase.from("profiles").select("email").eq("id", comp?.user_id ?? "").single();
+    if (profile?.email) {
+      await emailVagaRejeitada({
+        empresaEmail: profile.email,
+        empresaNome: comp?.nome_estabelecimento ?? "",
+        tituloVaga: job.titulo || job.funcao || "Vaga",
+        motivo,
+        jobId: id,
+      }).catch(() => {});
+    }
+  }
 }
