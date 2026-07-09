@@ -1,0 +1,2 @@
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS modelo_remuneracao text NOT NULL DEFAULT 'a_combinar';
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS comissao text NOT NULL DEFAULT '';

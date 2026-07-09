@@ -17,7 +17,6 @@ const VINCULOS = [
 ];
 
 const FAIXAS_SALARIAIS = [
-  "A combinar",
   "Até R$ 1.500",
   "R$ 1.500 – R$ 2.000",
   "R$ 2.000 – R$ 3.000",
@@ -25,6 +24,24 @@ const FAIXAS_SALARIAIS = [
   "R$ 4.000 – R$ 6.000",
   "Acima de R$ 6.000",
   "Outro",
+];
+
+const FAIXAS_COMISSAO = [
+  "Até 30%",
+  "30% – 40%",
+  "40% – 50%",
+  "50% – 60%",
+  "60% – 70%",
+  "Acima de 70%",
+  "A combinar",
+  "Outro",
+];
+
+const MODELOS = [
+  { value: "fixo", label: "Salário fixo" },
+  { value: "comissao", label: "Comissão sobre vendas" },
+  { value: "fixo_comissao", label: "Fixo + Comissão" },
+  { value: "a_combinar", label: "A combinar" },
 ];
 
 interface Props {
@@ -42,8 +59,14 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
   const [funcaoOutro, setFuncaoOutro] = useState("");
   const [descricao, setDescricao] = useState("");
   const [tipoVinculo, setTipoVinculo] = useState("");
+  const [modeloRemuneracao, setModeloRemuneracao] = useState("fixo");
   const [faixaSalarial, setFaixaSalarial] = useState("");
   const [faixaOutro, setFaixaOutro] = useState("");
+  const [comissao, setComissao] = useState("");
+  const [comissaoOutro, setComissaoOutro] = useState("");
+
+  const temFixo = modeloRemuneracao === "fixo" || modeloRemuneracao === "fixo_comissao";
+  const temComissao = modeloRemuneracao === "comissao" || modeloRemuneracao === "fixo_comissao";
   const [cep, setCep] = useState(company.cep ?? "");
   const [endereco, setEndereco] = useState(company.endereco ?? "");
   const [cidade, setCidade] = useState(company.cidade ?? "");
@@ -93,7 +116,9 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
         funcao_outro: funcao === "Outro" ? funcaoOutro : null,
         descricao,
         tipo_vinculo: tipoVinculo || null,
-        faixa_salarial: faixaSalarial === "Outro" ? faixaOutro : faixaSalarial,
+        modelo_remuneracao: modeloRemuneracao,
+      faixa_salarial: temFixo ? (faixaSalarial === "Outro" ? faixaOutro : faixaSalarial) : "",
+      comissao: temComissao ? (comissao === "Outro" ? comissaoOutro : comissao) : "",
         cep: cep.replace(/\D/g, ""),
         endereco,
         cidade,
@@ -209,15 +234,55 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
               </select>
             </F>
 
-            <F label="Faixa salarial *">
+            <F label="Modelo de remuneração *">
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <select required value={faixaSalarial} onChange={(e) => setFaixaSalarial(e.target.value)} style={sel}>
-                  <option value="">Selecione</option>
-                  {FAIXAS_SALARIAIS.map((f) => <option key={f} value={f}>{f}</option>)}
-                </select>
-                {faixaSalarial === "Outro" && (
-                  <input required value={faixaOutro} onChange={(e) => setFaixaOutro(e.target.value)}
-                    placeholder="Ex: R$ 1.800 + comissão" style={inp} autoFocus />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {MODELOS.map((m) => {
+                    const active = modeloRemuneracao === m.value;
+                    return (
+                      <button key={m.value} type="button" onClick={() => setModeloRemuneracao(m.value)} style={{
+                        padding: "10px 12px", borderRadius: "var(--radius-md)", cursor: "pointer", textAlign: "left",
+                        border: `2px solid ${active ? "var(--color-brand-primary)" : "var(--border-default)"}`,
+                        background: active ? "var(--brand-magenta-50)" : "var(--surface-card)",
+                        color: active ? "var(--brand-magenta-700)" : "var(--text-primary)",
+                        fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400, fontSize: 14,
+                      }}>
+                        {m.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {temFixo && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+                      FAIXA SALARIAL
+                    </p>
+                    <select required value={faixaSalarial} onChange={(e) => setFaixaSalarial(e.target.value)} style={sel}>
+                      <option value="">Selecione</option>
+                      {FAIXAS_SALARIAIS.map((f) => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                    {faixaSalarial === "Outro" && (
+                      <input value={faixaOutro} onChange={(e) => setFaixaOutro(e.target.value)}
+                        placeholder="Ex: R$ 1.800 / mês" style={inp} autoFocus />
+                    )}
+                  </div>
+                )}
+
+                {temComissao && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+                      FAIXA DE COMISSÃO
+                    </p>
+                    <select required value={comissao} onChange={(e) => setComissao(e.target.value)} style={sel}>
+                      <option value="">Selecione</option>
+                      {FAIXAS_COMISSAO.map((f) => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                    {comissao === "Outro" && (
+                      <input value={comissaoOutro} onChange={(e) => setComissaoOutro(e.target.value)}
+                        placeholder="Ex: 35% sobre serviços" style={inp} autoFocus />
+                    )}
+                  </div>
                 )}
               </div>
             </F>
