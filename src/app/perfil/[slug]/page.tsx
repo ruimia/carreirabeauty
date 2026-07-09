@@ -152,10 +152,10 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        {/* Bio */}
-        {p.bio && (
-          <Section title="Sobre mim">
-            <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>{p.bio}</p>
+        {/* Apresentação */}
+        {p.educacao_basica && (
+          <Section title="Quem sou eu">
+            <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{p.educacao_basica}</p>
           </Section>
         )}
 
@@ -166,7 +166,6 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
               { label: "Experiência", value: p.experiencia },
               { label: "Disponibilidade", value: p.disponibilidade },
               { label: "Tipo de vínculo", value: p.tipo_vinculo },
-              { label: "Formação", value: p.educacao_basica },
             ].filter((r) => r.value).map((r) => (
               <div key={r.label}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>

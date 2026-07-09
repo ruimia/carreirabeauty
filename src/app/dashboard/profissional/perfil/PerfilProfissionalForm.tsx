@@ -45,9 +45,9 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   const [dataNascimento, setDataNascimento] = useState(p.data_nascimento ?? "");
   const [genero, setGenero] = useState(p.genero ?? "");
   const [instagram, setInstagram] = useState(p.instagram ?? "");
+  const [apresentacao, setApresentacao] = useState(p.educacao_basica ?? "");
   const [experiencia, setExperiencia] = useState(p.experiencia ?? "");
   const [disponibilidade, setDisponibilidade] = useState(p.disponibilidade ?? "");
-  const [pretensao, setPretensao] = useState(p.pretensao_salarial ?? "");
   const [tipoVinculo, setTipoVinculo] = useState(p.tipo_vinculo ?? "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(p.foto_perfil_url ?? null);
 
@@ -146,7 +146,8 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         nome, telefone, funcoes, funcao_outro: funcoes.includes(OUTRA) ? funcaoOutro : null,
         cep: cep.replace(/\D/g, ""), endereco,
         cidade, estado, localizacao: `${cidade} - ${estado}`,
-        experiencia, disponibilidade, pretensao_salarial: pretensao,
+        educacao_basica: apresentacao || null,
+        experiencia, disponibilidade,
         tipo_vinculo: tipoVinculo || null,
         data_nascimento: dataNascimento || null, genero: genero || null,
         instagram: instagram.replace(/^@/, "") || null,
@@ -168,8 +169,9 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
     setNome(p.nome ?? ""); setTelefone(p.telefone ?? "");
     setFuncoes(p.funcoes?.length ? p.funcoes : []); setFuncaoOutro(p.funcao_outro ?? "");
     setCep(p.cep ?? ""); setEndereco(p.endereco ?? ""); setCidade(p.cidade ?? ""); setEstado(p.estado ?? "");
+    setApresentacao(p.educacao_basica ?? "");
     setExperiencia(p.experiencia ?? ""); setDisponibilidade(p.disponibilidade ?? "");
-    setPretensao(p.pretensao_salarial ?? ""); setTipoVinculo(p.tipo_vinculo ?? "");
+    setTipoVinculo(p.tipo_vinculo ?? "");
     setDataNascimento(p.data_nascimento ?? ""); setGenero(p.genero ?? ""); setInstagram(p.instagram ?? "");
     setAvatarPreview(p.foto_perfil_url ?? null);
     setEducacao(p.educacao ?? []); setExperiencias(p.experiencia_prof ?? []);
@@ -261,6 +263,14 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
           <SectionTitle>Dados pessoais</SectionTitle>
           <F label="Nome completo" editing={editing}>
             {editing ? <input value={nome} onChange={(e) => setNome(e.target.value)} style={inp} /> : <V>{nome || "—"}</V>}
+          </F>
+          <F label="Apresentação" editing={editing}>
+            {editing ? (
+              <textarea rows={3} maxLength={280} value={apresentacao}
+                onChange={(e) => setApresentacao(e.target.value)}
+                placeholder="Quem sou eu? Em poucas palavras, conte sobre você e sua trajetória…"
+                style={{ ...inp, height: "auto", padding: "10px 14px", resize: "none", lineHeight: 1.6 }} />
+            ) : <V style={{ whiteSpace: "pre-wrap" }}>{apresentacao || "—"}</V>}
           </F>
           <F label="WhatsApp *" editing={editing}>
             {editing ? <input type="tel" inputMode="numeric" placeholder="(11) 99999-9999" value={telefone}

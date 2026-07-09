@@ -7,7 +7,7 @@ import StepShell from "@/components/ui/StepShell";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 7;
 
 const VINCULOS = [
   { value: "clt", label: "CLT" },
@@ -275,30 +275,19 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
   }
 
   if (step === 6) return (
-    <StepShell step={6} total={TOTAL_STEPS} title="Qual é sua formação?" subtitle="Ex: Técnico em estética, Curso de cabeleireiro no SENAC.">
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <textarea rows={3} placeholder="Descreva sua formação principal" value={educacao} onChange={(e) => setEducacao(e.target.value)}
-          style={{ ...inputStyle, height: "auto", padding: "14px 16px", resize: "none", lineHeight: 1.5 }} />
-        {errBox}
-        <PrimaryBtn label="Continuar" onClick={() => go({ educacao_basica: educacao }, 7)} disabled={!educacao.trim()} />
-      </div>
-    </StepShell>
-  );
-
-  if (step === 7) return (
-    <StepShell step={7} total={TOTAL_STEPS} title="Que tipo de trabalho você busca?" subtitle="Pode escolher mais de um. Opcional.">
+    <StepShell step={6} total={TOTAL_STEPS} title="Que tipo de trabalho você busca?" subtitle="Pode escolher mais de um. Opcional.">
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {VINCULOS.map((v) => <MultiBtn key={v.value} value={v.value} label={v.label} />)}
         {errBox}
         <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-          <GhostBtn label="Pular" onClick={() => go({}, 8)} />
-          <PrimaryBtn label="Continuar" onClick={() => go({ tipo_vinculo: tipoVinculo[0] ?? null }, 8)} disabled={false} />
+          <GhostBtn label="Pular" onClick={() => go({}, 7)} />
+          <PrimaryBtn label="Continuar" onClick={() => go({ tipo_vinculo: tipoVinculo[0] ?? null }, 7)} disabled={false} />
         </div>
       </div>
     </StepShell>
   );
 
-  if (step === 8) {
+  if (step === 7) {
     async function handleFinish(withPhoto: boolean) {
       setLoading(true); setError("");
       try {
@@ -316,7 +305,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
     }
 
     return (
-      <StepShell step={8} total={TOTAL_STEPS} title="Adicione uma foto de perfil" subtitle="Opcional — aparece no seu perfil público e nas candidaturas.">
+      <StepShell step={7} total={TOTAL_STEPS} title="Adicione uma foto de perfil" subtitle="Opcional — aparece no seu perfil público e nas candidaturas.">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div onClick={() => fileRef.current?.click()} style={{
             border: `2px dashed ${avatarPreview ? "var(--color-brand-primary)" : "var(--border-default)"}`,
