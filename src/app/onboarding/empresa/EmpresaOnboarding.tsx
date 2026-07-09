@@ -58,7 +58,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
     const data = await fetchCep(raw);
     if (data) {
       setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
-      setCidade(data.municipio ?? data.city ?? "");
+      setCidade(data.city ?? "");
       setEstado(data.state ?? "");
     }
     setCepLoading(false);
