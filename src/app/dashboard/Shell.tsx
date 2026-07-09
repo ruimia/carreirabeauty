@@ -23,7 +23,7 @@ interface Props {
 const EMPRESA_TABS: Tab[] = [
   {
     label: "Vagas",
-    icon: "📋",
+    icon: "ph-fill ph-briefcase",
     href: "/dashboard/empresa",
     isActive: (p) =>
       p === "/dashboard/empresa" ||
@@ -31,20 +31,20 @@ const EMPRESA_TABS: Tab[] = [
   },
   {
     label: "Nova vaga",
-    icon: "➕",
+    icon: "ph-bold ph-plus",
     href: "/dashboard/empresa/vagas/nova",
     cta: true,
     isActive: (p) => p.startsWith("/dashboard/empresa/vagas/nova"),
   },
   {
     label: "Planos",
-    icon: "⭐",
+    icon: "ph ph-star",
     href: "/dashboard/empresa/planos",
     isActive: (p) => p.startsWith("/dashboard/empresa/planos"),
   },
   {
     label: "Perfil",
-    icon: "👤",
+    icon: "ph ph-user-circle",
     href: "/dashboard/empresa/perfil",
     isActive: (p) => p.startsWith("/dashboard/empresa/perfil"),
   },
@@ -53,19 +53,19 @@ const EMPRESA_TABS: Tab[] = [
 const PROFISSIONAL_TABS: Tab[] = [
   {
     label: "Vagas",
-    icon: "🔍",
+    icon: "ph-fill ph-briefcase",
     href: "/dashboard/profissional",
     isActive: (p) => p === "/dashboard/profissional",
   },
   {
     label: "Planos",
-    icon: "⭐",
+    icon: "ph ph-star",
     href: "/dashboard/profissional/planos",
     isActive: (p) => p.startsWith("/dashboard/profissional/planos"),
   },
   {
     label: "Perfil",
-    icon: "👤",
+    icon: "ph ph-user-circle",
     href: "/dashboard/profissional/perfil",
     isActive: (p) => p.startsWith("/dashboard/profissional/perfil"),
   },
@@ -91,7 +91,7 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
         .ds-shell { display: flex; min-height: 100vh; background: var(--surface-page); }
         .ds-sidebar {
           display: none;
-          width: 220px;
+          width: 240px;
           flex-shrink: 0;
           position: fixed;
           left: 0; top: 0;
@@ -102,7 +102,7 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
           z-index: 20;
         }
         .ds-main { flex: 1; display: flex; flex-direction: column; }
-        .ds-content { flex: 1; padding-bottom: 72px; }
+        .ds-content { flex: 1; padding-bottom: 88px; }
         .ds-bottom-nav {
           position: fixed;
           bottom: 0; left: 0; right: 0;
@@ -126,24 +126,33 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
           background: transparent;
           cursor: pointer;
           padding: 0;
-          transition: opacity 0.15s;
+          color: var(--text-tertiary);
         }
-        .ds-tab:active { opacity: 0.7; }
-        .ds-tab-icon { font-size: 20px; line-height: 1; }
+        .ds-tab.active { color: var(--color-brand-primary); }
+        .ds-tab i { font-size: 21px; }
         .ds-tab-label { font-size: 10px; font-weight: 600; font-family: var(--font-body); letter-spacing: 0.02em; }
-        .ds-tab-cta .ds-tab-icon {
+        .ds-tab-cta i {
           width: 44px; height: 44px;
           background: var(--color-brand-primary);
+          color: #fff;
           border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
           font-size: 22px;
-          box-shadow: 0 2px 8px rgba(220,0,220,0.35);
-          margin-top: -8px;
+          box-shadow: 0 4px 12px rgba(220,0,220,0.35);
+          margin-top: -10px;
         }
         .ds-tab-cta .ds-tab-label { color: var(--color-brand-primary); }
-        @media (min-width: 768px) {
+        .ds-nav-item {
+          display: flex; align-items: center; gap: 12px;
+          padding: 11px 14px; border-radius: var(--radius-md);
+          margin-bottom: 2px; color: var(--text-secondary);
+          font: 500 14px/1 var(--font-body); text-decoration: none;
+        }
+        .ds-nav-item i { font-size: 19px; }
+        .ds-nav-item.active { background: var(--brand-magenta-50); color: var(--color-brand-primary); font-weight: 700; }
+        @media (min-width: 860px) {
           .ds-sidebar { display: flex; }
-          .ds-main { margin-left: 220px; }
+          .ds-main { margin-left: 240px; }
           .ds-content { padding-bottom: 0; }
           .ds-bottom-nav { display: none; }
           .ds-mobile-only { display: none !important; }
@@ -173,64 +182,39 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
             </Link>
           </div>
 
-          <nav style={{ flex: 1, padding: "12px 12px" }}>
+          <nav style={{ flex: 1, padding: "14px 12px" }}>
             {tabs.map((tab) => {
               const active = tab.isActive(pathname);
               return (
                 <Link
                   key={tab.href}
                   href={tab.href}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "11px 12px",
-                    borderRadius: "var(--radius-md)",
-                    textDecoration: "none",
-                    marginBottom: 2,
-                    background: active ? "var(--brand-blush-50, #fdf4ff)" : "transparent",
-                  }}
+                  className={`ds-nav-item${active ? " active" : ""}`}
                 >
-                  <span style={{ fontSize: 18 }}>{tab.icon}</span>
-                  <span style={{
-                    fontSize: 14,
-                    fontWeight: active ? 700 : 500,
-                    color: active ? "var(--color-brand-primary)" : "var(--text-secondary)",
-                    fontFamily: "var(--font-body)",
-                  }}>
-                    {tab.label}
-                  </span>
+                  <i className={active && !tab.icon.includes("ph-bold") ? tab.icon.replace(/^ph /, "ph-fill ") : tab.icon}></i>
+                  {tab.label}
                 </Link>
               );
             })}
           </nav>
 
-          <div style={{ padding: "16px 12px", borderTop: "1px solid var(--border-default)" }}>
+          <div style={{ padding: "16px 12px", borderTop: "1px solid var(--border-default)", display: "flex", flexDirection: "column", gap: 2 }}>
             <a
               href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                display: "flex", alignItems: "center", gap: 10,
-                padding: "10px 12px", borderRadius: "var(--radius-md)",
-                textDecoration: "none", color: "#25D366",
-                fontSize: 14, fontWeight: 600, fontFamily: "var(--font-body)",
-              }}
+              className="ds-nav-item"
+              style={{ color: "#1ea952" }}
             >
-              <span style={{ fontSize: 18 }}>💬</span>
+              <i className="ph ph-whatsapp-logo"></i>
               Suporte
             </a>
             <button
               onClick={handleLogout}
-              style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%",
-                padding: "10px 12px", borderRadius: "var(--radius-md)",
-                border: "none", background: "transparent", cursor: "pointer",
-                color: "var(--text-tertiary)", fontSize: 14, fontWeight: 500,
-                fontFamily: "var(--font-body)",
-              }}
+              className="ds-nav-item"
+              style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--text-tertiary)", width: "100%", textAlign: "left" }}
             >
-              <span style={{ fontSize: 18 }}>🚪</span>
+              <i className="ph ph-sign-out"></i>
               Sair
             </button>
           </div>
@@ -246,26 +230,14 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
           <nav className="ds-bottom-nav">
             {tabs.map((tab) => {
               const active = tab.isActive(pathname);
-              const color = active
-                ? "var(--color-brand-primary)"
-                : "var(--text-tertiary)";
-
               return (
                 <Link
                   key={tab.href}
                   href={tab.href}
-                  className={`ds-tab${tab.cta ? " ds-tab-cta" : ""}`}
+                  className={`ds-tab${tab.cta ? " ds-tab-cta" : ""}${active ? " active" : ""}`}
                 >
-                  {tab.cta ? (
-                    <span className="ds-tab-icon">➕</span>
-                  ) : (
-                    <span className="ds-tab-icon" style={{ filter: active ? "none" : "grayscale(1) opacity(0.5)" }}>
-                      {tab.icon}
-                    </span>
-                  )}
-                  <span className="ds-tab-label" style={{ color: tab.cta ? "var(--color-brand-primary)" : color }}>
-                    {tab.label}
-                  </span>
+                  <i className={tab.icon}></i>
+                  <span className="ds-tab-label">{tab.label}</span>
                 </Link>
               );
             })}

@@ -1,5 +1,3 @@
-export const metadata = { title: "Entrar" };
-
 "use client";
 
 import { useState } from "react";
