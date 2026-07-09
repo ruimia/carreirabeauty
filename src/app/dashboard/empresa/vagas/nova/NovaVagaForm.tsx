@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -15,15 +15,16 @@ const VINCULOS = [
 ] as const;
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  company: { id: string; endereco: string; cidade: string; estado: string; cep: string };
+  company: { id: string; endereco: string; cidade: string; estado: string; cep: string; logo_url: string | null };
   profissoes: string[];
 }
 
 export default function NovaVagaForm({ company, profissoes }: Props) {
   const router = useRouter();
   const supabase = createClient();
+  const fileRef = useRef<HTMLInputElement>(null);
 
+  const [titulo, setTitulo] = useState("");
   const [funcao, setFuncao] = useState("");
   const [funcaoOutro, setFuncaoOutro] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -33,6 +34,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
   const [endereco, setEndereco] = useState(company.endereco ?? "");
   const [cidade, setCidade] = useState(company.cidade ?? "");
   const [estado, setEstado] = useState(company.estado ?? "");
+  const [fotoPreview, setFotoPreview] = useState<string | null>(company.logo_url ?? null);
   const [cepLoading, setCepLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -54,29 +56,46 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
     e.preventDefault();
     setLoading(true); setError("");
 
-    const funcaoLabel = funcao === "Outro" ? funcaoOutro : funcao;
-    const baseSlug = buildSlug(funcaoLabel, cidade);
-    const { data: existing } = await supabase.from("jobs").select("id").eq("slug", baseSlug).maybeSingle();
-    const slug = existing ? `${baseSlug}-${randomSuffix()}` : baseSlug;
+    try {
+      let fotoUrl = company.logo_url ?? null;
+      if (fileRef.current?.files?.[0]) {
+        const file = fileRef.current.files[0];
+        const ext = file.name.split(".").pop();
+        const path = `${company.id}/vaga-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("logos").upload(path, file, { upsert: true });
+        if (upErr) throw new Error(upErr.message);
+        fotoUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
+      }
 
-    const { error: jErr } = await supabase.from("jobs").insert({
-      company_id: company.id,
-      funcao: funcao === "Outro" ? "outro" : funcao,
-      funcao_outro: funcao === "Outro" ? funcaoOutro : null,
-      descricao,
-      tipo_vinculo: tipoVinculo || null,
-      faixa_salarial: faixaSalarial,
-      cep: cep.replace(/\D/g, ""),
-      endereco,
-      cidade,
-      estado,
-      slug,
-      status: "ativa",
-    });
+      const funcaoLabel = funcao === "Outro" ? funcaoOutro : funcao;
+      const slugBase = buildSlug(titulo || funcaoLabel, cidade);
+      const { data: existing } = await supabase.from("jobs").select("id").eq("slug", slugBase).maybeSingle();
+      const slug = existing ? `${slugBase}-${randomSuffix()}` : slugBase;
 
-    if (jErr) setError("Erro ao publicar vaga. Tente novamente.");
-    else router.push("/dashboard/empresa");
-    setLoading(false);
+      const { error: jErr } = await supabase.from("jobs").insert({
+        company_id: company.id,
+        titulo,
+        funcao: funcao === "Outro" ? "outro" : funcao,
+        funcao_outro: funcao === "Outro" ? funcaoOutro : null,
+        descricao,
+        tipo_vinculo: tipoVinculo || null,
+        faixa_salarial: faixaSalarial,
+        cep: cep.replace(/\D/g, ""),
+        endereco,
+        cidade,
+        estado,
+        foto_url: fotoUrl,
+        slug,
+        status: "ativa",
+      });
+
+      if (jErr) throw new Error("Erro ao publicar vaga. Tente novamente.");
+      router.push("/dashboard/empresa");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao publicar.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const inp: React.CSSProperties = {
@@ -108,6 +127,48 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
             border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
             padding: 20, display: "flex", flexDirection: "column", gap: 18,
           }}>
+
+            {/* Foto da vaga */}
+            <F label="Foto da vaga">
+              <div
+                onClick={() => fileRef.current?.click()}
+                style={{
+                  height: 140, borderRadius: "var(--radius-lg)", overflow: "hidden",
+                  border: `2px dashed ${fotoPreview ? "var(--color-brand-primary)" : "var(--border-default)"}`,
+                  background: fotoPreview ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", position: "relative", transition: "all var(--duration-fast)",
+                }}
+              >
+                {fotoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={fotoPreview} alt="Foto da vaga"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 28, marginBottom: 6 }}>📷</div>
+                    <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Toque para adicionar foto</p>
+                  </div>
+                )}
+                {fotoPreview && (
+                  <div style={{
+                    position: "absolute", bottom: 8, right: 8,
+                    background: "rgba(0,0,0,0.55)", borderRadius: "var(--radius-pill)",
+                    padding: "4px 10px", fontSize: 12, color: "#fff", fontWeight: 600,
+                  }}>
+                    Trocar
+                  </div>
+                )}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) setFotoPreview(URL.createObjectURL(f)); }} />
+            </F>
+
+            <F label="Título da vaga">
+              <input value={titulo} onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Ex: Cabeleireiro(a) para salão no centro" style={inp} />
+            </F>
+
             <F label="Função *">
               <select required value={funcao} onChange={(e) => setFuncao(e.target.value)} style={sel}>
                 <option value="">Selecione uma função</option>
@@ -125,7 +186,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
             <F label="Descrição da vaga *">
               <textarea required rows={4} value={descricao} onChange={(e) => setDescricao(e.target.value)}
                 placeholder="Descreva o que o profissional vai fazer, requisitos, diferenciais…"
-                style={{ ...inp, height: "auto", padding: "12px 14px", resize: "none", lineHeight: 1.5 }} />
+                style={{ ...inp, height: "auto", padding: "12px 14px", resize: "none", lineHeight: 1.6 }} />
             </F>
 
             <F label="Tipo de vínculo">
@@ -143,10 +204,14 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
 
             <F label="CEP *">
               <div style={{ position: "relative" }}>
-                <input type="text" inputMode="numeric" placeholder="00000-000" required value={maskCep(cep)}
+                <input type="text" inputMode="numeric" required placeholder="00000-000" value={maskCep(cep)}
                   onChange={(e) => setCep(e.target.value.replace(/\D/g, "").slice(0, 8))}
                   onBlur={handleCepBlur} style={inp} />
-                {cepLoading && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>buscando…</span>}
+                {cepLoading && (
+                  <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>
+                    buscando…
+                  </span>
+                )}
               </div>
             </F>
 
@@ -172,8 +237,8 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
               width: "100%", height: 48, borderRadius: "var(--radius-pill)", border: "none",
               background: loading ? "var(--neutral-200)" : "var(--color-brand-primary)",
               color: loading ? "var(--text-tertiary)" : "#fff",
-              fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 16, cursor: loading ? "not-allowed" : "pointer",
-              marginTop: 4,
+              fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 16,
+              cursor: loading ? "not-allowed" : "pointer", marginTop: 4,
             }}>
               {loading ? "Publicando…" : "Publicar vaga"}
             </button>
@@ -187,8 +252,10 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6,
-        color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
+      <p style={{
+        fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6,
+        color: "var(--text-tertiary)", fontFamily: "var(--font-body)",
+      }}>
         {label}
       </p>
       {children}
