@@ -184,7 +184,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
                     style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 28, marginBottom: 6 }}>📷</div>
+                    <i className="ph ph-camera" style={{ fontSize: 28, color: "var(--text-tertiary)", marginBottom: 6, display: "block" }}></i>
                     <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Toque para adicionar foto</p>
                   </div>
                 )}

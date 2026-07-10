@@ -58,7 +58,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
         </div>
       </header>
 
-      <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x)" }}>
+      <main style={{ maxWidth: 920, margin: "0 auto", padding: "20px var(--space-page-x)" }}>
         {count === 0 ? (
           <div style={{
             background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
@@ -73,7 +73,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }} className="candidatos-grid">
             {applications!.map((app) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const p = app.professionals as any;
@@ -88,6 +88,8 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
             })}
           </div>
         )}
+
+        <style>{`@media (min-width: 860px) { .candidatos-grid { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
       </main>
     </div>
   );

@@ -24,7 +24,7 @@ export default async function PlanosEmpresaPage() {
 
   return (
     <div>
-      <main style={{ maxWidth: 600, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
+      <main style={{ maxWidth: 860, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", marginBottom: 6 }}>
           Planos
         </h1>
@@ -32,7 +32,7 @@ export default async function PlanosEmpresaPage() {
           Escolha o plano ideal para o tamanho da sua equipe. Cancele quando quiser.
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }} className="plans-grid-empresa">
           {PLANOS_ORDER.map((key) => {
             const plano = PLANOS_EMPRESA[key];
             const ativo = key === planoAtual;
@@ -100,6 +100,8 @@ export default async function PlanosEmpresaPage() {
         <p style={{ fontSize: 12, color: "var(--text-tertiary)", textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
           Pagamentos processados via Mercado Pago. Cancele a qualquer momento.
         </p>
+
+        <style>{`@media (min-width: 860px) { .plans-grid-empresa { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
       </main>
     </div>
   );

@@ -120,11 +120,12 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
         </p>
         {!editing && (
           <button onClick={() => { setEditing(true); setSuccess(false); }} style={{
-            height: 34, padding: "0 16px", borderRadius: "var(--radius-pill)",
-            border: "1px solid var(--color-brand-primary)", background: "transparent",
-            color: "var(--color-brand-primary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, cursor: "pointer",
+            height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
+            border: "none", background: "var(--color-brand-primary)",
+            color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
+            boxShadow: "var(--shadow-sm)",
           }}>
-            Editar
+            ✏️ Editar perfil
           </button>
         )}
       </header>
