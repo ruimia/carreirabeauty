@@ -111,24 +111,27 @@ export default async function VagaPage({ params }: Props) {
           </Link>
         )}
 
-        {/* Foto da vaga */}
-        {vaga.foto_url && (
-          <div style={{ borderRadius: "var(--radius-xl)", overflow: "hidden", marginBottom: 16, maxHeight: 220 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={vaga.foto_url} alt={vaga.titulo || vaga.funcao}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </div>
-        )}
-
         {/* Vaga */}
         <div style={{
           background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
           border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
           padding: 24, marginBottom: 16,
         }}>
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", marginBottom: 4 }}>
-            {vaga.titulo || (vaga.funcao === "outro" ? (vaga.funcao_outro || "Outro") : vaga.funcao)}
-          </h1>
+          <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 4 }}>
+            {vaga.foto_url && (
+              <div style={{
+                width: 64, height: 64, borderRadius: "var(--radius-md)", flexShrink: 0,
+                overflow: "hidden", border: "1px solid var(--border-default)",
+              }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={vaga.foto_url} alt={vaga.titulo || vaga.funcao}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", flex: 1 }}>
+              {vaga.titulo || (vaga.funcao === "outro" ? (vaga.funcao_outro || "Outro") : vaga.funcao)}
+            </h1>
+          </div>
           {vaga.titulo && (
             <p style={{ fontSize: 14, color: "var(--text-tertiary)", marginBottom: 8 }}>
               {vaga.funcao === "outro" ? (vaga.funcao_outro || "Outro") : vaga.funcao}

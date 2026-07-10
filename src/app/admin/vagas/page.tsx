@@ -84,7 +84,7 @@ export default async function AdminVagasPage() {
           <div className="mt-2 bg-gray-50 rounded-lg p-3 space-y-2 text-sm">
             {v.foto_url && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={v.foto_url} alt="" className="w-full max-w-xs rounded-lg object-cover" />
+              <img src={v.foto_url} alt="" className="w-20 h-20 rounded-lg object-cover" />
             )}
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase">Descrição</p>
