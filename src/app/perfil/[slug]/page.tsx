@@ -86,11 +86,8 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
           background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
           boxShadow: "var(--shadow-md)", overflow: "hidden", marginBottom: 16,
         }}>
-          {/* Topo colorido */}
-          <div style={{ height: 80, background: "var(--brand-magenta-500)", position: "relative" }} />
-
           {/* Avatar */}
-          <div style={{ padding: "0 24px 24px", marginTop: -24 }}>
+          <div style={{ padding: "24px 24px" }}>
             <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 16 }}>
               {p.foto_perfil_url
                 // eslint-disable-next-line @next/next/no-img-element
