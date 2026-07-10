@@ -21,11 +21,15 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
     if (!professionalId) return;
     setLoading(true); setError("");
     try {
-      await candidatar(jobId, mensagem.trim() || null);
+      const result = await candidatar(jobId, mensagem.trim() || null);
+      if (!result.ok) {
+        if (result.error === "LIMITE_PLANO") { setError("LIMITE"); return; }
+        setError("Erro ao enviar candidatura. Tente novamente.");
+        return;
+      }
       setEnviado(true);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Erro ao enviar.";
-      setError(msg === "LIMITE_PLANO" ? "LIMITE" : msg);
+    } catch {
+      setError("Erro ao enviar candidatura. Tente novamente.");
     } finally {
       setLoading(false);
     }

@@ -20,17 +20,21 @@ interface CriarVagaInput {
   fotoUrl: string | null;
 }
 
-export async function criarVaga(input: CriarVagaInput) {
+type CriarVagaResult =
+  | { ok: true; slug: string }
+  | { ok: false; error: "NAO_AUTENTICADO" | "EMPRESA_NAO_ENCONTRADA" | "LIMITE_PLANO" | "ERRO_DB"; plano?: string };
+
+export async function criarVaga(input: CriarVagaInput): Promise<CriarVagaResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Não autenticado");
+  if (!user) return { ok: false, error: "NAO_AUTENTICADO" };
 
   const { data: company } = await supabase
     .from("companies")
     .select("id, plano")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (!company) throw new Error("Empresa não encontrada");
+  if (!company) return { ok: false, error: "EMPRESA_NAO_ENCONTRADA" };
 
   // Checa limite de vagas do plano (conta apenas vagas ativas + em análise)
   const { count } = await supabase
@@ -39,9 +43,10 @@ export async function criarVaga(input: CriarVagaInput) {
     .eq("company_id", company.id)
     .in("status", ["ativa", "pendente_moderacao", "pausada"]);
 
-  const limite = limiteVagasEmpresa(company.plano ?? "gratis");
+  const plano = company.plano ?? "gratis";
+  const limite = limiteVagasEmpresa(plano);
   if ((count ?? 0) >= limite) {
-    throw new Error(`LIMITE_PLANO:${company.plano ?? "gratis"}`);
+    return { ok: false, error: "LIMITE_PLANO", plano };
   }
 
   const slugBase = buildSlug(input.titulo || input.funcao, input.cidade);
@@ -67,6 +72,6 @@ export async function criarVaga(input: CriarVagaInput) {
     status: "pendente_moderacao",
   });
 
-  if (error) throw new Error("Erro ao publicar vaga. Tente novamente.");
-  return { slug };
+  if (error) return { ok: false, error: "ERRO_DB" };
+  return { ok: true, slug };
 }

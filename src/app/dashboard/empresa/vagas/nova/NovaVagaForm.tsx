@@ -104,7 +104,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
         fotoUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
       }
 
-      await criarVaga({
+      const result = await criarVaga({
         titulo,
         funcao,
         funcaoOutro: funcao === "Outro" ? funcaoOutro : null,
@@ -119,10 +119,18 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
         estado,
         fotoUrl,
       });
+
+      if (!result.ok) {
+        if (result.error === "LIMITE_PLANO") { setError("LIMITE"); return; }
+        if (result.error === "NAO_AUTENTICADO") { router.push("/login"); return; }
+        setError("Erro ao publicar vaga. Tente novamente.");
+        return;
+      }
+
       router.push("/dashboard/empresa");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erro ao publicar.";
-      setError(msg.startsWith("LIMITE_PLANO:") ? "LIMITE" : msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }

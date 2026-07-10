@@ -4,17 +4,21 @@ import { createClient } from "@/lib/supabase/server";
 import { emailNovaCandidatura } from "@/lib/email";
 import { limiteCandidaturasMes } from "@/lib/planos";
 
-export async function candidatar(jobId: string, mensagem: string | null) {
+type CandidatarResult =
+  | { ok: true; jaAplicou: boolean }
+  | { ok: false; error: "NAO_AUTENTICADO" | "PERFIL_NAO_ENCONTRADO" | "LIMITE_PLANO" | "ERRO_DB" };
+
+export async function candidatar(jobId: string, mensagem: string | null): Promise<CandidatarResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Não autenticado");
+  if (!user) return { ok: false, error: "NAO_AUTENTICADO" };
 
   const { data: prof } = await supabase
     .from("professionals")
     .select("id, nome, plano")
     .eq("user_id", user.id)
     .single();
-  if (!prof) throw new Error("Perfil profissional não encontrado");
+  if (!prof) return { ok: false, error: "PERFIL_NAO_ENCONTRADO" };
 
   // Checa limite de candidaturas do mês
   const limite = limiteCandidaturasMes(prof.plano ?? "gratis");
@@ -26,7 +30,7 @@ export async function candidatar(jobId: string, mensagem: string | null) {
       .select("id", { count: "exact", head: true })
       .eq("professional_id", prof.id)
       .gte("criado_em", inicioMes.toISOString());
-    if ((count ?? 0) >= limite) throw new Error("LIMITE_PLANO");
+    if ((count ?? 0) >= limite) return { ok: false, error: "LIMITE_PLANO" };
   }
 
   const { error } = await supabase.from("applications").insert({
@@ -36,8 +40,8 @@ export async function candidatar(jobId: string, mensagem: string | null) {
   });
 
   if (error) {
-    if (error.code === "23505") return { jaAplicou: true };
-    throw new Error(error.message);
+    if (error.code === "23505") return { ok: true, jaAplicou: true };
+    return { ok: false, error: "ERRO_DB" };
   }
 
   // Busca dados da vaga e empresa para o email
@@ -83,5 +87,5 @@ export async function candidatar(jobId: string, mensagem: string | null) {
     }
   }
 
-  return { jaAplicou: false };
+  return { ok: true, jaAplicou: false };
 }
