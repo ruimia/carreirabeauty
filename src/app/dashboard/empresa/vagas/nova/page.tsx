@@ -1,25 +1,23 @@
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Nova vaga" };
 
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import NovaVagaForm from "./NovaVagaForm";
+import { getProfissoes } from "@/lib/config";
 
 export default async function NovaVagaPage() {
-  // step 1: criar client
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  // step 2: pegar usuário
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError) return <div style={{ padding: 24, color: "red" }}>auth error: {authError.message}</div>;
-  if (!user) return <div style={{ padding: 24 }}>sem usuário</div>;
+  const [{ data: company, error: companyErr }, profissoes] = await Promise.all([
+    supabase.from("companies").select("id, endereco, cidade, estado, cep, logo_url").eq("user_id", user.id).maybeSingle(),
+    getProfissoes().catch(() => [] as string[]),
+  ]);
 
-  // step 3: buscar empresa
-  const { data: company, error: companyErr } = await supabase
-    .from("companies")
-    .select("id, endereco, cidade, estado, cep, logo_url")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  if (companyErr) throw new Error(`company: ${companyErr.message}`);
+  if (!company) redirect("/onboarding/empresa");
 
-  if (companyErr) return <div style={{ padding: 24, color: "red" }}>company err: {companyErr.message} / code: {companyErr.code}</div>;
-  if (!company) return <div style={{ padding: 24 }}>empresa não encontrada</div>;
-
-  return <div style={{ padding: 24 }}>✅ step 3 OK — empresa: {company.id}</div>;
+  return <NovaVagaForm company={company} profissoes={profissoes} />;
 }
