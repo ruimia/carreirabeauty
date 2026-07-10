@@ -2,7 +2,7 @@
 
 > Documento de trabalho para definir modelo de negócio antes de partir para especificação técnica (Claude Code).
 
-Status geral: 🟡 em preenchimento
+Status geral: 🟢 em produção — MVP lançado em beta.carreirabeauty.com. Ver [CHANGELOG.md](CHANGELOG.md) para o histórico de mudanças recentes e bugs corrigidos. As seções abaixo foram atualizadas para refletir decisões tomadas durante a construção (algumas divergem do planejamento original).
 
 ---
 
@@ -56,12 +56,28 @@ Opções em discussão:
 | Comissão por contratação | Cobra só quando dá match/contratação | Alinhado a resultado | Difícil de rastrear/cobrar, ciclo longo |
 | Perfil premium do profissional | Profissional paga por destaque no perfil | Receita adicional | Risco de afastar candidatos (raramente pagam) |
 
-- [x] **Modelo escolhido:** só o empregador paga (profissional sempre grátis)
-- [x] **Estrutura:** trial de 7 dias grátis, 1 vaga por CNPJ → após o trial, assinatura mensal por CNPJ libera vagas ilimitadas
-- [x] **Unidade de cobrança:** por CNPJ (não por vaga) — mensalidade simples, sem limite de vagas ativas enquanto assinante
-- [ ] Valor da mensalidade: a validar com mercado (sem referência ainda)
-- [x] **Pós-trial sem assinatura:** vaga permanece visível na busca, mas fica bloqueada para novas candidaturas até a empresa assinar
-- [ ] Ticket médio esperado por empresa:
+> **⚠️ Modelo real implementado diverge do planejado abaixo** — evoluiu de "trial de 7 dias" para **freemium permanente** (mais alinhado ao objetivo de crescer a oferta rápido, seção "Freemium + destaque pago" da tabela acima), e o profissional também tem um plano pago opcional (não é mais "sempre grátis").
+
+- [x] **Modelo implementado: freemium nos dois lados** (não é mais "só empregador paga")
+- [x] **Empresa** — planos por CNPJ, sem prazo de trial:
+
+  | Plano | Vagas ativas simultâneas | Candidatos visíveis | Preço/mês |
+  |---|---|---|---|
+  | Grátis | 1 | 10 | R$ 0 |
+  | Basic | 3 | 100 | R$ 49 |
+  | Plus | 5 | ilimitado | R$ 99 |
+  | Premium | 10 | ilimitado | R$ 179 |
+
+- [x] **Profissional** — planos por conta:
+
+  | Plano | Candidaturas/mês | Preço/mês |
+  |---|---|---|
+  | Grátis | 10 | R$ 0 |
+  | Pro | ilimitado | R$ 29 |
+
+- [x] **Gateway de pagamento implementado: Mercado Pago** (assinatura recorrente) — decisão da seção 9 (Asaas/Vindi eram cogitados, mas o time optou por Mercado Pago)
+- [x] **Sem trial expirando:** toda empresa/profissional tem acesso permanente ao plano grátis (1 vaga / 10 candidaturas por mês) — não há bloqueio por tempo, só por limite de uso simultâneo
+- [ ] Ticket médio esperado por empresa/profissional: a validar com dados reais de conversão
 - [x] Dados do negócio anterior: não disponíveis no momento — relançamento sem histórico de referência
 
 ---
@@ -258,11 +274,16 @@ Disparo semanal automático para ambos os lados — importante para um marketpla
 - [x] Barbeiro
 - [x] Massoterapeuta
 - [x] Designer de sobrancelha/cílios
-- [x] **Depilador(a)** — adicionado
-- [x] **Podólogo(a)** — adicionado
+- [x] Depilador(a)
+- [x] Podólogo(a)
 - [x] Recepcionista
 - [x] Auxiliar/assistente
+- [x] **Fisioterapeuta** — adicionado
+- [x] **Biomédico(a)** — adicionado
+- [x] **Micropigmentista** — adicionado
 - [x] Outro (campo livre)
+
+> **⚠️ Mudança de modelo:** o profissional pode selecionar **múltiplas funções** (não apenas uma) — campo `funcoes` (array), não mais `funcao` (singular). Reflete que muitos profissionais atuam em mais de uma especialidade (ex: manicure + esteticista). Tabela `profissoes` é administrável pelo admin (`/admin/config`), permitindo adicionar novas funções sem deploy.
 
 ---
 
@@ -317,7 +338,7 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 - [x] **Pagamento/assinatura:** gateway de pagamento com suporte a assinatura recorrente (ex: Stripe ou um gateway nacional como Pagar.me/Asaas — nacional facilita para PIX/boleto, relevante pro público de salões pequenos)
 
 - [x] **Gateway de pagamento: precisa ser nacional** (confirmado) — internacional (Stripe) descartado pelo perfil do público (salões pequenos, preferência por PIX/boleto)
-- [ ] **Qual gateway nacional: ainda pendente**, opções comparadas (pesquisa de jul/2026):
+- [x] **Decidido e implementado: Mercado Pago** — assinaturas recorrentes via `MP_ACCESS_TOKEN`/planos configurados por webhook (`/api/webhooks/mercadopago`), ver `scripts/criar-planos-mp.mjs`. Comparativo abaixo mantido como histórico da decisão:
 
 | Gateway | Taxa (assinatura/PIX) | Perfil | Observação |
 |---|---|---|---|
@@ -326,8 +347,7 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 | **Mercado Pago** | Pix 0,99%; Crédito 4,49% | Menor barreira de entrada, marca mais reconhecida pelo usuário final | Menos estruturado para assinatura recorrente — mais focado em checkout avulso |
 | **Pix Automático (nativo, via PSP)** | 0,22%–0,35% direto no Banco Central; 0,28%–0,99% via PSP como Asaas | Novo padrão do Banco Central (lançado início de 2026) para débito recorrente via Pix | Tecnologia mais nova — vale monitorar maturidade de suporte antes de depender dela no MVP |
 
-- [x] Inclinação inicial (não decidido): **Asaas** pelo custo baixo + familiaridade da marca com o público, ou **Vindi** se preferir terceirizar a lógica de assinatura em vez de construir no banco de dados (seção 10, entidade Subscription)
-- [x] **Geocoding/mapas: Google Maps Geocoding API** — mais preciso e conhecido no Brasil
+- [x] **Geocoding/CEP: BrasilAPI** (`brasilapi.com.br/api/cep/v2`) — usado para autopreencher endereço a partir do CEP no onboarding (mais simples que geocoding completo lat/long por enquanto; filtro por raio geográfico ainda não implementado — busca hoje é por cidade/estado, não por distância)
 
 ### Próximos passos técnicos
 1. [x] Especificar modelo de dados — alto nível (seção 10)
@@ -351,21 +371,34 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 - status_assinatura (trial | ativa | expirada)
 
 **Professional** (profissional) — 1:1 com User do tipo "profissional"
-- id, user_id, nome, telefone, função, localização, latitude/longitude (geocoded), experiência, disponibilidade, pretensão_salarial, tipo_vínculo (opcional), educação_básica, foto_perfil_url (opcional)
+- id, user_id, nome, telefone, **funcoes (array — múltiplas funções, não mais uma só)**, funcao_outro, localização, latitude/longitude (geocoded), experiência, disponibilidade, pretensão_salarial, tipo_vínculo (opcional), educação_básica (apresentação), foto_perfil_url (opcional)
+- **habilidades (array)** — tags de especialidade dentro de cada função (ex: "Balayage", "Unhas em gel")
+- **educacao (jsonb array)** — formação/cursos: `{ curso, instituicao, ano }`
+- **experiencia_prof (jsonb array)** — histórico profissional: `{ cargo, empresa, periodo }`
+- **portfolio_urls (array)** — fotos de portfólio
+- **plano (gratis | pro), plano_status, plano_validade** — assinatura via Mercado Pago
 - slug (para a URL pública — seção 7.9)
 
-**PortfolioItem** — N:1 com Professional (opcional, condicional à função)
-- id, professional_id, foto_url, descrição
+**PortfolioItem** — substituído por `professionals.portfolio_urls` (array simples, sem tabela própria)
 
 **Job** (vaga) — N:1 com Company
-- id, company_id, função, descrição, tipo_vínculo, faixa_salarial, status (ativa | pausada | fechada | bloqueada_pos_trial)
+- id, company_id, funcao (texto livre, não mais enum), funcao_outro, titulo, descrição, tipo_vínculo, modelo_remuneracao, faixa_salarial, comissão, foto_url, endereço/cidade/estado/cep (copiado da empresa, editável)
+- **status (ativa | pendente_moderacao | rejeitada | pausada | fechada)** — toda vaga nova passa por moderação do admin antes de ficar visível
+- **motivo_rejeicao** — preenchido pelo admin ao rejeitar
+- slug (para a URL pública da vaga)
 - criado_em
 
 **Application** (candidatura) — relaciona Professional ↔ Job (N:N via tabela associativa)
-- id, job_id, professional_id, criado_em, status (a definir se há status além de "aplicado")
+- id, job_id, professional_id, criado_em, **mensagem** (texto livre do candidato)
+- Binária (aplicou/não aplicou), como planejado originalmente
 
-**Subscription** (assinatura) — N:1 com Company
-- id, company_id, status, valor, ciclo_cobrança, gateway_pagamento_id, criado_em, renovado_em
+**Company** (campos adicionais implementados)
+- **plano (gratis | basic | plus | premium), plano_status, plano_validade** — assinatura via Mercado Pago
+- **slug** — página pública da empresa (`/empresa/[slug]`), não estava no plano original
+- **is_admin** (em Profile) — flag de administrador, dá acesso ao painel `/admin`
+
+**Admin** (novo, não estava no modelo original)
+- Painel `/admin` — visão geral (métricas + últimos cadastros, incluindo cadastros incompletos), moderação de vagas (aprovar/rejeitar com motivo), gestão de empresas/profissionais (bloquear/desbloquear), configuração de categorias/funções/habilidades sem deploy
 
 ### Relacionamentos-chave
 - User 1:1 Company **ou** User 1:1 Professional (um User nunca é os dois)
