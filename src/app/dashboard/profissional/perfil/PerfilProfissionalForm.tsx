@@ -60,6 +60,13 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   const [portfolioNewFiles, setPortfolioNewFiles] = useState<File[]>([]);
   const [portfolioPreviews, setPortfolioPreviews] = useState<string[]>([]);
   const [selectedHabilidades, setSelectedHabilidades] = useState<string[]>(p.habilidades ?? []);
+  const [novaHabilidade, setNovaHabilidade] = useState("");
+  function addNovaHabilidade() {
+    const v = novaHabilidade.trim();
+    if (!v) return;
+    setSelectedHabilidades((prev) => prev.some((x) => x.toLowerCase() === v.toLowerCase()) ? prev : [...prev, v]);
+    setNovaHabilidade("");
+  }
 
   const funcaoLabel = funcoes.map((f) => f === OUTRA ? (funcaoOutro || OUTRA) : f).join(", ");
 
@@ -357,41 +364,111 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
               color: editing ? "var(--color-brand-primary)" : "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>
               Habilidades
             </p>
+            {editing && (
+              <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>Selecione suas habilidades:</p>
+            )}
             {editing && funcoes.filter(f => f !== OUTRA).length === 0 && (
               <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Selecione suas funções acima para ver as habilidades disponíveis.</p>
             )}
             {editing && habilidadesFiltradas.length === 0 && funcoes.filter(f => f !== OUTRA).length > 0 && (
               <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Nenhuma habilidade cadastrada para estas funções. Peça ao admin para adicionar.</p>
             )}
-            {Object.entries(habilidadesPorProfissao).map(([prof, nomes]) => (
-              <div key={prof} style={{ marginBottom: 12 }}>
-                {Object.keys(habilidadesPorProfissao).length > 1 && (
-                  <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", marginBottom: 6, fontFamily: "var(--font-body)" }}>
-                    {prof}
-                  </p>
-                )}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {nomes.map((h) => {
-                    const active = selectedHabilidades.includes(h);
-                    return (
-                      <button key={h}
-                        onClick={() => editing ? setSelectedHabilidades((prev) =>
-                          prev.includes(h) ? prev.filter((x) => x !== h) : [...prev, h]) : undefined}
-                        style={{
-                          padding: "5px 12px", borderRadius: "var(--radius-pill)", fontSize: 13,
-                          border: `1.5px solid ${active ? "var(--brand-cyan-400)" : "var(--border-default)"}`,
-                          background: active ? "var(--brand-cyan-50)" : "var(--surface-sunken)",
-                          color: active ? "var(--brand-cyan-700)" : "var(--text-tertiary)",
-                          fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400,
-                          cursor: editing ? "pointer" : "default",
-                        }}>
-                        {h}
-                      </button>
-                    );
-                  })}
+            {Object.entries(habilidadesPorProfissao).map(([prof, nomes]) => {
+              const visiveis = editing ? nomes : nomes.filter((h) => selectedHabilidades.includes(h));
+              if (visiveis.length === 0) return null;
+              return (
+                <div key={prof} style={{ marginBottom: 12 }}>
+                  {Object.keys(habilidadesPorProfissao).length > 1 && (
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", marginBottom: 6, fontFamily: "var(--font-body)" }}>
+                      {prof}
+                    </p>
+                  )}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {visiveis.map((h) => {
+                      const active = selectedHabilidades.includes(h);
+                      return (
+                        <button key={h}
+                          onClick={() => editing ? setSelectedHabilidades((prev) =>
+                            prev.includes(h) ? prev.filter((x) => x !== h) : [...prev, h]) : undefined}
+                          style={{
+                            padding: "5px 12px", borderRadius: "var(--radius-pill)", fontSize: 13,
+                            border: `1.5px solid ${active ? "var(--brand-cyan-400)" : "var(--border-default)"}`,
+                            background: active ? "var(--brand-cyan-50)" : "var(--surface-sunken)",
+                            color: active ? "var(--brand-cyan-700)" : "var(--text-tertiary)",
+                            fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400,
+                            cursor: editing ? "pointer" : "default",
+                          }}>
+                          {h}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+              );
+            })}
+            {(() => {
+              const sugeridas = new Set(habilidadesFiltradas.map((h) => h.nome));
+              const customHabilidades = selectedHabilidades.filter((h) => !sugeridas.has(h));
+              if (customHabilidades.length === 0) return null;
+              return (
+                <div style={{ marginBottom: 12 }}>
+                  {Object.keys(habilidadesPorProfissao).length > 0 && (
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", marginBottom: 6, fontFamily: "var(--font-body)" }}>
+                      Outras
+                    </p>
+                  )}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {customHabilidades.map((h) => (
+                      <span key={h} style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        padding: "5px 12px", borderRadius: "var(--radius-pill)", fontSize: 13,
+                        border: "1.5px solid var(--brand-cyan-400)", background: "var(--brand-cyan-50)",
+                        color: "var(--brand-cyan-700)", fontFamily: "var(--font-body)", fontWeight: 700,
+                      }}>
+                        {h}
+                        {editing && (
+                          <button
+                            onClick={() => setSelectedHabilidades((prev) => prev.filter((x) => x !== h))}
+                            aria-label={`Remover ${h}`}
+                            style={{
+                              border: "none", background: "none", cursor: "pointer", padding: 0,
+                              color: "var(--brand-cyan-700)", fontSize: 14, lineHeight: 1, display: "flex",
+                            }}>
+                            ×
+                          </button>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+            {editing && (
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                <input
+                  value={novaHabilidade}
+                  onChange={(e) => setNovaHabilidade(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addNovaHabilidade(); } }}
+                  placeholder="Adicionar outra habilidade…"
+                  style={{
+                    flex: 1, height: 38, padding: "0 12px", borderRadius: "var(--radius-pill)",
+                    border: "1px solid var(--border-default)", background: "var(--surface-card)",
+                    fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-primary)", outline: "none",
+                  }}
+                />
+                <button
+                  onClick={addNovaHabilidade}
+                  disabled={!novaHabilidade.trim()}
+                  style={{
+                    height: 38, padding: "0 16px", borderRadius: "var(--radius-pill)", border: "none",
+                    background: "var(--color-brand-primary)", color: "#fff",
+                    fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, cursor: "pointer",
+                    opacity: novaHabilidade.trim() ? 1 : 0.5,
+                  }}>
+                  + Adicionar
+                </button>
               </div>
-            ))}
+            )}
             {!editing && selectedHabilidades.length === 0 && <V>—</V>}
           </div>
         </div>
