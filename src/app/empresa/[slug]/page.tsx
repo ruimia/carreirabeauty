@@ -5,6 +5,19 @@ import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
+function formatRelativeTime(dateStr: string): string {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return "agora mesmo";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h}h`;
+  const d = Math.floor(h / 24);
+  if (d === 1) return "ontem";
+  if (d < 7) return `há ${d}d`;
+  return new Date(dateStr).toLocaleDateString("pt-BR");
+}
+
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -94,24 +107,48 @@ export default async function EmpresaPage({ params }: Props) {
                   background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
                   border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
                   padding: "18px 20px", transition: "box-shadow var(--duration-fast)",
+                  display: "flex", gap: 14,
                 }}>
-                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)", marginBottom: 4 }}>
-                    {vaga.funcao === "outro" ? (vaga.funcao_outro || "Outro") : vaga.funcao}
-                  </p>
-                  {vaga.faixa_salarial && (
-                    <p style={{ fontSize: 13, color: "var(--brand-magenta-600)", fontWeight: 600, marginBottom: 4 }}>
-                      {vaga.faixa_salarial}
+                  {vaga.foto_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={vaga.foto_url} alt="" style={{
+                      width: 56, height: 56, borderRadius: "var(--radius-md)", objectFit: "cover", flexShrink: 0,
+                    }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)", marginBottom: 4 }}>
+                      {vaga.titulo || (vaga.funcao === "outro" ? (vaga.funcao_outro || "Outro") : vaga.funcao)}
                     </p>
-                  )}
-                  {vaga.tipo_vinculo && (
-                    <span style={{
-                      display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.04em",
-                      textTransform: "uppercase", padding: "3px 10px", borderRadius: "var(--radius-pill)",
-                      background: "var(--brand-cyan-50)", color: "var(--brand-cyan-700)",
-                    }}>
-                      {vaga.tipo_vinculo}
-                    </span>
-                  )}
+                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      {vaga.faixa_salarial && (
+                        <span style={{ fontSize: 13, color: "var(--brand-magenta-600)", fontWeight: 600 }}>
+                          {vaga.faixa_salarial}
+                        </span>
+                      )}
+                      {vaga.tipo_vinculo && (
+                        <span style={{
+                          display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.04em",
+                          textTransform: "uppercase", padding: "3px 10px", borderRadius: "var(--radius-pill)",
+                          background: "var(--brand-cyan-50)", color: "var(--brand-cyan-700)",
+                        }}>
+                          {vaga.tipo_vinculo}
+                        </span>
+                      )}
+                    </div>
+                    {vaga.descricao && (
+                      <p style={{
+                        fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.4, marginBottom: 6,
+                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                      }}>
+                        {vaga.descricao}
+                      </p>
+                    )}
+                    {vaga.criado_em && (
+                      <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+                        {formatRelativeTime(vaga.criado_em)}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
