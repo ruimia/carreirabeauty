@@ -4,9 +4,6 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-if (process.env.NODE_ENV !== "development") {
-  throw new Error("test-login só está disponível em desenvolvimento");
-}
 
 const USERS = [
   {
