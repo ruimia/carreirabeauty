@@ -22,15 +22,17 @@ export default async function PlanosProfissionalPage() {
 
   return (
     <div>
-      <main style={{ maxWidth: 600, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--text-primary)", marginBottom: 6 }}>
-          Planos
+      <main style={{ maxWidth: 780, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 26, color: "var(--text-primary)", marginBottom: 4 }}>
+          Destaque seu perfil
         </h1>
-        <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 28 }}>
-          Com o plano Pro você se candidata sem limites e aparece em destaque para as empresas.
+        <p style={{ fontSize: 14, color: "var(--text-tertiary)", lineHeight: 1.5, marginBottom: 24 }}>
+          Apareça primeiro nas buscas de empresas da sua região.
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr", gap: 16,
+        }} className="plans-grid-profissional">
           {PLANOS_ORDER.map((key) => {
             const plano = PLANOS_PROFISSIONAL[key];
             const ativo = key === planoAtual;
@@ -40,76 +42,61 @@ export default async function PlanosProfissionalPage() {
               <div key={key} style={{
                 background: "var(--surface-card)",
                 borderRadius: "var(--radius-xl)",
-                border: ativo
-                  ? "2px solid var(--color-success-fg, #16a34a)"
-                  : destaque
-                    ? "2px solid var(--color-brand-primary)"
-                    : "1px solid var(--border-default)",
-                boxShadow: destaque ? "var(--shadow-md)" : "var(--shadow-xs)",
-                overflow: "hidden",
+                border: destaque ? "2px solid var(--color-brand-primary)" : "2px solid var(--border-default)",
+                boxShadow: destaque ? "var(--shadow-md)" : "none",
+                padding: 22, position: "relative",
               }}>
+                {destaque && (
+                  <span style={{
+                    position: "absolute", top: -12, left: 20,
+                    background: "var(--color-brand-primary)", color: "#fff",
+                    fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: "var(--radius-pill)",
+                  }}>
+                    {ativo ? "Seu plano" : "Recomendado"}
+                  </span>
+                )}
+
+                <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: destaque ? "var(--color-brand-primary)" : "var(--text-tertiary)", marginBottom: 8 }}>
+                  {plano.nome}
+                </p>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 30, color: "var(--text-primary)", marginBottom: 16 }}>
+                  {plano.preco === 0 ? "R$ 0" : (
+                    <>R$ {plano.preco}<span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
+                  )}
+                </p>
+
+                {key === "gratis" ? (
+                  <>
+                    <Feature text="10 candidaturas por mês" ok />
+                    <Feature text="Página pública indexada no Google" ok />
+                    <Feature text="Destaque nas buscas" ok={false} />
+                  </>
+                ) : (
+                  <>
+                    <Feature text="Tudo do plano grátis" ok />
+                    <Feature text="Candidaturas ilimitadas" ok />
+                    <Feature text="Perfil em destaque nas buscas" ok />
+                    <Feature text="Selo Pro no perfil" ok />
+                  </>
+                )}
+
                 {ativo ? (
-                  <div style={{ background: "var(--color-success-fg, #16a34a)", padding: "6px 20px" }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                      Plano atual
-                    </p>
+                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 14, fontWeight: 600, marginTop: 12 }}>
+                    Plano atual
                   </div>
-                ) : destaque ? (
-                  <div style={{ background: "var(--color-brand-primary)", padding: "6px 20px" }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                      Recomendado
-                    </p>
+                ) : plano.preco === 0 ? (
+                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 14, marginTop: 12 }}>
+                    Fazer downgrade
                   </div>
-                ) : null}
-
-                <div style={{ padding: "20px 24px" }}>
-                  <div style={{ marginBottom: 14 }}>
-                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--text-primary)" }}>
-                      {plano.nome}
-                    </p>
-                    {plano.preco === 0 ? (
-                      <p style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginTop: 4 }}>
-                        Grátis
-                      </p>
-                    ) : (
-                      <p style={{ fontSize: 22, fontWeight: 800, color: "var(--color-brand-primary)", marginTop: 4 }}>
-                        R$ {plano.preco}<span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span>
-                      </p>
-                    )}
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
-                    {key === "gratis" ? (
-                      <>
-                        <Feature text="10 candidaturas por mês" />
-                        <Feature text="Perfil público básico" />
-                      </>
-                    ) : (
-                      <>
-                        <Feature text="Candidaturas ilimitadas" />
-                        <Feature text="Badge Pro no perfil" />
-                        <Feature text="Destaque para empresas" />
-                        <Feature text="Perfil completo visível" />
-                      </>
-                    )}
-                  </div>
-
-                  {ativo ? (
-                    <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 14, fontWeight: 600 }}>
-                      Plano atual
-                    </div>
-                  ) : plano.preco === 0 ? (
-                    <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 14 }}>
-                      Fazer downgrade
-                    </div>
-                  ) : (
+                ) : (
+                  <div style={{ marginTop: 12 }}>
                     <AssinarButton
                       planoKey="profissional_pro"
-                      label="Assinar Pro — R$ 29/mês"
+                      label="Assinar destaque"
                       destaque
                     />
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -118,16 +105,18 @@ export default async function PlanosProfissionalPage() {
         <p style={{ fontSize: 12, color: "var(--text-tertiary)", textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
           Pagamentos processados via Mercado Pago. Cancele a qualquer momento.
         </p>
+
+        <style>{`@media (min-width: 860px) { .plans-grid-profissional { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
       </main>
     </div>
   );
 }
 
-function Feature({ text }: { text: string }) {
+function Feature({ text, ok }: { text: string; ok: boolean }) {
   return (
-    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-      <span style={{ fontSize: 15, color: "var(--color-success-fg, #16a34a)", flexShrink: 0 }}>✓</span>
-      <p style={{ fontSize: 14, color: "var(--text-secondary)" }}>{text}</p>
+    <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
+      <i className={ok ? "ph-fill ph-check-circle" : "ph ph-x"} style={{ fontSize: 16, color: ok ? "var(--color-success-fg)" : "var(--text-tertiary)", flexShrink: 0, marginTop: 1 }}></i>
+      <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.4 }}>{text}</p>
     </div>
   );
 }

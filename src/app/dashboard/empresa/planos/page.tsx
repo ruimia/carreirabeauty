@@ -25,14 +25,14 @@ export default async function PlanosEmpresaPage() {
   return (
     <div>
       <main style={{ maxWidth: 600, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--text-primary)", marginBottom: 6 }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", marginBottom: 6 }}>
           Planos
         </h1>
-        <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 28 }}>
+        <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 24 }}>
           Escolha o plano ideal para o tamanho da sua equipe. Cancele quando quiser.
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {PLANOS_ORDER.map((key) => {
             const plano = PLANOS_EMPRESA[key];
             const ativo = key === planoAtual;
@@ -42,75 +42,56 @@ export default async function PlanosEmpresaPage() {
               <div key={key} style={{
                 background: "var(--surface-card)",
                 borderRadius: "var(--radius-xl)",
-                border: destaque
-                  ? "2px solid var(--color-brand-primary)"
-                  : ativo
-                    ? "2px solid var(--color-success-fg, #16a34a)"
-                    : "1px solid var(--border-default)",
-                boxShadow: destaque ? "var(--shadow-md)" : "var(--shadow-xs)",
-                overflow: "hidden",
+                border: ativo
+                  ? "2px solid var(--color-success-fg, #16a34a)"
+                  : destaque
+                    ? "2px solid var(--color-brand-primary)"
+                    : "2px solid var(--border-default)",
+                boxShadow: destaque ? "var(--shadow-md)" : "none",
+                padding: "20px 24px 24px", position: "relative",
               }}>
-                {destaque && (
-                  <div style={{ background: "var(--color-brand-primary)", padding: "6px 20px" }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                      Mais popular
-                    </p>
-                  </div>
-                )}
-                {ativo && !destaque && (
-                  <div style={{ background: "var(--color-success-fg, #16a34a)", padding: "6px 20px" }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                      Plano atual
-                    </p>
-                  </div>
+                {(ativo || destaque) && (
+                  <span style={{
+                    position: "absolute", top: -12, left: 20,
+                    background: ativo ? "var(--color-success-fg, #16a34a)" : "var(--color-brand-primary)",
+                    color: "#fff", fontSize: 11, fontWeight: 700,
+                    padding: "5px 12px", borderRadius: "var(--radius-pill)",
+                  }}>
+                    {ativo ? "Plano atual" : "Mais popular"}
+                  </span>
                 )}
 
-                <div style={{ padding: "20px 24px" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                    <div>
-                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--text-primary)" }}>
-                        {plano.nome}
-                      </p>
-                      {plano.preco === 0 ? (
-                        <p style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", marginTop: 4 }}>
-                          Grátis
-                        </p>
-                      ) : (
-                        <p style={{ fontSize: 22, fontWeight: 800, color: "var(--color-brand-primary)", marginTop: 4 }}>
-                          R$ {plano.preco}<span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span>
-                        </p>
-                      )}
-                    </div>
-                    {ativo && destaque && (
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: "var(--radius-pill)", background: "var(--color-success-bg)", color: "var(--color-success-fg)" }}>
-                        Ativo
-                      </span>
-                    )}
-                  </div>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--text-primary)", marginTop: 4 }}>
+                  {plano.nome}
+                </p>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: plano.preco === 0 ? "var(--text-primary)" : "var(--color-brand-primary)", margin: "4px 0 16px" }}>
+                  {plano.preco === 0 ? "Grátis" : (
+                    <>R$ {plano.preco}<span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
+                  )}
+                </p>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
-                    <Feature text={`${plano.vagas} vaga${plano.vagas > 1 ? "s" : ""} ativa${plano.vagas > 1 ? "s" : ""}`} />
-                    <Feature text={plano.candidatos === null ? "Candidatos ilimitados" : `Ver até ${plano.candidatos} candidatos por vaga`} />
-                    {key !== "gratis" && <Feature text="Badge de empresa verificada" />}
-                    {key === "premium" && <Feature text="Destaque na listagem de vagas" />}
-                  </div>
+                <Feature text={`${plano.vagas} vaga${plano.vagas > 1 ? "s" : ""} ativa${plano.vagas > 1 ? "s" : ""}`} />
+                <Feature text={plano.candidatos === null ? "Candidatos ilimitados" : `Ver até ${plano.candidatos} candidatos por vaga`} />
+                {key !== "gratis" && <Feature text="Badge de empresa verificada" />}
+                {key === "premium" && <Feature text="Destaque na listagem de vagas" />}
 
-                  {ativo ? (
-                    <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 14, fontWeight: 600 }}>
-                      Plano atual
-                    </div>
-                  ) : plano.preco === 0 ? (
-                    <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 14 }}>
-                      Fazer downgrade
-                    </div>
-                  ) : (
+                {ativo ? (
+                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 14, fontWeight: 600, marginTop: 8 }}>
+                    Plano atual
+                  </div>
+                ) : plano.preco === 0 ? (
+                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 14, marginTop: 8 }}>
+                    Fazer downgrade
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 8 }}>
                     <AssinarButton
                       planoKey={`empresa_${key}`}
                       label={`Assinar ${plano.nome}`}
                       destaque={destaque}
                     />
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -126,9 +107,9 @@ export default async function PlanosEmpresaPage() {
 
 function Feature({ text }: { text: string }) {
   return (
-    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-      <span style={{ fontSize: 15, color: "var(--color-success-fg, #16a34a)", flexShrink: 0 }}>✓</span>
-      <p style={{ fontSize: 14, color: "var(--text-secondary)" }}>{text}</p>
+    <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
+      <i className="ph-fill ph-check-circle" style={{ fontSize: 16, color: "var(--color-success-fg)", flexShrink: 0, marginTop: 1 }}></i>
+      <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.4 }}>{text}</p>
     </div>
   );
 }
