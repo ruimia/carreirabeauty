@@ -3,25 +3,22 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-const FUNCAO_LABEL: Record<string, string> = {
-  cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
-  esteticista: "Esteticista", maquiador: "Maquiador(a)", barbeiro: "Barbeiro",
-  massoterapeuta: "Massoterapeuta", designer_sobrancelha_cilios: "Designer de sobrancelha/cílios",
-  depilador: "Depilador(a)", podologo: "Podólogo(a)", recepcionista: "Recepcionista",
-  auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
-};
+function funcoesLabel(funcoes: string[] | null, funcaoOutro: string | null): string {
+  if (!funcoes?.length) return "Profissional de beleza";
+  return funcoes.map((f) => (f === "Outro" ? (funcaoOutro || "Outro") : f)).join(", ");
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: p } = await supabase
     .from("professionals")
-    .select("nome, funcao, funcao_outro, cidade, estado, foto_perfil_url")
+    .select("nome, funcoes, funcao_outro, cidade, estado, foto_perfil_url")
     .eq("slug", slug).single();
 
   if (!p) return { title: "Perfil não encontrado — CarreiraBeauty" };
 
-  const funcao = p.funcao === "outro" ? p.funcao_outro : FUNCAO_LABEL[p.funcao] ?? p.funcao;
+  const funcao = funcoesLabel(p.funcoes, p.funcao_outro);
   return {
     title: `${p.nome} — ${funcao} em ${p.cidade} | CarreiraBeauty`,
     description: `Perfil profissional de ${p.nome}, ${funcao} em ${p.cidade} - ${p.estado}. Encontre profissionais de beleza no CarreiraBeauty.`,
@@ -48,7 +45,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  const funcao = p.funcao === "outro" ? (p.funcao_outro || "Outro") : (FUNCAO_LABEL[p.funcao] ?? p.funcao);
+  const funcao = funcoesLabel(p.funcoes, p.funcao_outro);
   const initials = p.nome?.split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase() ?? "?";
 
   const tags = [
