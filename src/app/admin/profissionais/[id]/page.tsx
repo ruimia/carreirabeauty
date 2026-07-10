@@ -62,9 +62,9 @@ export default async function AdminProfissionalDetailPage({ params }: { params: 
           {[
             ["Funções", funcoesLabel(p.funcoes, p.funcao_outro)],
             ["Cidade", `${p.cidade} · ${p.estado}`],
-            ["Experiência", p.anos_experiencia ? `${p.anos_experiencia} anos` : "—"],
+            ["Experiência", p.experiencia],
             ["Disponibilidade", p.disponibilidade],
-            ["Regime", p.regime_trabalho],
+            ["Tipo de vínculo", p.tipo_vinculo],
             ["Instagram", p.instagram ? `@${p.instagram}` : "—"],
             ["Slug", p.slug],
             ["Desde", new Date(p.criado_em).toLocaleDateString("pt-BR")],
@@ -75,10 +75,54 @@ export default async function AdminProfissionalDetailPage({ params }: { params: 
             </div>
           ))}
         </div>
-        {p.bio && (
+
+        {p.educacao_basica && (
           <div>
-            <p className="text-xs text-gray-400 mb-1">Bio</p>
-            <p className="text-sm text-gray-600">{p.bio}</p>
+            <p className="text-xs text-gray-400 mb-1">Apresentação</p>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{p.educacao_basica}</p>
+          </div>
+        )}
+
+        {!!p.habilidades?.length && (
+          <div>
+            <p className="text-xs text-gray-400 mb-1.5">Habilidades</p>
+            <div className="flex flex-wrap gap-1.5">
+              {p.habilidades.map((h: string) => (
+                <span key={h} className="text-xs bg-teal-50 text-teal-700 px-2 py-1 rounded-full">{h}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!!p.educacao?.length && (
+          <div>
+            <p className="text-xs text-gray-400 mb-1.5">Formação e cursos</p>
+            <div className="space-y-1.5">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {p.educacao.map((edu: any, i: number) => (
+                <div key={i} className="text-sm text-gray-700">
+                  <span className="font-medium">{edu.curso}</span>
+                  {edu.instituicao && <span className="text-gray-400"> — {edu.instituicao}</span>}
+                  {edu.ano && <span className="text-gray-400"> ({edu.ano})</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!!p.experiencia_prof?.length && (
+          <div>
+            <p className="text-xs text-gray-400 mb-1.5">Experiência profissional</p>
+            <div className="space-y-1.5">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {p.experiencia_prof.map((exp: any, i: number) => (
+                <div key={i} className="text-sm text-gray-700">
+                  <span className="font-medium">{exp.cargo}</span>
+                  {exp.empresa && <span className="text-gray-400"> — {exp.empresa}</span>}
+                  {exp.periodo && <span className="text-gray-400"> ({exp.periodo})</span>}
+                </div>
+              ))}
+            </div>
           </div>
         )}
         <div className="pt-2 border-t border-gray-100 flex gap-2">
