@@ -12,6 +12,11 @@ const FUNCAO_LABEL: Record<string, string> = {
   auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
 };
 
+function funcoesLabel(funcoes: string[] | null, funcaoOutro: string | null): string {
+  if (!funcoes?.length) return "—";
+  return funcoes.map((f) => (f === "Outro" ? (funcaoOutro || "Outro") : f)).join(", ");
+}
+
 export default async function AdminProfissionalDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -55,7 +60,7 @@ export default async function AdminProfissionalDetailPage({ params }: { params: 
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           {[
-            ["Função", FUNCAO_LABEL[p.funcao] ?? p.funcao],
+            ["Funções", funcoesLabel(p.funcoes, p.funcao_outro)],
             ["Cidade", `${p.cidade} · ${p.estado}`],
             ["Experiência", p.anos_experiencia ? `${p.anos_experiencia} anos` : "—"],
             ["Disponibilidade", p.disponibilidade],

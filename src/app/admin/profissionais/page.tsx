@@ -4,19 +4,11 @@ export const metadata = { title: "Profissionais — Admin" };
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
-const FUNCAO_LABEL: Record<string, string> = {
-  cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
-  esteticista: "Esteticista", maquiador: "Maquiador(a)", barbeiro: "Barbeiro",
-  massoterapeuta: "Massoterapeuta", designer_sobrancelha_cilios: "Designer sobrancelha/cílios",
-  depilador: "Depilador(a)", podologo: "Podólogo(a)", recepcionista: "Recepcionista",
-  auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
-};
-
 export default async function AdminProfissionaisPage() {
   const supabase = await createClient();
   const { data: profissionais } = await supabase
     .from("professionals")
-    .select("id, nome, funcao, cidade, estado, bloqueado, criado_em, slug")
+    .select("id, nome, funcoes, funcao_outro, cidade, estado, bloqueado, criado_em, slug")
     .order("criado_em", { ascending: false });
 
   return (
@@ -46,7 +38,9 @@ export default async function AdminProfissionaisPage() {
                     {p.bloqueado && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Bloqueado</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">
-                    {FUNCAO_LABEL[p.funcao] ?? p.funcao}
+                    {p.funcoes?.length
+                      ? p.funcoes.map((f: string) => f === "Outro" ? (p.funcao_outro || "Outro") : f).join(", ")
+                      : "—"}
                   </td>
                   <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">{p.cidade} · {p.estado}</td>
                   <td className="px-4 py-3">
