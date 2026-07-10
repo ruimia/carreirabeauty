@@ -173,6 +173,9 @@ textarea.input { height: auto; padding: 12px 16px; resize: none; }
 .page-x { padding: 16px var(--space-page-x) 32px; max-width: 640px; margin: 0 auto; width: 100%; }
 @media (min-width: 860px) { .page-x { padding: 32px 40px !important; } }
 
+.mobile-only { display: block; }
+@media (min-width: 860px) { .mobile-only { display: none; } }
+
 .stat-card { background: var(--surface-card); border-radius: var(--radius-lg); border: 1px solid var(--border-default); box-shadow: var(--shadow-xs); padding: 18px; display: flex; align-items: center; gap: 14px; }
 .stat-icon { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
 

@@ -566,6 +566,39 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
           )}
         </div>
 
+        {/* Suporte e sair — só no mobile, desktop já tem na sidebar */}
+        {!editing && (
+          <div className="mobile-only" style={{
+            background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+            border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+            padding: "8px 20px", marginBottom: 12,
+          }}>
+            <a
+              href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "flex", alignItems: "center", gap: 10, padding: "12px 4px",
+                color: "#1ea952", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15, textDecoration: "none",
+              }}
+            >
+              <i className="ph ph-whatsapp-logo" style={{ fontSize: 20 }}></i>
+              Suporte
+            </a>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10, padding: "12px 4px",
+                color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15,
+                background: "none", border: "none", cursor: "pointer", textAlign: "left",
+              }}
+            >
+              <i className="ph ph-sign-out" style={{ fontSize: 20 }}></i>
+              Sair
+            </button>
+          </div>
+        )}
+
         {error && (
           <p style={{ fontSize: 13, color: "var(--color-danger-fg)", background: "var(--color-danger-bg)", padding: "10px 14px", borderRadius: "var(--radius-sm)", marginBottom: 12 }}>
             {error}
