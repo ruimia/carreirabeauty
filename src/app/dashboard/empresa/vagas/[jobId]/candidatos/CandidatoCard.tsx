@@ -56,6 +56,7 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
   const tag: React.CSSProperties = {
     background: "var(--neutral-100)", color: "var(--text-secondary)",
     fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: "var(--radius-pill)",
+    display: "inline-flex", alignItems: "center", gap: 4,
   };
 
   const sectionLabel: React.CSSProperties = {
@@ -96,8 +97,8 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
               {funcao}
             </p>
             {p.cidade && (
-              <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 2 }}>
-                📍 {p.cidade}{p.estado ? ` · ${p.estado}` : ""}
+              <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
+                <i className="ph ph-map-pin"></i> {p.cidade}{p.estado ? ` · ${p.estado}` : ""}
               </p>
             )}
           </div>
@@ -106,9 +107,9 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
         {/* Tags rápidas */}
         {(p.experiencia || p.disponibilidade || p.tipo_vinculo) && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-            {p.experiencia && <span style={tag}>⏱ {p.experiencia}</span>}
-            {p.disponibilidade && <span style={tag}>📅 {p.disponibilidade}</span>}
-            {p.tipo_vinculo && <span style={tag}>📄 {p.tipo_vinculo.toUpperCase()}</span>}
+            {p.experiencia && <span style={tag}><i className="ph ph-clock"></i> {p.experiencia}</span>}
+            {p.disponibilidade && <span style={tag}><i className="ph ph-calendar-check"></i> {p.disponibilidade}</span>}
+            {p.tipo_vinculo && <span style={tag}><i className="ph ph-file-text"></i> {p.tipo_vinculo.toUpperCase()}</span>}
           </div>
         )}
 
@@ -117,12 +118,13 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
           {hasExtra && (
             <button onClick={() => setOpen(!open)} style={{
               flex: 1, height: 40, borderRadius: "var(--radius-pill)",
-              border: "1px solid var(--border-default)", background: open ? "var(--brand-magenta-50)" : "var(--surface-card)",
+              border: `1px solid ${open ? "var(--color-brand-primary)" : "var(--border-default)"}`,
+              background: open ? "var(--brand-magenta-50)" : "var(--surface-card)",
               color: open ? "var(--color-brand-primary)" : "var(--text-secondary)",
               fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13,
               cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             }}>
-              {open ? "▲ Menos" : "▼ Ver mais"}
+              <i className={open ? "ph ph-caret-up" : "ph ph-caret-down"}></i> {open ? "Menos" : "Ver mais"}
             </button>
           )}
           {p.slug && (
@@ -133,7 +135,7 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
               fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center",
               textDecoration: "none", gap: 5,
             }}>
-              Perfil ↗
+              Perfil <i className="ph ph-arrow-square-out"></i>
             </Link>
           )}
           {whatsappUrl && (
@@ -144,7 +146,7 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
               display: "flex", alignItems: "center", justifyContent: "center",
               textDecoration: "none", gap: 6,
             }}>
-              <span style={{ fontSize: 15 }}>💬</span> WhatsApp
+              <i className="ph ph-whatsapp-logo" style={{ fontSize: 16 }}></i> WhatsApp
             </a>
           )}
         </div>

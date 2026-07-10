@@ -58,7 +58,7 @@ export default async function EmpresaPage({ params }: Props) {
             {company.logo_url
               // eslint-disable-next-line @next/next/no-img-element
               ? <img src={company.logo_url} alt={company.nome_estabelecimento} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              : "🏪"
+              : <i className="ph-fill ph-storefront" style={{ color: "var(--color-brand-primary)" }}></i>
             }
           </div>
           <div style={{ flex: 1 }}>
@@ -66,8 +66,8 @@ export default async function EmpresaPage({ params }: Props) {
               {company.nome_estabelecimento}
             </h1>
             {(company.cidade || company.estado) && (
-              <p style={{ fontSize: 14, color: "var(--text-tertiary)", marginBottom: 6 }}>
-                📍 {[company.endereco, company.cidade, company.estado].filter(Boolean).join(", ")}
+              <p style={{ fontSize: 14, color: "var(--text-tertiary)", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+                <i className="ph ph-map-pin"></i> {[company.endereco, company.cidade, company.estado].filter(Boolean).join(", ")}
               </p>
             )}
             {company.instagram && (

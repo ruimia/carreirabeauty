@@ -154,7 +154,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
               {logoPreview
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={logoPreview} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : (editing ? "📷" : "🏪")
+                : <i className={editing ? "ph ph-camera" : "ph-fill ph-storefront"} style={{ color: "var(--color-brand-primary)" }}></i>
               }
             </div>
             <div>
