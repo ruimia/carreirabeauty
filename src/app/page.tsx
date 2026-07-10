@@ -73,6 +73,9 @@ export default async function Home() {
                 🏪 Sou empresa
               </Link>
             </div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)" }}>
+              ✓ Cadastro grátis para profissionais &nbsp;·&nbsp; ✓ 1 vaga grátis para empresas
+            </p>
           </div>
         </section>
 
@@ -80,16 +83,19 @@ export default async function Home() {
         <section id="profissionais" style={{ padding: "56px 24px" }}>
           <div style={{ maxWidth: 960, margin: "0 auto" }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-cyan-600)" }}>Para profissionais</span>
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 24px" }}>
-              Sua próxima vaga está perto de casa
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 12px" }}>
+              Crie seu perfil e descubra oportunidades perto de você
             </h2>
+            <div style={{ marginBottom: 20 }}>
+              <GratisBadge accent="var(--brand-cyan-500)" bg="var(--brand-cyan-50)" />
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
-              <Step num={1} title="Cadastre-se em minutos" desc="Conte sua função, experiência e onde você está." accent="var(--brand-cyan-500)" />
+              <Step num={1} title="Cadastre-se em minutos, de graça" desc="Conte sua função, experiência e onde você está." accent="var(--brand-cyan-500)" />
               <Step num={2} title="Ganhe uma página pública" desc="Seu currículo online, indexado no Google, de graça." accent="var(--brand-cyan-500)" />
               <Step num={3} title="Receba vagas perto de você" desc="Filtro geográfico fino — nada de vaga do outro lado da cidade." accent="var(--brand-cyan-500)" />
             </div>
             <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)" }}>
-              Criar meu perfil profissional
+              Criar meu perfil grátis
             </Link>
           </div>
         </section>
@@ -98,16 +104,19 @@ export default async function Home() {
         <section id="empresas" style={{ background: "var(--surface-sunken)", padding: "56px 24px" }}>
           <div style={{ maxWidth: 960, margin: "0 auto" }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-magenta-600)" }}>Para empresas</span>
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 24px" }}>
-              Encontre profissionais qualificados no seu bairro
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 12px" }}>
+              Divulgue sua vaga grátis e encontre profissionais no seu bairro
             </h2>
+            <div style={{ marginBottom: 20 }}>
+              <GratisBadge accent="var(--color-brand-primary)" bg="var(--brand-magenta-50)" text="1 vaga grátis, sem prazo" />
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
               <Step num={1} title="Cadastre seu CNPJ" desc="Validamos e puxamos os dados do seu negócio automaticamente." accent="var(--color-brand-primary)" />
-              <Step num={2} title="Publique sua primeira vaga" desc="7 dias grátis para testar — sem cartão de crédito." accent="var(--color-brand-primary)" />
+              <Step num={2} title="Publique sua primeira vaga de graça" desc="Sem prazo, sem cartão de crédito — todo estabelecimento tem direito a 1 vaga ativa gratuita." accent="var(--color-brand-primary)" />
               <Step num={3} title="Converse com candidatos" desc="Veja quem se candidatou e fale direto pelo WhatsApp." accent="var(--color-brand-primary)" />
             </div>
             <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>
-              Cadastrar minha empresa
+              Cadastrar minha empresa grátis
             </Link>
           </div>
         </section>
@@ -266,6 +275,18 @@ function Testimonial({ initials, avatarBg, quote, name, role }: { initials: stri
         </div>
       </div>
     </div>
+  );
+}
+
+function GratisBadge({ accent, bg, text = "100% grátis" }: { accent: string; bg: string; text?: string }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      fontSize: 13, fontWeight: 700, color: accent,
+      background: bg, padding: "6px 14px", borderRadius: "var(--radius-pill)",
+    }}>
+      ✓ {text}
+    </span>
   );
 }
 
