@@ -209,7 +209,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         <p style={{ flex: 1, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
           Meu perfil
         </p>
-        {!editing && (
+        {!editing ? (
           <button onClick={() => { setEditing(true); setSuccess(false); }} style={{
             height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
             border: "none", background: "var(--color-brand-primary)",
@@ -218,6 +218,24 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
           }}>
             ✏️ Editar perfil
           </button>
+        ) : (
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={handleCancel} disabled={loading} style={{
+              height: 36, padding: "0 16px", borderRadius: "var(--radius-pill)",
+              border: "1px solid var(--border-default)", background: "transparent",
+              color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, cursor: "pointer",
+            }}>
+              Cancelar
+            </button>
+            <button onClick={handleSave} disabled={loading} style={{
+              height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
+              border: "none", background: "var(--color-brand-primary)",
+              color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
+              boxShadow: "var(--shadow-sm)", opacity: loading ? 0.6 : 1,
+            }}>
+              {loading ? "Salvando…" : "Salvar"}
+            </button>
+          </div>
         )}
       </header>
 
