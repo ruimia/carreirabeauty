@@ -174,6 +174,72 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
           </div>
         </Section>
 
+        {/* Habilidades */}
+        {!!p.habilidades?.length && (
+          <Section title="Habilidades">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {p.habilidades.map((h: string) => (
+                <span key={h} style={{
+                  background: "var(--brand-cyan-50)", color: "var(--brand-cyan-700)",
+                  fontSize: 12, fontWeight: 600, padding: "4px 12px",
+                  borderRadius: "var(--radius-pill)", border: "1px solid var(--brand-cyan-100)",
+                }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Formação */}
+        {!!p.educacao?.length && (
+          <Section title="Formação e cursos">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {p.educacao.map((edu: any, i: number) => (
+                <div key={i}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{edu.curso}</p>
+                  <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
+                    {[edu.instituicao, edu.ano].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Experiência profissional */}
+        {!!p.experiencia_prof?.length && (
+          <Section title="Experiência profissional">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {p.experiencia_prof.map((exp: any, i: number) => (
+                <div key={i}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{exp.cargo}</p>
+                  <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
+                    {[exp.empresa, exp.periodo].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Portfólio */}
+        {!!p.portfolio_urls?.length && (
+          <Section title="Portfólio">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+              {p.portfolio_urls.map((url: string, i: number) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={url} alt="" style={{
+                  width: "100%", aspectRatio: "1", objectFit: "cover",
+                  borderRadius: "var(--radius-md)",
+                }} />
+              ))}
+            </div>
+          </Section>
+        )}
+
         {/* CTA */}
         <div style={{
           background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
