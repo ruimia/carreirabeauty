@@ -69,9 +69,51 @@ export default async function DashboardProfissionalPage() {
       (j.funcao === "outro" && funcoes.includes("outro")));
   });
 
+  // Força do perfil — quanto mais completo, mais fácil empresas encontrarem
+  const checks: { label: string; done: boolean }[] = [
+    { label: "Foto de perfil", done: !!professional.foto_perfil_url },
+    { label: "Apresentação", done: !!professional.educacao_basica },
+    { label: "Habilidades", done: (professional.habilidades?.length ?? 0) > 0 },
+    { label: "Formação e cursos", done: (professional.educacao?.length ?? 0) > 0 },
+    { label: "Experiência profissional", done: (professional.experiencia_prof?.length ?? 0) > 0 },
+    { label: "Portfólio", done: (professional.portfolio_urls?.length ?? 0) > 0 },
+  ];
+  const doneCount = checks.filter((c) => c.done).length;
+  const perfilPct = Math.round((doneCount / checks.length) * 100);
+  const faltando = checks.filter((c) => !c.done).map((c) => c.label);
+
   return (
     <div>
       <main className="page-x">
+
+        {/* Força do perfil */}
+        {perfilPct < 100 && (
+          <Link href="/dashboard/profissional/perfil" style={{
+            display: "block", textDecoration: "none", marginBottom: 20,
+            background: "linear-gradient(135deg, var(--color-brand-primary), var(--brand-magenta-600, #a600a6))",
+            borderRadius: "var(--radius-xl)", padding: 20, boxShadow: "var(--shadow-md)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <p style={{ font: "700 16px/1.3 var(--font-display)", color: "#fff" }}>
+                Seu perfil está {perfilPct}% completo
+              </p>
+              <span style={{
+                fontSize: 13, fontWeight: 800, color: "var(--color-brand-primary)",
+                background: "#fff", padding: "8px 16px", borderRadius: "var(--radius-pill)",
+                whiteSpace: "nowrap", flexShrink: 0, marginLeft: 12,
+              }}>
+                Completar →
+              </span>
+            </div>
+            <div style={{ height: 8, borderRadius: 4, background: "rgba(255,255,255,0.3)", overflow: "hidden", marginBottom: 10 }}>
+              <div style={{ height: "100%", width: `${perfilPct}%`, background: "#fff", borderRadius: 4 }} />
+            </div>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", lineHeight: 1.5 }}>
+              Perfis completos aparecem mais e passam mais confiança às empresas.
+              Falta: {faltando.join(", ")}.
+            </p>
+          </Link>
+        )}
 
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
