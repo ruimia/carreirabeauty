@@ -106,7 +106,8 @@ export default function EditarVagaForm({ job, company, profissoes }: Props) {
       if (jErr) throw new Error("Erro ao salvar. Tente novamente.");
       router.push("/dashboard/empresa");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao salvar.");
+      const isNetworkError = e instanceof TypeError && /fetch/i.test(e.message);
+      setError(isNetworkError ? "Falha de conexão. Verifique sua internet e tente novamente." : e instanceof Error ? e.message : "Erro ao salvar.");
     } finally {
       setLoading(false);
     }

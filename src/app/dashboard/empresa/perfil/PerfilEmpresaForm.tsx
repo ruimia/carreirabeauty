@@ -80,7 +80,10 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
       }).eq("id", company.id);
       if (upErr) throw new Error(upErr.message);
       setSuccess(true); setEditing(false); router.refresh();
-    } catch (e) { setError(e instanceof Error ? e.message : "Erro ao salvar."); }
+    } catch (e) {
+      const isNetworkError = e instanceof TypeError && /fetch/i.test(e.message);
+      setError(isNetworkError ? "Falha de conexão. Verifique sua internet e tente novamente." : e instanceof Error ? e.message : "Erro ao salvar.");
+    }
     finally { setLoading(false); }
   }
 

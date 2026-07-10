@@ -161,7 +161,10 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
       setPortfolioUrls(allPortfolioUrls);
       setPortfolioNewFiles([]); setPortfolioPreviews([]);
       setSuccess(true); setEditing(false); router.refresh();
-    } catch (e) { setError(e instanceof Error ? e.message : "Erro ao salvar."); }
+    } catch (e) {
+      const isNetworkError = e instanceof TypeError && /fetch/i.test(e.message);
+      setError(isNetworkError ? "Falha de conexão. Verifique sua internet e tente novamente." : e instanceof Error ? e.message : "Erro ao salvar.");
+    }
     finally { setLoading(false); }
   }
 
