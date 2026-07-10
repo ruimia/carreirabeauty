@@ -3,6 +3,24 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin" };
 import { createClient } from "@/lib/supabase/server";
 
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+
+  if (diffMin < 1) return "agora mesmo";
+  if (diffMin < 60) return `há ${diffMin} min`;
+
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `há ${diffH}h`;
+
+  const diffDays = Math.floor(diffH / 24);
+  if (diffDays === 1) return "ontem";
+  if (diffDays < 7) return `há ${diffDays}d`;
+
+  return `${date.toLocaleDateString("pt-BR")} às ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 export default async function AdminPage() {
   const supabase = await createClient();
 
@@ -86,7 +104,7 @@ export default async function AdminPage() {
                 <p className="text-sm font-medium text-gray-800 truncate min-w-0">{c.nome}</p>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge}`}>{label}</span>
-                  <span className="text-xs text-gray-400">{new Date(c.criado_em).toLocaleDateString("pt-BR")}</span>
+                  <span className="text-xs text-gray-400">{formatRelativeTime(c.criado_em)}</span>
                 </div>
               </div>
             );
@@ -110,7 +128,7 @@ export default async function AdminPage() {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {e.bloqueado && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Bloqueada</span>}
-                  <span className="text-xs text-gray-400">{new Date(e.criado_em).toLocaleDateString("pt-BR")}</span>
+                  <span className="text-xs text-gray-400">{formatRelativeTime(e.criado_em)}</span>
                 </div>
               </div>
             ))}
@@ -131,7 +149,7 @@ export default async function AdminPage() {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {p.bloqueado && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Bloqueado</span>}
-                  <span className="text-xs text-gray-400">{new Date(p.criado_em).toLocaleDateString("pt-BR")}</span>
+                  <span className="text-xs text-gray-400">{formatRelativeTime(p.criado_em)}</span>
                 </div>
               </div>
             ))}
