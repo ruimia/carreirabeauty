@@ -35,20 +35,20 @@ ON CONFLICT (nome) DO NOTHING;
 ALTER TABLE categorias_negocio ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Categorias legíveis por todos" ON categorias_negocio;
+DROP POLICY IF EXISTS "Categorias gerenciadas por admin" ON categorias_negocio;
 CREATE POLICY "Categorias legíveis por todos"
   ON categorias_negocio FOR SELECT USING (true);
-
-CREATE POLICY IF NOT EXISTS "Categorias gerenciadas por admin"
+CREATE POLICY "Categorias gerenciadas por admin"
   ON categorias_negocio FOR ALL
   USING ((SELECT is_admin FROM profiles WHERE id = auth.uid()) = true)
   WITH CHECK ((SELECT is_admin FROM profiles WHERE id = auth.uid()) = true);
 
 -- 5. RLS na profissoes (pode ter falhado antes porque a tabela não existia)
 DROP POLICY IF EXISTS "Profissões legíveis por todos" ON profissoes;
+DROP POLICY IF EXISTS "Profissões gerenciadas por admin" ON profissoes;
 CREATE POLICY "Profissões legíveis por todos"
   ON profissoes FOR SELECT USING (true);
-
-CREATE POLICY IF NOT EXISTS "Profissões gerenciadas por admin"
+CREATE POLICY "Profissões gerenciadas por admin"
   ON profissoes FOR ALL
   USING ((SELECT is_admin FROM profiles WHERE id = auth.uid()) = true)
   WITH CHECK ((SELECT is_admin FROM profiles WHERE id = auth.uid()) = true);
