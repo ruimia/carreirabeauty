@@ -28,47 +28,77 @@ export default function EscolhaTipoPage() {
   }
 
   return (
-    <main className="min-h-screen bg-rose-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow p-8 max-w-sm w-full">
-        <h1 className="text-2xl font-bold text-rose-600 mb-1">
-          CarreiraBeauty
+    <main style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      background: "var(--surface-accent)", padding: "24px var(--space-page-x)",
+    }}>
+      <div style={{
+        background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+        boxShadow: "var(--shadow-md)", padding: "36px 30px", width: "100%", maxWidth: 420,
+      }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-square.jpg" alt="" style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover", marginBottom: 14 }} />
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, color: "var(--text-primary)", marginBottom: 4 }}>
+          Como você vai usar o CarreiraBeauty?
         </h1>
-        <p className="text-gray-500 text-sm mb-8">
-          Como você vai usar a plataforma?
+        <p style={{ fontSize: 14, color: "var(--text-tertiary)", lineHeight: 1.4, marginBottom: 24 }}>
+          Você pode mudar isso depois, se precisar.
         </p>
 
-        <div className="space-y-3">
-          <button
-            onClick={() => escolher("empresa")}
-            disabled={!!loading}
-            className="w-full text-left border-2 border-gray-100 hover:border-rose-300 rounded-xl p-4 transition disabled:opacity-50"
-          >
-            <p className="font-semibold text-gray-800">
-              Sou um estabelecimento
-            </p>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Salão, esmalteria, clínica — quero publicar vagas
-            </p>
-            {loading === "empresa" && (
-              <p className="text-rose-500 text-sm mt-1">Carregando...</p>
-            )}
-          </button>
+        <Opcao
+          icon="ph-fill ph-storefront"
+          iconColor="var(--color-brand-primary)"
+          title="Sou um estabelecimento"
+          desc="Salão, esmalteria, clínica — quero publicar vagas"
+          loading={loading === "empresa"}
+          disabled={!!loading}
+          onClick={() => escolher("empresa")}
+        />
 
-          <button
-            onClick={() => escolher("profissional")}
-            disabled={!!loading}
-            className="w-full text-left border-2 border-gray-100 hover:border-rose-300 rounded-xl p-4 transition disabled:opacity-50"
-          >
-            <p className="font-semibold text-gray-800">Sou profissional</p>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Cabeleireiro, manicure, esteticista — quero encontrar vagas
-            </p>
-            {loading === "profissional" && (
-              <p className="text-rose-500 text-sm mt-1">Carregando...</p>
-            )}
-          </button>
-        </div>
+        <Opcao
+          icon="ph-fill ph-user-circle"
+          iconColor="var(--brand-cyan-500)"
+          title="Sou profissional"
+          desc="Cabeleireiro, manicure, esteticista — quero encontrar vagas"
+          loading={loading === "profissional"}
+          disabled={!!loading}
+          onClick={() => escolher("profissional")}
+        />
       </div>
     </main>
+  );
+}
+
+function Opcao({ icon, iconColor, title, desc, loading, disabled, onClick }: {
+  icon: string; iconColor: string; title: string; desc: string;
+  loading: boolean; disabled: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        width: "100%", textAlign: "left", padding: 20, borderRadius: "var(--radius-lg)",
+        border: "2px solid var(--border-default)", background: "var(--surface-card)",
+        cursor: disabled ? "default" : "pointer", display: "flex", gap: 14, alignItems: "flex-start",
+        marginBottom: 12, opacity: disabled && !loading ? 0.5 : 1,
+        transition: "border-color var(--duration-fast) var(--ease-standard)",
+      }}
+      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.borderColor = "var(--color-brand-primary)"; }}
+      onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.borderColor = "var(--border-default)"; }}
+    >
+      <i className={icon} style={{ fontSize: 24, flexShrink: 0, color: iconColor }}></i>
+      <div>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>
+          {title}
+        </p>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.4, marginTop: 2 }}>
+          {desc}
+        </p>
+        {loading && (
+          <p style={{ fontSize: 13, color: "var(--color-brand-primary)", marginTop: 6 }}>Carregando…</p>
+        )}
+      </div>
+    </button>
   );
 }
