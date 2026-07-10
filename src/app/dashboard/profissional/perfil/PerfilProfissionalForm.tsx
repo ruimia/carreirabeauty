@@ -146,7 +146,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         nome, telefone, funcoes, funcao_outro: funcoes.includes(OUTRA) ? funcaoOutro : null,
         cep: cep.replace(/\D/g, ""), endereco,
         cidade, estado, localizacao: `${cidade} - ${estado}`,
-        educacao_basica: apresentacao || null,
+        educacao_basica: apresentacao,
         experiencia, disponibilidade,
         tipo_vinculo: tipoVinculo || null,
         data_nascimento: dataNascimento || null, genero: genero || null,
