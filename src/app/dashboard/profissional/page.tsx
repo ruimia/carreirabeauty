@@ -28,7 +28,7 @@ function Avatar({ name, size = 44 }: { name: string; size?: number }) {
       fontFamily: "var(--font-display)", fontWeight: 700,
       fontSize: size * 0.35, flexShrink: 0,
     }}>
-      {initials || "🏪"}
+      {initials || <i className="ph-fill ph-storefront"></i>}
     </div>
   );
 }

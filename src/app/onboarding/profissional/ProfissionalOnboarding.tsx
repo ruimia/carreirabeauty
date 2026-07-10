@@ -318,7 +318,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
               // eslint-disable-next-line @next/next/no-img-element
               ? <img src={avatarPreview} alt="Foto" style={{ width: 96, height: 96, objectFit: "cover", borderRadius: "50%" }} />
               : <>
-                  <span style={{ fontSize: 40, marginBottom: 8 }}>📷</span>
+                  <i className="ph ph-camera" style={{ fontSize: 40, color: "var(--text-tertiary)", marginBottom: 8 }}></i>
                   <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Toque para selecionar</p>
                 </>
             }
