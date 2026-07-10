@@ -14,13 +14,17 @@ export type PlanoEmpresa = keyof typeof PLANOS_EMPRESA;
 export type PlanoProfissional = keyof typeof PLANOS_PROFISSIONAL;
 
 export function limiteVagasEmpresa(plano: string): number {
-  return PLANOS_EMPRESA[plano as PlanoEmpresa]?.vagas ?? 1;
+  return PLANOS_EMPRESA[plano as PlanoEmpresa]?.vagas ?? PLANOS_EMPRESA.gratis.vagas;
 }
 
 export function limiteCandidatosEmpresa(plano: string): number | null {
-  return PLANOS_EMPRESA[plano as PlanoEmpresa]?.candidatos ?? 10;
+  return plano in PLANOS_EMPRESA
+    ? PLANOS_EMPRESA[plano as PlanoEmpresa].candidatos
+    : PLANOS_EMPRESA.gratis.candidatos;
 }
 
 export function limiteCandidaturasMes(plano: string): number | null {
-  return PLANOS_PROFISSIONAL[plano as PlanoProfissional]?.candidaturas_mes ?? 3;
+  return plano in PLANOS_PROFISSIONAL
+    ? PLANOS_PROFISSIONAL[plano as PlanoProfissional].candidaturas_mes
+    : PLANOS_PROFISSIONAL.gratis.candidaturas_mes;
 }
