@@ -90,7 +90,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
           <div style={{ height: 80, background: "var(--brand-magenta-500)", position: "relative" }} />
 
           {/* Avatar */}
-          <div style={{ padding: "0 24px 24px", marginTop: -40 }}>
+          <div style={{ padding: "0 24px 24px", marginTop: -24 }}>
             <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 16 }}>
               {p.foto_perfil_url
                 // eslint-disable-next-line @next/next/no-img-element
