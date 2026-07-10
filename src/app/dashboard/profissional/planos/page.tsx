@@ -81,7 +81,7 @@ export default async function PlanosProfissionalPage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
                     {key === "gratis" ? (
                       <>
-                        <Feature text="3 candidaturas por mês" />
+                        <Feature text="10 candidaturas por mês" />
                         <Feature text="Perfil público básico" />
                       </>
                     ) : (

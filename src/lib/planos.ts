@@ -6,7 +6,7 @@ export const PLANOS_EMPRESA = {
 } as const;
 
 export const PLANOS_PROFISSIONAL = {
-  gratis: { nome: "Grátis", candidaturas_mes: 3,    preco: 0 },
+  gratis: { nome: "Grátis", candidaturas_mes: 10,    preco: 0 },
   pro:    { nome: "Pro",    candidaturas_mes: null,  preco: 29 },
 } as const;
 

@@ -94,7 +94,7 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
       {error === "LIMITE" ? (
         <div style={{ marginTop: 10, padding: "12px 14px", background: "var(--brand-magenta-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--brand-magenta-200, #f0abfc)" }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", marginBottom: 4 }}>Limite de candidaturas atingido</p>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>Você usou suas 3 candidaturas do mês. Faça upgrade para o plano Pro e candidate-se sem limites.</p>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>Você usou suas 10 candidaturas do mês. Faça upgrade para o plano Pro e candidate-se sem limites.</p>
           <a href="/dashboard/profissional/planos" style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "var(--color-brand-primary)", padding: "8px 18px", borderRadius: "var(--radius-pill)", textDecoration: "none", display: "inline-block" }}>
             Ver plano Pro →
           </a>
