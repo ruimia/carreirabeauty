@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState("");
 
   const supabase = createClient();
@@ -21,17 +25,27 @@ export default function LoginPage() {
     });
   }
 
-  async function handleMagicLink(e: React.FormEvent) {
+  async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${location.origin}/auth/callback` },
-    });
+    const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) setError(error.message);
     else setSent(true);
     setLoading(false);
+  }
+
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    setVerifying(true);
+    setError("");
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+    if (error) {
+      setError("Código inválido ou expirado. Confira e tente novamente.");
+      setVerifying(false);
+      return;
+    }
+    router.push("/dashboard");
   }
 
   if (sent) {
@@ -39,13 +53,38 @@ export default function LoginPage() {
       <main style={styles.page}>
         <div style={styles.card}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>📬</div>
-          <h1 style={styles.h1}>Verifique seu e-mail</h1>
+          <h1 style={styles.h1}>Digite o código</h1>
           <p style={{ ...styles.body, color: "var(--text-secondary)", marginTop: 8 }}>
-            Enviamos um link de acesso para{" "}
+            Enviamos um código de 6 dígitos para{" "}
             <strong style={{ color: "var(--text-primary)" }}>{email}</strong>.
-            Clique no link para entrar.
           </p>
-          <button onClick={() => setSent(false)} style={{ ...styles.btnGhost, marginTop: 24 }}>
+
+          <form onSubmit={handleVerifyCode} style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 20 }}>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              maxLength={6}
+              placeholder="000000"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              style={{ ...styles.input, textAlign: "center", fontSize: 24, letterSpacing: "0.3em", fontWeight: 700 }}
+              autoFocus
+            />
+
+            {error && (
+              <p style={{ fontSize: 13, color: "var(--color-danger-fg)", background: "var(--color-danger-bg)", padding: "10px 14px", borderRadius: "var(--radius-sm)" }}>
+                {error}
+              </p>
+            )}
+
+            <button type="submit" disabled={verifying || code.length !== 6} style={{ ...styles.btnPrimary, opacity: verifying || code.length !== 6 ? 0.6 : 1 }}>
+              {verifying ? "Verificando…" : "Confirmar código"}
+            </button>
+          </form>
+
+          <button onClick={() => { setSent(false); setCode(""); setError(""); }} style={{ ...styles.btnGhost, marginTop: 12 }}>
             Usar outro e-mail
           </button>
         </div>
@@ -85,8 +124,8 @@ export default function LoginPage() {
           <span style={styles.dividerLine} />
         </div>
 
-        {/* Magic link form — secundário */}
-        <form onSubmit={handleMagicLink} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* Login por código — secundário */}
+        <form onSubmit={handleSendCode} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <input
             type="email"
             required
@@ -103,10 +142,10 @@ export default function LoginPage() {
           )}
 
           <button type="submit" disabled={loading} style={styles.btnSecondary}>
-            {loading ? "Enviando…" : "Receber link por e-mail"}
+            {loading ? "Enviando…" : "Receber código por e-mail"}
           </button>
           <p style={{ ...styles.caption, textAlign: "center", fontSize: 12 }}>
-            Enviaremos um link de acesso para o seu e-mail — sem senha para lembrar.
+            Enviaremos um código de 6 dígitos para o seu e-mail — sem senha para lembrar.
           </p>
         </form>
 
