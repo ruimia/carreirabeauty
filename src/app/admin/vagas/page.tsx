@@ -9,7 +9,12 @@ export default async function AdminVagasPage() {
   const supabase = await createClient();
   const { data: vagas } = await supabase
     .from("jobs")
-    .select("id, titulo, funcao, funcao_outro, status, motivo_rejeicao, criado_em, applications(count), companies(nome_estabelecimento, cidade)")
+    .select(`
+      id, titulo, funcao, funcao_outro, status, motivo_rejeicao, criado_em,
+      descricao, tipo_vinculo, modelo_remuneracao, faixa_salarial, comissao,
+      endereco, cidade, estado, cep, foto_url,
+      applications(count), companies(nome_estabelecimento, cidade)
+    `)
     .order("criado_em", { ascending: false });
 
   const pendentes = vagas?.filter((v) => v.status === "pendente_moderacao") ?? [];
@@ -71,6 +76,49 @@ export default async function AdminVagasPage() {
             )}
           </div>
         </div>
+
+        <details className="mt-2 group">
+          <summary className="text-xs text-teal-600 hover:text-teal-700 font-medium cursor-pointer select-none list-none flex items-center gap-1">
+            <span className="group-open:rotate-90 transition-transform inline-block">▸</span> Ver detalhes da vaga
+          </summary>
+          <div className="mt-2 bg-gray-50 rounded-lg p-3 space-y-2 text-sm">
+            {v.foto_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={v.foto_url} alt="" className="w-full max-w-xs rounded-lg object-cover" />
+            )}
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase">Descrição</p>
+              <p className="text-gray-700 whitespace-pre-wrap">{v.descricao || "—"}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase">Tipo de vínculo</p>
+                <p className="text-gray-700">{v.tipo_vinculo || "Não especificado"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase">Modelo de remuneração</p>
+                <p className="text-gray-700">{v.modelo_remuneracao || "—"}</p>
+              </div>
+              {v.faixa_salarial && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase">Faixa salarial</p>
+                  <p className="text-gray-700">{v.faixa_salarial}</p>
+                </div>
+              )}
+              {v.comissao && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase">Comissão</p>
+                  <p className="text-gray-700">{v.comissao}</p>
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase">Endereço</p>
+              <p className="text-gray-700">{[v.endereco, v.cidade, v.estado, v.cep].filter(Boolean).join(", ") || "—"}</p>
+            </div>
+          </div>
+        </details>
+
         {showMod && <ModeracaoActions id={v.id} />}
       </div>
     );
