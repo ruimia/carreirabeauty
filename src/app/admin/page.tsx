@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Admin" };
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import Link from "next/link";
 
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
@@ -21,7 +23,18 @@ function formatRelativeTime(dateStr: string): string {
   return `${date.toLocaleDateString("pt-BR")} às ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
-export default async function AdminPage() {
+const PAGE_SIZE = 20;
+
+interface Props {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function AdminPage({ searchParams }: Props) {
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam ?? "1") || 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   const supabase = await createClient();
 
   const [
@@ -29,55 +42,80 @@ export default async function AdminPage() {
     { count: totalProfissionais },
     { count: totalVagas },
     { count: totalCandidaturas },
-    { data: recentEmpresas },
-    { data: recentProfissionais },
-    { data: recentProfiles },
+    { count: totalCadastros },
+    { data: profiles, count: totalPageCount },
   ] = await Promise.all([
     supabase.from("companies").select("*", { count: "exact", head: true }),
     supabase.from("professionals").select("*", { count: "exact", head: true }),
     supabase.from("jobs").select("*", { count: "exact", head: true }),
     supabase.from("applications").select("*", { count: "exact", head: true }),
-    supabase.from("companies").select("id, nome_estabelecimento, cidade, status_assinatura, bloqueado, criado_em")
-      .order("criado_em", { ascending: false }).limit(5),
-    supabase.from("professionals").select("id, nome, funcao, cidade, bloqueado, criado_em")
-      .order("criado_em", { ascending: false }).limit(5),
-    supabase.from("profiles").select("id, email, tipo, criado_em")
-      .order("criado_em", { ascending: false }).limit(10),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("id, email, tipo, criado_em", { count: "exact" })
+      .order("criado_em", { ascending: false })
+      .range(from, to),
   ]);
 
   const stats = [
+    { label: "Total de cadastros", value: totalCadastros ?? 0, color: "bg-gray-100 text-gray-700" },
     { label: "Empresas", value: totalEmpresas ?? 0, color: "bg-rose-50 text-rose-600" },
     { label: "Profissionais", value: totalProfissionais ?? 0, color: "bg-blue-50 text-blue-600" },
     { label: "Vagas", value: totalVagas ?? 0, color: "bg-green-50 text-green-600" },
     { label: "Candidaturas", value: totalCandidaturas ?? 0, color: "bg-purple-50 text-purple-600" },
   ];
 
-  // Cruza os últimos cadastros (profiles) com companies/professionals para saber se completaram o onboarding
-  const profileIds = (recentProfiles ?? []).map((p) => p.id);
+  // Cruza os cadastros da página com companies/professionals para saber tipo, nome e cidade/estado
+  const profileIds = (profiles ?? []).map((p) => p.id);
   const [{ data: companiesByUser }, { data: professionalsByUser }] = await Promise.all([
-    supabase.from("companies").select("user_id, nome_estabelecimento, status_cadastro").in("user_id", profileIds.length ? profileIds : [""]),
-    supabase.from("professionals").select("user_id, nome, slug").in("user_id", profileIds.length ? profileIds : [""]),
+    supabase.from("companies").select("user_id, nome_estabelecimento, cidade, estado, status_cadastro")
+      .in("user_id", profileIds.length ? profileIds : [""]),
+    supabase.from("professionals").select("user_id, nome, cidade, estado, slug")
+      .in("user_id", profileIds.length ? profileIds : [""]),
   ]);
 
-  const cadastros = (recentProfiles ?? []).map((profile) => {
+  // Provider de login (Google vs Email) vem do Supabase Auth, não das tabelas de negócio
+  const providerById = new Map<string, string>();
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    for (const u of data.users) {
+      providerById.set(u.id, u.app_metadata?.provider ?? "email");
+    }
+  } catch {
+    // se a service role key não estiver configurada, apenas omite a coluna de login
+  }
+
+  const cadastros = (profiles ?? []).map((profile) => {
     const company = companiesByUser?.find((c) => c.user_id === profile.id);
     const professional = professionalsByUser?.find((p) => p.user_id === profile.id);
 
+    let nome = profile.email;
+    let tipo: "empresa" | "profissional" | "incompleto" = "incompleto";
+    let cidadeEstado = "—";
+
     if (company?.status_cadastro === "completo") {
-      return { id: profile.id, nome: company.nome_estabelecimento, tipo: "empresa" as const, criado_em: profile.criado_em };
+      nome = company.nome_estabelecimento;
+      tipo = "empresa";
+      cidadeEstado = [company.cidade, company.estado].filter(Boolean).join(" - ") || "—";
+    } else if (professional?.slug) {
+      nome = professional.nome;
+      tipo = "profissional";
+      cidadeEstado = [professional.cidade, professional.estado].filter(Boolean).join(" - ") || "—";
     }
-    if (professional?.slug) {
-      return { id: profile.id, nome: professional.nome, tipo: "profissional" as const, criado_em: profile.criado_em };
-    }
-    return { id: profile.id, nome: profile.email, tipo: "incompleto" as const, criado_em: profile.criado_em };
+
+    const provider = providerById.get(profile.id);
+    const login = provider === "google" ? "Google" : "E-mail";
+
+    return { id: profile.id, nome, tipo, cidadeEstado, login, criado_em: profile.criado_em };
   });
+
+  const totalPages = Math.max(1, Math.ceil((totalPageCount ?? 0) / PAGE_SIZE));
 
   return (
     <div className="space-y-6 py-4">
       <h1 className="text-xl font-bold text-gray-800">Visão geral</h1>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {stats.map((s) => (
           <div key={s.label} className={`rounded-xl p-4 ${s.color}`}>
             <p className="text-3xl font-bold">{s.value}</p>
@@ -86,10 +124,10 @@ export default async function AdminPage() {
         ))}
       </div>
 
-      {/* Últimos cadastros (inclui incompletos) */}
+      {/* Lista única de cadastros, paginada */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-700 text-sm">Últimos cadastros</h2>
+          <h2 className="font-semibold text-gray-700 text-sm">Cadastros</h2>
         </div>
         <div className="divide-y divide-gray-50">
           {cadastros.map((c) => {
@@ -101,59 +139,38 @@ export default async function AdminPage() {
             const label = c.tipo === "empresa" ? "Empresa" : c.tipo === "profissional" ? "Profissional" : "Incompleto";
             return (
               <div key={c.id} className="px-4 py-3 flex items-center justify-between gap-2">
-                <p className="text-sm font-medium text-gray-800 truncate min-w-0">{c.nome}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-800 truncate">{c.nome}</p>
+                  <p className="text-xs text-gray-400">{c.cidadeEstado}</p>
+                </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge}`}>{label}</span>
-                  <span className="text-xs text-gray-400">{formatRelativeTime(c.criado_em)}</span>
+                  <span className="text-xs text-gray-400 w-14 text-right">{c.login}</span>
+                  <span className="text-xs text-gray-400 w-20 text-right">{formatRelativeTime(c.criado_em)}</span>
                 </div>
               </div>
             );
           })}
           {cadastros.length === 0 && <p className="text-sm text-gray-400 px-4 py-4">Nenhum cadastro ainda.</p>}
         </div>
-      </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        {/* Empresas recentes */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-700 text-sm">Últimas empresas</h2>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {recentEmpresas?.map((e) => (
-              <div key={e.id} className="px-4 py-3 flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{e.nome_estabelecimento}</p>
-                  <p className="text-xs text-gray-400">{e.cidade}</p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {e.bloqueado && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Bloqueada</span>}
-                  <span className="text-xs text-gray-400">{formatRelativeTime(e.criado_em)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Profissionais recentes */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-700 text-sm">Últimos profissionais</h2>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {recentProfissionais?.map((p) => (
-              <div key={p.id} className="px-4 py-3 flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{p.nome}</p>
-                  <p className="text-xs text-gray-400">{p.cidade}</p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {p.bloqueado && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Bloqueado</span>}
-                  <span className="text-xs text-gray-400">{formatRelativeTime(p.criado_em)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Paginação */}
+        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between text-sm">
+          <Link
+            href={`/admin?page=${page - 1}`}
+            aria-disabled={page <= 1}
+            className={`px-3 py-1.5 rounded-lg border border-gray-200 ${page <= 1 ? "pointer-events-none opacity-40" : "hover:bg-gray-50"}`}
+          >
+            Anterior
+          </Link>
+          <span className="text-gray-500">Página {page} de {totalPages}</span>
+          <Link
+            href={`/admin?page=${page + 1}`}
+            aria-disabled={page >= totalPages}
+            className={`px-3 py-1.5 rounded-lg border border-gray-200 ${page >= totalPages ? "pointer-events-none opacity-40" : "hover:bg-gray-50"}`}
+          >
+            Próxima
+          </Link>
         </div>
       </div>
     </div>
