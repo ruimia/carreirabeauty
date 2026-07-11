@@ -105,7 +105,7 @@ export default function LoginPage() {
 
         {/* Google — destaque principal */}
         <button onClick={handleGoogle} disabled={loading} style={{ ...styles.btnGoogle, marginTop: 24 }}>
-          <svg width="20" height="20" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
+          <svg width="22" height="22" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
             <path fill="#4285F4" d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.3 7.3-10.6 7.3-17.3z"/>
             <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.1 1.4-4.8 2.3-8 2.3-6.1 0-11.3-4.1-13.2-9.7H2.6v6.2C6.5 42.7 14.7 48 24 48z"/>
             <path fill="#FBBC05" d="M10.8 28.8c-.5-1.4-.8-2.8-.8-4.3s.3-3 .8-4.3v-6.2H2.6C1 17.3 0 20.5 0 24s1 6.7 2.6 9.8l8.2-5z"/>
@@ -113,26 +113,26 @@ export default function LoginPage() {
           </svg>
           Continuar com Google
         </button>
-        <p style={{ ...styles.caption, textAlign: "center", marginTop: 8 }}>
-          O jeito mais rápido de entrar — sem senha
+        <p style={{ ...styles.caption, textAlign: "center", marginTop: 10, fontWeight: 600, color: "var(--color-brand-primary)" }}>
+          ⚡ O jeito mais rápido de entrar — sem senha
         </p>
 
         {/* Divider */}
-        <div style={styles.divider}>
+        <div style={{ ...styles.divider, margin: "28px 0 20px" }}>
           <span style={styles.dividerLine} />
-          <span style={styles.dividerText}>ou entre com e-mail</span>
+          <span style={{ ...styles.dividerText, fontSize: 11 }}>ou entre com e-mail</span>
           <span style={styles.dividerLine} />
         </div>
 
         {/* Login por código — secundário */}
-        <form onSubmit={handleSendCode} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <form onSubmit={handleSendCode} style={{ display: "flex", flexDirection: "column", gap: 8, opacity: 0.85 }}>
           <input
             type="email"
             required
             placeholder="seu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={styles.inputSmall}
+            style={{ ...styles.inputSmall, height: 38, fontSize: 13 }}
           />
 
           {error && (
@@ -141,12 +141,9 @@ export default function LoginPage() {
             </p>
           )}
 
-          <button type="submit" disabled={loading} style={styles.btnSecondary}>
+          <button type="submit" disabled={loading} style={{ ...styles.btnSecondary, height: 38, fontSize: 13, fontWeight: 500 }}>
             {loading ? "Enviando…" : "Receber código por e-mail"}
           </button>
-          <p style={{ ...styles.caption, textAlign: "center", fontSize: 12 }}>
-            Enviaremos um código de 6 dígitos para o seu e-mail — sem senha para lembrar.
-          </p>
         </form>
 
         <p style={{ ...styles.caption, marginTop: 24, textAlign: "center" }}>
@@ -253,20 +250,20 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
   btnGoogle: {
-    height: 56,
+    height: 60,
     borderRadius: "var(--radius-pill)",
     border: "2px solid var(--color-brand-primary)",
     background: "var(--surface-card)",
     color: "var(--text-primary)",
     fontFamily: "var(--font-body)",
     fontWeight: 700,
-    fontSize: 16,
+    fontSize: 17,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
-    boxShadow: "var(--shadow-sm)",
+    gap: 12,
+    boxShadow: "var(--shadow-md)",
     transition: "transform var(--duration-fast) var(--ease-standard)",
   },
   gratisBadge: {
