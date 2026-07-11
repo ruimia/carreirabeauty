@@ -7,6 +7,7 @@ import StepShell from "@/components/ui/StepShell";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 import { compressImage } from "@/lib/compressImage";
+import { trackLead } from "@/lib/trackLead";
 
 const TOTAL_STEPS = 7;
 
@@ -94,6 +95,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
       const { data: existing } = await supabase.from("professionals").select("id").eq("slug", slug).neq("id", professionalId ?? "").maybeSingle();
       if (existing) slug = `${base}-${randomSuffix()}`;
       await upsert({ ...extraFields, slug });
+      trackLead();
       router.push("/dashboard/profissional");
     } catch (e) { setError(e instanceof Error ? e.message : "Erro ao finalizar."); }
     finally { setLoading(false); }
