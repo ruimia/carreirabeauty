@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { emailNovaCandidatura } from "@/lib/email";
 import { limiteCandidaturasMes } from "@/lib/planos";
 
@@ -44,30 +45,26 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
     return { ok: false, error: "ERRO_DB" };
   }
 
-  // Busca dados da vaga e empresa para o email
-  const { data: job } = await supabase
+  // Busca dados da vaga e empresa para o email.
+  // Usa o client admin (service role) porque RLS de companies/profiles só permite
+  // que cada usuário veja a própria linha — o profissional não tem acesso de leitura
+  // aos dados da empresa dona da vaga.
+  const admin = createAdminClient();
+  const { data: job } = await admin
     .from("jobs")
-    .select("id, titulo, funcao, funcao_outro, company_id, companies(nome_estabelecimento)")
+    .select("id, titulo, funcao, funcao_outro, company_id")
     .eq("id", jobId)
     .single();
 
   if (job) {
-    const { data: companyProfile } = await supabase
-      .from("profiles")
-      .select("email")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .eq("id", (job.companies as any)?.user_id ?? "")
-      .maybeSingle();
-
-    // busca user_id da empresa
-    const { data: company } = await supabase
+    const { data: company } = await admin
       .from("companies")
       .select("user_id, nome_estabelecimento")
       .eq("id", job.company_id)
       .single();
 
     if (company) {
-      const { data: profile } = await supabase
+      const { data: profile } = await admin
         .from("profiles")
         .select("email")
         .eq("id", company.user_id)
