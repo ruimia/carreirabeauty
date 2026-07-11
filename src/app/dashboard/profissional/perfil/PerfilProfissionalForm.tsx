@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { compressImage } from "@/lib/compressImage";
 
 const VINCULOS: Record<string, string> = { clt: "CLT", pj: "PJ", freela: "Freela / autônomo" };
 const OUTRA = "Outro";
@@ -117,8 +118,9 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
       // Avatar upload
       let fotoUrl = p.foto_perfil_url ?? null;
       if (fileRef.current?.files?.[0]) {
-        const file = fileRef.current.files[0];
-        const ext = file.name.split(".").pop();
+        const rawFile = fileRef.current.files[0];
+        const file = await compressImage(rawFile);
+        const ext = rawFile.name.split(".").pop();
         const path = `${p.user_id}/avatar.${ext}`;
         const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
         if (upErr) throw new Error(upErr.message);

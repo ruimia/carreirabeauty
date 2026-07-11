@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 import { buildSlug, randomSuffix } from "@/lib/slug";
+import { compressImage } from "@/lib/compressImage";
 
 const FAIXAS: Record<string, string> = {
   "1_5": "1 a 5 funcionários",
@@ -58,8 +59,9 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
     try {
       let logoUrl = company.logo_url ?? null;
       if (fileRef.current?.files?.[0]) {
-        const file = fileRef.current.files[0];
-        const ext = file.name.split(".").pop();
+        const rawFile = fileRef.current.files[0];
+        const file = await compressImage(rawFile);
+        const ext = rawFile.name.split(".").pop();
         const path = `${company.user_id}/logo.${ext}`;
         const { error: upErr } = await supabase.storage.from("logos").upload(path, file, { upsert: true });
         if (upErr) throw new Error(upErr.message);
