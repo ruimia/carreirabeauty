@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Admin" };
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 
 function formatRelativeTime(dateStr: string): string {
@@ -68,21 +67,9 @@ export default async function AdminPage({ searchParams }: Props) {
   const [{ data: companiesByUser }, { data: professionalsByUser }] = await Promise.all([
     supabase.from("companies").select("user_id, nome_estabelecimento, cidade, estado, status_cadastro")
       .in("user_id", profileIds.length ? profileIds : [""]),
-    supabase.from("professionals").select("user_id, nome, cidade, estado, slug")
+    supabase.from("professionals").select("user_id, nome, cidade, estado, funcoes, funcao_outro, slug")
       .in("user_id", profileIds.length ? profileIds : [""]),
   ]);
-
-  // Provider de login (Google vs Email) vem do Supabase Auth, não das tabelas de negócio
-  const providerById = new Map<string, string>();
-  try {
-    const admin = createAdminClient();
-    const { data } = await admin.auth.admin.listUsers({ perPage: 1000 });
-    for (const u of data.users) {
-      providerById.set(u.id, u.app_metadata?.provider ?? "email");
-    }
-  } catch {
-    // se a service role key não estiver configurada, apenas omite a coluna de login
-  }
 
   const cadastros = (profiles ?? []).map((profile) => {
     const company = companiesByUser?.find((c) => c.user_id === profile.id);
@@ -91,6 +78,7 @@ export default async function AdminPage({ searchParams }: Props) {
     let nome = profile.email;
     let tipo: "empresa" | "profissional" | "incompleto" = "incompleto";
     let cidadeEstado = "—";
+    let profissao = "—";
 
     if (company?.status_cadastro === "completo") {
       nome = company.nome_estabelecimento;
@@ -100,12 +88,12 @@ export default async function AdminPage({ searchParams }: Props) {
       nome = professional.nome;
       tipo = "profissional";
       cidadeEstado = [professional.cidade, professional.estado].filter(Boolean).join(" - ") || "—";
+      profissao = (professional.funcoes ?? [])
+        .map((f: string) => (f === "outro" ? (professional.funcao_outro || "Outro") : f))
+        .join(", ") || "—";
     }
 
-    const provider = providerById.get(profile.id);
-    const login = provider === "google" ? "Google" : "E-mail";
-
-    return { id: profile.id, nome, tipo, cidadeEstado, login, criado_em: profile.criado_em };
+    return { id: profile.id, nome, tipo, cidadeEstado, profissao, criado_em: profile.criado_em };
   });
 
   const totalPages = Math.max(1, Math.ceil((totalPageCount ?? 0) / PAGE_SIZE));
@@ -145,7 +133,7 @@ export default async function AdminPage({ searchParams }: Props) {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge}`}>{label}</span>
-                  <span className="text-xs text-gray-400 w-14 text-right">{c.login}</span>
+                  <span className="text-xs text-gray-400 w-28 text-right truncate">{c.profissao}</span>
                   <span className="text-xs text-gray-400 w-20 text-right">{formatRelativeTime(c.criado_em)}</span>
                 </div>
               </div>
