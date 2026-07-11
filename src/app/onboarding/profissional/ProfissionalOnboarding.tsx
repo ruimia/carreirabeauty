@@ -269,7 +269,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
           {opcoes.map((o) => <ChoiceBtn key={o} value={o} label={o} current={disponibilidade} onSelect={setDisponibilidade} />)}
           {errBox}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-            <GhostBtn label="Pular" onClick={() => go({ disponibilidade: null }, 6)} />
+            <GhostBtn label="Pular" onClick={() => go({ disponibilidade: "" }, 6)} />
             <PrimaryBtn label="Continuar" onClick={() => go({ disponibilidade }, 6)} disabled={!disponibilidade} />
           </div>
         </div>
