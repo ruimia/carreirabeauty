@@ -115,7 +115,6 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
   }
 
   async function handleLogoInstagram() {
-    if (!instagram.trim()) { setError("Informe o @ do Instagram."); return; }
     setLoading(true); setError("");
     try {
       let logoUrl = initialData.logo_url ?? null;
@@ -140,7 +139,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
 
   const btn = (label: string, onClick: () => void, disabled: boolean, ghost = false) => (
     <button onClick={onClick} disabled={disabled || loading} style={{
-      flex: 1, height: 52, borderRadius: "var(--radius-pill)",
+      flex: "1 1 auto", width: "100%", height: 52, borderRadius: "var(--radius-pill)",
       border: ghost ? "1.5px solid var(--border-default)" : "none",
       background: ghost ? "transparent" : (disabled || loading) ? "var(--neutral-200)" : "var(--color-brand-primary)",
       color: ghost ? "var(--text-secondary)" : (disabled || loading) ? "var(--text-tertiary)" : "#fff",
@@ -287,7 +286,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
 
   if (step === 7) return (
     <StepShell step={7} total={TOTAL_STEPS} title="Foto e Instagram do estabelecimento"
-      subtitle="O Instagram é obrigatório. A foto ajuda os candidatos a conhecer seu negócio.">
+      subtitle="Ambos opcionais. Ajudam os candidatos a conhecer seu negócio.">
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Upload */}
         <div>
@@ -316,7 +315,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
 
         {/* Instagram */}
         <label style={labelStyle}>
-          Instagram do estabelecimento
+          Instagram do estabelecimento <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}>(opcional)</span>
           <div style={{
             display: "flex", alignItems: "center", height: 52,
             border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden",
