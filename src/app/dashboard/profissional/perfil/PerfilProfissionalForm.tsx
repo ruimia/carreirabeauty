@@ -129,8 +129,9 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
       // Portfolio uploads
       const newUrls: string[] = [];
-      for (const file of portfolioNewFiles) {
-        const ext = file.name.split(".").pop();
+      for (const rawFile of portfolioNewFiles) {
+        const file = await compressImage(rawFile);
+        const ext = rawFile.name.split(".").pop();
         const path = `${p.user_id}/portfolio/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
         if (!upErr) {

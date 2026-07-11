@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import StepShell from "@/components/ui/StepShell";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { compressImage } from "@/lib/compressImage";
 
 const TOTAL_STEPS = 7;
 
@@ -293,8 +294,9 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
       try {
         let fotoUrl = initialData.foto_perfil_url ?? null;
         if (withPhoto && fileRef.current?.files?.[0]) {
-          const file = fileRef.current.files[0];
-          const ext = file.name.split(".").pop();
+          const rawFile = fileRef.current.files[0];
+          const file = await compressImage(rawFile);
+          const ext = rawFile.name.split(".").pop();
           const path = `${userId}/avatar.${ext}`;
           const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
           if (upErr) throw new Error(upErr.message);

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { fetchCep, maskCep } from "@/lib/cep";
 import { criarVaga } from "./actions";
+import { compressImage } from "@/lib/compressImage";
 
 const VINCULOS = [
   { value: "", label: "Não especificado" },
@@ -96,8 +97,9 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
     try {
       let fotoUrl = company.logo_url ?? null;
       if (fileRef.current?.files?.[0]) {
-        const file = fileRef.current.files[0];
-        const ext = file.name.split(".").pop();
+        const rawFile = fileRef.current.files[0];
+        const file = await compressImage(rawFile);
+        const ext = rawFile.name.split(".").pop();
         const path = `${company.id}/vaga-${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("logos").upload(path, file, { upsert: true });
         if (upErr) throw new Error(upErr.message);
