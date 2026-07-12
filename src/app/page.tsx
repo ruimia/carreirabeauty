@@ -48,10 +48,10 @@ export default async function Home() {
             {/* CTAs — logo abaixo do subtítulo, sem scroll */}
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
               <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
-                👤 Sou profissional
+                👤 Cadastro grátis
               </Link>
               <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
-                🏪 Sou empresa
+                🏪 Cadastro + vaga grátis
               </Link>
             </div>
             <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)" }}>
