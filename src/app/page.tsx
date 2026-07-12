@@ -41,9 +41,25 @@ export default async function Home() {
             <p style={{ fontSize: 17, color: "var(--text-secondary)", maxWidth: 560, lineHeight: 1.5 }}>
               Salões, clínicas e profissionais se encontram perto de casa. Simples, rápido e feito para o seu bairro.
             </p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--brand-magenta-600)" }}>
+              Profissionais e negócios da beleza, estética e bem-estar já estão se conectando por aqui
+            </p>
+
+            {/* CTAs — logo abaixo do subtítulo, sem scroll */}
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
+              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
+                👤 Sou profissional
+              </Link>
+              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
+                🏪 Sou empresa
+              </Link>
+            </div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)" }}>
+              ✓ Cadastro 100% grátis para profissionais &nbsp;·&nbsp; ✓ 1 vaga grátis para empresas
+            </p>
 
             {/* Categoria cards */}
-            <div style={{ width: "100%", maxWidth: 960, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, textAlign: "left" }}>
+            <div style={{ width: "100%", maxWidth: 960, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, textAlign: "left", marginTop: 16 }}>
               <CategoryCard accent="var(--brand-magenta-500)" icon="✂️" title="Beleza" desc="Salões, esmalterias e barbearias"
                 tags={["Cabeleireiro(a)", "Manicure/Pedicure", "Barbeiro(a)", "Maquiador(a)", "Depiladora", "Recepcionista"]} />
               <CategoryCard accent="var(--brand-cyan-500)" icon="✨" title="Estética" desc="Clínicas de estética"
@@ -63,19 +79,6 @@ export default async function Home() {
                 ))}
               </div>
             </div>
-
-            {/* CTAs */}
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 12 }}>
-              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
-                👤 Sou profissional
-              </Link>
-              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
-                🏪 Sou empresa
-              </Link>
-            </div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)" }}>
-              ✓ Cadastro grátis para profissionais &nbsp;·&nbsp; ✓ 1 vaga grátis para empresas
-            </p>
           </div>
         </section>
 
