@@ -39,10 +39,7 @@ export default async function Home() {
               O maior site de empregos de beleza, estética e bem-estar do Brasil
             </h1>
             <p style={{ fontSize: 17, color: "var(--text-secondary)", maxWidth: 560, lineHeight: 1.5 }}>
-              Salões, clínicas e profissionais se encontram perto de casa. Simples, rápido e feito para o seu bairro.
-            </p>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--brand-magenta-600)" }}>
-              Profissionais e negócios da beleza, estética e bem-estar já estão se conectando por aqui
+              Aqui, profissionais encontram as melhores vagas em salões, clínicas de estética, spas e studios — e negócios encontram os profissionais certos pertinho deles.
             </p>
 
             {/* CTAs — logo abaixo do subtítulo, sem scroll */}
