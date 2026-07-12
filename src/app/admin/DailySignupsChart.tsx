@@ -60,7 +60,7 @@ export default function DailySignupsChart({ data }: { data: DayCount[] }) {
                 height={Math.max(barHeight, d.count > 0 ? 3 : 0)}
                 rx={3}
                 fill={isHover ? "var(--color-brand-primary-hover, #ba00b9)" : "#dc00dc"}
-                style={{ transition: "fill 100ms" }}
+                style={{ transition: "fill 100ms", pointerEvents: "none" }}
               />
               {showLabel && (
                 <text
@@ -69,6 +69,7 @@ export default function DailySignupsChart({ data }: { data: DayCount[] }) {
                   textAnchor="middle"
                   fontSize="9"
                   fill="#a1a1aa"
+                  style={{ pointerEvents: "none" }}
                 >
                   {formatDate(d.date)}
                 </text>
