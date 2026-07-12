@@ -77,23 +77,18 @@ export default async function Home() {
             {/* Categoria cards */}
             <div style={{ width: "100%", maxWidth: 960, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, textAlign: "left", marginTop: 16 }}>
               <CategoryCard accent="var(--brand-magenta-500)" icon="✂️" title="Beleza" desc="Salões, esmalterias e barbearias"
-                tags={["Cabeleireiro(a)", "Manicure/Pedicure", "Barbeiro(a)", "Maquiador(a)", "Depiladora", "Recepcionista"]} />
+                tags={["Cabeleireiro(a)", "Manicure/Pedicure", "Barbeiro(a)", "Maquiador(a)", "Depiladora", "Assistente/Auxiliar", "Recepcionista"]} />
               <CategoryCard accent="var(--brand-cyan-500)" icon="✨" title="Estética" desc="Clínicas de estética"
-                tags={["Esteticista", "Biomédico(a)", "Recepcionista"]} />
+                tags={["Esteticista", "Biomédico(a)", "Designer de sobrancelha/cílios", "Recepcionista"]} />
               <CategoryCard accent="var(--brand-blush-500)" icon="🌿" title="Saúde e bem-estar" desc="Spas e clínicas de terapia"
                 tags={["Fisioterapeuta", "Massoterapeuta", "Podólogo(a)", "Recepcionista"]} />
             </div>
 
             {/* Praça */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-tertiary)" }}>
-                📍 Sua praça está aqui
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-tertiary)" }}>
+                📍 De capitais a cidades do interior do Brasil — sua região está aqui
               </span>
-              <div style={{ display: "flex", gap: "6px 16px", flexWrap: "wrap", justifyContent: "center" }}>
-                {["São Paulo, SP", "Campinas, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG", "Curitiba, PR"].map((c) => (
-                  <Pill key={c}>{c}</Pill>
-                ))}
-              </div>
             </div>
           </div>
         </section>
