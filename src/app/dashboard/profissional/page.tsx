@@ -85,6 +85,17 @@ export default async function DashboardProfissionalPage() {
   const perfilPct = Math.round((doneCount / checks.length) * 100);
   const faltando = checks.filter((c) => !c.done).map((c) => c.label);
 
+  // Dicas práticas — versão em ação de cada item que falta, com ícone
+  const DICA: Record<string, { texto: string; icon: string }> = {
+    "Foto de perfil": { texto: "Coloque uma foto sua", icon: "ph-fill ph-camera" },
+    "Apresentação": { texto: "Escreva um pouco sobre você", icon: "ph-fill ph-chat-circle-text" },
+    "Habilidades": { texto: "Marque suas habilidades", icon: "ph-fill ph-star" },
+    "Formação e cursos": { texto: "Adicione seus cursos", icon: "ph-fill ph-graduation-cap" },
+    "Experiência profissional": { texto: "Conte sua experiência", icon: "ph-fill ph-briefcase" },
+    "Portfólio": { texto: "Mostre fotos do seu trabalho", icon: "ph-fill ph-images" },
+  };
+  const dicas = faltando.slice(0, 3).map((label) => DICA[label]).filter(Boolean);
+
   return (
     <div>
       <main className="page-x">
@@ -112,46 +123,55 @@ export default async function DashboardProfissionalPage() {
               <div style={{ height: "100%", width: `${perfilPct}%`, background: "#fff", borderRadius: 4 }} />
             </div>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", lineHeight: 1.5 }}>
-              Perfis completos aparecem mais e passam mais confiança às empresas.
+              Capricha no perfil e aumenta suas chances de ser chamada primeiro! 🚀
               Falta: {faltando.join(", ")}.
             </p>
           </Link>
         )}
 
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)" }}>
-              <i className="ph-fill ph-briefcase"></i>
+        {/* Stats — só aparece quando há algo pra mostrar (placar zerado desanima) */}
+        {(jobs.length > 0 || (applications?.length ?? 0) > 0) && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+            <div className="stat-card">
+              <div className="stat-icon" style={{ background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)" }}>
+                <i className="ph-fill ph-briefcase"></i>
+              </div>
+              <div>
+                <p style={{ font: "800 28px/1 var(--font-display)", color: "var(--text-primary)" }}>{jobs.length}</p>
+                <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 3 }}>Vagas para você</p>
+              </div>
             </div>
-            <div>
-              <p style={{ font: "800 28px/1 var(--font-display)", color: "var(--text-primary)" }}>{jobs.length}</p>
-              <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 3 }}>Vagas para você</p>
+            <div className="stat-card">
+              <div className="stat-icon" style={{ background: "var(--brand-cyan-50)", color: "var(--brand-cyan-600)" }}>
+                <i className="ph-fill ph-paper-plane-tilt"></i>
+              </div>
+              <div>
+                <p style={{ font: "800 28px/1 var(--font-display)", color: "var(--text-primary)" }}>{applications?.length ?? 0}</p>
+                <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 3 }}>Candidaturas</p>
+              </div>
             </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: "var(--brand-cyan-50)", color: "var(--brand-cyan-600)" }}>
-              <i className="ph-fill ph-paper-plane-tilt"></i>
-            </div>
-            <div>
-              <p style={{ font: "800 28px/1 var(--font-display)", color: "var(--text-primary)" }}>{applications?.length ?? 0}</p>
-              <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 3 }}>Candidaturas</p>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Vagas compatíveis */}
         <p className="section-label">Vagas para você</p>
 
         {jobs.length === 0 ? (
           <div className="card card-xl" style={{ padding: "28px 24px", textAlign: "center", marginBottom: 28 }}>
-            <i className="ph ph-envelope" style={{ fontSize: 40, color: "var(--text-tertiary)", marginBottom: 14, display: "block" }}></i>
+            <div style={{
+              width: 72, height: 72, borderRadius: "50%", margin: "0 auto 16px",
+              background: "linear-gradient(135deg, var(--brand-magenta-100), var(--brand-cyan-100))",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36,
+            }}>
+              🔍
+            </div>
             <p style={{ font: "var(--text-h2)", color: "var(--text-primary)", marginBottom: 8 }}>
-              Seu perfil está ativo
+              Sua vaga tá chegando! 🎉
             </p>
-            <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 300, margin: "0 auto 14px" }}>
-              Assim que uma vaga compatível com suas especialidades for publicada
-              {professional.estado ? ` no ${professional.estado}` : " na sua região"}, você receberá um email.
+            <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 320, margin: "0 auto 14px" }}>
+              A gente já tá de olho em vagas pra você
+              {professional.cidade && professional.estado ? ` em ${professional.cidade} - ${professional.estado}` : " na sua região"}.
+              Assim que aparecer uma, te avisamos na hora por email!
             </p>
             {funcoes.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" }}>
@@ -162,6 +182,32 @@ export default async function DashboardProfissionalPage() {
                 ))}
               </div>
             )}
+
+            {dicas.length > 0 && (
+              <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid var(--border-default)", textAlign: "left" }}>
+                <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", marginBottom: 12, textAlign: "center" }}>
+                  Enquanto isso, capricha aqui pra aparecer mais 👇
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {dicas.map((dica) => (
+                    <Link key={dica.texto} href="/dashboard/profissional/perfil" style={{
+                      display: "flex", alignItems: "center", gap: 10, textDecoration: "none",
+                      background: "var(--surface-sunken)", borderRadius: "var(--radius-md)", padding: "10px 14px",
+                    }}>
+                      <span style={{
+                        width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+                        background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)",
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15,
+                      }}>
+                        <i className={dica.icon}></i>
+                      </span>
+                      <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>{dica.texto}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 12 }}>
               <Link href="/dashboard/profissional/perfil" style={{ color: "var(--color-brand-primary)", fontWeight: 600 }}>
                 Editar especialidades
