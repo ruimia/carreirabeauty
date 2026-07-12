@@ -3,6 +3,28 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin" };
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import DailySignupsChart from "./DailySignupsChart";
+
+const CHART_DAYS = 30;
+
+function bucketByDay(dates: string[], days: number): { date: string; count: number }[] {
+  const buckets = new Map<string, number>();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    buckets.set(d.toISOString().slice(0, 10), 0);
+  }
+
+  for (const iso of dates) {
+    const day = iso.slice(0, 10);
+    if (buckets.has(day)) buckets.set(day, (buckets.get(day) ?? 0) + 1);
+  }
+
+  return Array.from(buckets, ([date, count]) => ({ date, count }));
+}
 
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
@@ -53,6 +75,15 @@ export default async function AdminPage({ searchParams }: Props) {
       .order("criado_em", { ascending: false })
       .range(from, to),
   ]);
+
+  const chartSince = new Date();
+  chartSince.setHours(0, 0, 0, 0);
+  chartSince.setDate(chartSince.getDate() - (CHART_DAYS - 1));
+  const { data: recentProfiles } = await supabase
+    .from("profiles")
+    .select("criado_em")
+    .gte("criado_em", chartSince.toISOString());
+  const dailySignups = bucketByDay((recentProfiles ?? []).map((p) => p.criado_em), CHART_DAYS);
 
   const stats = [
     { label: "Total de cadastros", value: totalCadastros ?? 0, color: "bg-gray-100 text-gray-700" },
@@ -111,6 +142,8 @@ export default async function AdminPage({ searchParams }: Props) {
           </div>
         ))}
       </div>
+
+      <DailySignupsChart data={dailySignups} />
 
       {/* Lista única de cadastros, paginada */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
