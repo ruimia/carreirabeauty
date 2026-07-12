@@ -36,7 +36,7 @@ export default async function Home() {
         <section style={{ background: "var(--surface-accent)", padding: "60px 24px 48px" }}>
           <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 20, textAlign: "center" }}>
             <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "clamp(28px, 5vw, 40px)", color: "var(--text-primary)", maxWidth: 720, lineHeight: 1.2 }}>
-              O maior site de empregos de beleza, estética e bem-estar do Brasil
+              Conectando profissionais de beleza, estética e bem-estar às vagas certas, no seu bairro, na sua cidade
             </h1>
             <p style={{ fontSize: 17, color: "var(--text-secondary)", maxWidth: 560, lineHeight: 1.5 }}>
               Aqui, profissionais encontram as melhores vagas em salões, clínicas de estética, spas e studios — e negócios encontram os profissionais certos pertinho deles.
