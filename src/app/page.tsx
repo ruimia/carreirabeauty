@@ -58,6 +58,18 @@ export default async function Home() {
               ✓ Cadastro 100% grátis para profissionais &nbsp;·&nbsp; ✓ 1 vaga grátis para empresas
             </p>
 
+            {/* Foto hero */}
+            <div style={{ width: "100%", maxWidth: 720, borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-md)", marginTop: 8 }}>
+              <Image
+                src="https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?w=1200&q=80&auto=format&fit=crop"
+                alt="Profissional de beleza atendendo cliente em salão"
+                width={1200} height={675}
+                style={{ width: "100%", height: "auto", display: "block", aspectRatio: "16/9", objectFit: "cover" }}
+                unoptimized
+                priority
+              />
+            </div>
+
             {/* Categoria cards */}
             <div style={{ width: "100%", maxWidth: 960, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, textAlign: "left", marginTop: 16 }}>
               <CategoryCard accent="var(--brand-magenta-500)" icon="✂️" title="Beleza" desc="Salões, esmalterias e barbearias"
@@ -84,43 +96,65 @@ export default async function Home() {
 
         {/* ── Como funciona — profissionais ── */}
         <section id="profissionais" style={{ padding: "56px 24px" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-cyan-600)" }}>Para profissionais</span>
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 12px" }}>
-              Crie seu perfil e descubra oportunidades perto de você
-            </h2>
-            <div style={{ marginBottom: 20 }}>
-              <GratisBadge accent="var(--brand-cyan-500)" bg="var(--brand-cyan-50)" />
+          <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexWrap: "wrap-reverse", gap: 32, alignItems: "center" }}>
+            <div style={{ flex: "1 1 320px" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-cyan-600)" }}>Para profissionais</span>
+              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 12px" }}>
+                Crie seu perfil e descubra oportunidades perto de você
+              </h2>
+              <div style={{ marginBottom: 20 }}>
+                <GratisBadge accent="var(--brand-cyan-500)" bg="var(--brand-cyan-50)" />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
+                <Step num={1} title="Cadastre-se em minutos, de graça" desc="Conte sua função, experiência e onde você está." accent="var(--brand-cyan-500)" />
+                <Step num={2} title="Ganhe uma página pública" desc="Seu currículo online, indexado no Google, de graça." accent="var(--brand-cyan-500)" />
+                <Step num={3} title="Receba vagas perto de você" desc="Filtro geográfico fino — nada de vaga do outro lado da cidade." accent="var(--brand-cyan-500)" />
+              </div>
+              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)" }}>
+                Criar meu perfil grátis
+              </Link>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
-              <Step num={1} title="Cadastre-se em minutos, de graça" desc="Conte sua função, experiência e onde você está." accent="var(--brand-cyan-500)" />
-              <Step num={2} title="Ganhe uma página pública" desc="Seu currículo online, indexado no Google, de graça." accent="var(--brand-cyan-500)" />
-              <Step num={3} title="Receba vagas perto de você" desc="Filtro geográfico fino — nada de vaga do outro lado da cidade." accent="var(--brand-cyan-500)" />
+            <div style={{ flex: "1 1 320px", borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-md)" }}>
+              <Image
+                src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=800&q=80&auto=format&fit=crop"
+                alt="Profissional de estética atendendo cliente"
+                width={800} height={600}
+                style={{ width: "100%", height: "auto", display: "block", aspectRatio: "4/3", objectFit: "cover" }}
+                unoptimized
+              />
             </div>
-            <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)" }}>
-              Criar meu perfil grátis
-            </Link>
           </div>
         </section>
 
         {/* ── Como funciona — empresas ── */}
         <section id="empresas" style={{ background: "var(--surface-sunken)", padding: "56px 24px" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-magenta-600)" }}>Para empresas</span>
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 12px" }}>
-              Divulgue sua vaga grátis e encontre profissionais no seu bairro
-            </h2>
-            <div style={{ marginBottom: 20 }}>
-              <GratisBadge accent="var(--color-brand-primary)" bg="var(--brand-magenta-50)" text="1 vaga grátis, sem prazo" />
+          <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexWrap: "wrap", gap: 32, alignItems: "center" }}>
+            <div style={{ flex: "1 1 320px", borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-md)" }}>
+              <Image
+                src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=800&q=80&auto=format&fit=crop"
+                alt="Interior de salão de beleza"
+                width={800} height={600}
+                style={{ width: "100%", height: "auto", display: "block", aspectRatio: "4/3", objectFit: "cover" }}
+                unoptimized
+              />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
-              <Step num={1} title="Cadastre seu CNPJ" desc="Validamos e puxamos os dados do seu negócio automaticamente." accent="var(--color-brand-primary)" />
-              <Step num={2} title="Publique sua primeira vaga de graça" desc="Sem prazo, sem cartão de crédito — todo estabelecimento tem direito a 1 vaga ativa gratuita." accent="var(--color-brand-primary)" />
-              <Step num={3} title="Converse com candidatos" desc="Veja quem se candidatou e fale direto pelo WhatsApp." accent="var(--color-brand-primary)" />
+            <div style={{ flex: "1 1 320px" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--brand-magenta-600)" }}>Para empresas</span>
+              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, color: "var(--text-primary)", margin: "8px 0 12px" }}>
+                Divulgue sua vaga grátis e encontre profissionais no seu bairro
+              </h2>
+              <div style={{ marginBottom: 20 }}>
+                <GratisBadge accent="var(--color-brand-primary)" bg="var(--brand-magenta-50)" text="1 vaga grátis, sem prazo" />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 28 }}>
+                <Step num={1} title="Cadastre seu CNPJ" desc="Validamos e puxamos os dados do seu negócio automaticamente." accent="var(--color-brand-primary)" />
+                <Step num={2} title="Publique sua primeira vaga de graça" desc="Sem prazo, sem cartão de crédito — todo estabelecimento tem direito a 1 vaga ativa gratuita." accent="var(--color-brand-primary)" />
+                <Step num={3} title="Converse com candidatos" desc="Veja quem se candidatou e fale direto pelo WhatsApp." accent="var(--color-brand-primary)" />
+              </div>
+              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>
+                Cadastrar minha empresa grátis
+              </Link>
             </div>
-            <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>
-              Cadastrar minha empresa grátis
-            </Link>
           </div>
         </section>
 
@@ -160,13 +194,13 @@ export default async function Home() {
               Quem já usa o CarreiraBeauty
             </h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
-              <Testimonial initials="RA" avatarBg="var(--brand-cyan-500)"
+              <Testimonial photo="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80&auto=format&fit=crop&crop=faces"
                 quote="Achei uma vaga de manicure a duas ruas de casa. Nunca foi tão rápido."
                 name="Renata" role="Manicure em Campinas, SP" />
-              <Testimonial initials="MS" avatarBg="var(--brand-blush-500)"
+              <Testimonial photo="https://images.unsplash.com/photo-1656399910161-8efafd973a29?w=200&q=80&auto=format&fit=crop&crop=faces"
                 quote="Publiquei a vaga e no mesmo dia já tinha candidatos do bairro."
                 name="Marcos" role="Dono do Studio Bella, SP" />
-              <Testimonial initials="JS" avatarBg="var(--color-brand-primary)"
+              <Testimonial photo="https://images.unsplash.com/photo-1508002366005-75a695ee2d17?w=200&q=80&auto=format&fit=crop&crop=faces"
                 quote="Minha página pública virou meu currículo — mando o link direto pro cliente."
                 name="Joana" role="Esteticista em Campinas, SP" />
             </div>
@@ -257,7 +291,7 @@ function Step({ num, title, desc, accent }: { num: number; title: string; desc: 
   );
 }
 
-function Testimonial({ initials, avatarBg, quote, name, role }: { initials: string; avatarBg: string; quote: string; name: string; role: string }) {
+function Testimonial({ photo, quote, name, role }: { photo: string; quote: string; name: string; role: string }) {
   return (
     <div style={{
       background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
@@ -267,11 +301,8 @@ function Testimonial({ initials, avatarBg, quote, name, role }: { initials: stri
       <span style={{ fontSize: 22, color: "var(--brand-magenta-300)" }}>"</span>
       <p style={{ fontSize: 15, color: "var(--text-primary)", lineHeight: 1.5, flex: 1 }}>{quote}</p>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{
-          width: 36, height: 36, borderRadius: "50%", background: avatarBg, color: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, flexShrink: 0,
-        }}>{initials}</span>
+        <Image src={photo} alt={name} width={36} height={36} unoptimized
+          style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
         <div>
           <div style={{ fontWeight: 600, fontSize: 13, color: "var(--text-primary)" }}>{name}</div>
           <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{role}</div>
