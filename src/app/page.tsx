@@ -46,17 +46,24 @@ export default async function Home() {
             </p>
 
             {/* CTAs — logo abaixo do subtítulo, sem scroll */}
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
-              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
-                👤 Cadastro grátis
-              </Link>
-              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 32px", fontSize: 16, boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
-                🏪 Cadastro + vaga grátis
-              </Link>
+            <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
+                  👤 Quero me cadastrar!
+                </Link>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
+                  Cadastre-se GRÁTIS para receber vagas na sua área.
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
+                  🏪 Quero anunciar minha vaga!
+                </Link>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
+                  Anuncie sua primeira vaga GRÁTIS.
+                </p>
+              </div>
             </div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)" }}>
-              ✓ Cadastro 100% grátis para profissionais &nbsp;·&nbsp; ✓ 1 vaga grátis para empresas
-            </p>
 
             {/* Foto hero */}
             <div style={{ width: "100%", maxWidth: 720, borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-md)", marginTop: 8 }}>
