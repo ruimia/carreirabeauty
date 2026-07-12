@@ -40,7 +40,7 @@ export async function aprovarVaga(id: string) {
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("titulo, funcao, slug, company_id, companies(nome_estabelecimento, user_id)")
+    .select("titulo, funcao, slug, company_id, companies(nome_estabelecimento, user_id, estado)")
     .eq("id", id).single();
 
   if (job) {
@@ -56,12 +56,14 @@ export async function aprovarVaga(id: string) {
       }).catch(() => {});
     }
 
-    // Notifica profissionais com funcao compatível
+    // Notifica profissionais com funcao e estado compatíveis
     if (job.funcao) {
-      const { data: profissionais } = await supabase
+      let query = supabase
         .from("professionals")
-        .select("id, nome, cidade, user_id, funcoes")
+        .select("id, nome, cidade, estado, user_id, funcoes")
         .contains("funcoes", [job.funcao]);
+      if (comp?.estado) query = query.eq("estado", comp.estado);
+      const { data: profissionais } = await query;
 
       if (profissionais?.length) {
         const userIds = profissionais.map((p) => p.user_id);

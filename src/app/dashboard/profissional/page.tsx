@@ -61,9 +61,12 @@ export default async function DashboardProfissionalPage() {
 
   const appliedJobIds = new Set((applications ?? []).map((a) => a.job_id));
 
-  // Vagas compatíveis ainda não candidatadas
+  // Vagas compatíveis ainda não candidatadas — mesma função e mesmo estado
   const jobs = (allJobs ?? []).filter((j) => {
     if (appliedJobIds.has(j.id)) return false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const jobEstado = (j.companies as any)?.estado;
+    if (professional.estado && jobEstado && jobEstado !== professional.estado) return false;
     if (funcoes.length === 0) return true;
     return funcoes.some((f) => f.toLowerCase() === j.funcao?.toLowerCase() ||
       (j.funcao === "outro" && funcoes.includes("outro")));
@@ -147,7 +150,8 @@ export default async function DashboardProfissionalPage() {
               Seu perfil está ativo
             </p>
             <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 300, margin: "0 auto 14px" }}>
-              Assim que uma vaga compatível com suas especialidades for publicada, você receberá um email.
+              Assim que uma vaga compatível com suas especialidades for publicada
+              {professional.estado ? ` no ${professional.estado}` : " na sua região"}, você receberá um email.
             </p>
             {funcoes.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" }}>
