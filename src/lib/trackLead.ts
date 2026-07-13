@@ -10,3 +10,10 @@ export function trackLead() {
   window.dataLayer = window.dataLayer ?? [];
   window.dataLayer.push({ event: "Lead" });
 }
+
+/** Dispara o evento CompleteRegistration pro GTM (dataLayer) ao final do onboarding de empresa. */
+export function trackCompleteRegistration() {
+  if (typeof window === "undefined") return;
+  window.dataLayer = window.dataLayer ?? [];
+  window.dataLayer.push({ event: "CompleteRegistration" });
+}

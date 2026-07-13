@@ -7,7 +7,7 @@ import StepShell from "@/components/ui/StepShell";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { compressImage } from "@/lib/compressImage";
-import { trackLead } from "@/lib/trackLead";
+import { trackCompleteRegistration } from "@/lib/trackLead";
 
 const TOTAL_STEPS = 7;
 
@@ -131,7 +131,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
       const { data: existing } = await supabase.from("companies").select("id").eq("slug", base).neq("id", companyId ?? "").maybeSingle();
       const slug = existing ? `${base}-${randomSuffix()}` : base;
       await upsertCompany({ instagram: instagram.replace(/^@/, ""), logo_url: logoUrl, slug, status_cadastro: "completo" });
-      trackLead();
+      trackCompleteRegistration();
       router.push("/dashboard/empresa");
     } catch { setError("Erro ao salvar. Tente novamente."); }
     finally { setLoading(false); }
