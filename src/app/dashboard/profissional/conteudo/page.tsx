@@ -1,0 +1,80 @@
+export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Conteúdo" };
+
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+
+export default async function ConteudoListaPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: professional } = await supabase
+    .from("professionals")
+    .select("plano")
+    .eq("user_id", user.id)
+    .single();
+
+  const isPro = professional?.plano === "pro";
+
+  const { data: conteudos } = await supabase
+    .from("conteudos")
+    .select("id, titulo, slug, pro")
+    .eq("ativo", true)
+    .order("ordem", { ascending: true });
+
+  return (
+    <div>
+      <main className="page-x">
+        <p className="section-label">Conteúdo pra você crescer</p>
+
+        {(conteudos ?? []).length === 0 && (
+          <div className="card card-xl" style={{ padding: "28px 24px", textAlign: "center", marginBottom: 28 }}>
+            <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
+              Nenhum conteúdo publicado ainda. Volte em breve!
+            </p>
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+          {(conteudos ?? []).map((c) => {
+            const bloqueado = c.pro && !isPro;
+            return (
+              <Link
+                key={c.id}
+                href={bloqueado ? "/dashboard/profissional/planos" : `/dashboard/profissional/conteudo/${c.slug}`}
+                style={{ textDecoration: "none" }}
+              >
+                <div className="job-feed-card" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{
+                    width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
+                    background: bloqueado ? "var(--surface-sunken)" : "var(--brand-magenta-50)",
+                    color: bloqueado ? "var(--text-tertiary)" : "var(--color-brand-primary)",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
+                  }}>
+                    <i className={bloqueado ? "ph-fill ph-lock-simple" : "ph-fill ph-book-open-text"}></i>
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                      {c.titulo}
+                    </p>
+                    {c.pro && (
+                      <span className="tag" style={{
+                        marginTop: 4, background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)",
+                      }}>
+                        PRO
+                      </span>
+                    )}
+                  </div>
+                  <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </main>
+    </div>
+  );
+}

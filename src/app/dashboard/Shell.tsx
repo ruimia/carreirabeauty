@@ -58,6 +58,12 @@ const PROFISSIONAL_TABS: Tab[] = [
     isActive: (p) => p === "/dashboard/profissional",
   },
   {
+    label: "Conteúdo",
+    icon: "ph ph-book-open-text",
+    href: "/dashboard/profissional/conteudo",
+    isActive: (p) => p.startsWith("/dashboard/profissional/conteudo"),
+  },
+  {
     label: "Planos",
     icon: "ph ph-star",
     href: "/dashboard/profissional/planos",
