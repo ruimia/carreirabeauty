@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import PdfPageViewer from "@/components/PdfPageViewer";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -40,17 +41,13 @@ export default async function ConteudoViewerPage({ params }: Props) {
 
   return (
     <div>
-      <main className="page-x" style={{ paddingBottom: 0 }}>
+      <main className="page-x" style={{ paddingBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Link href="/dashboard/profissional/conteudo" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
           <p style={{ font: "600 16px/1.3 var(--font-display)", color: "var(--text-primary)" }}>{conteudo.titulo}</p>
         </div>
+        <PdfPageViewer src={conteudo.pdf_url} />
       </main>
-      <iframe
-        src={conteudo.pdf_url}
-        title={conteudo.titulo}
-        style={{ width: "100%", height: "calc(100vh - 140px)", border: "none", display: "block" }}
-      />
     </div>
   );
 }
