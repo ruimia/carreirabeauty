@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailNovaCandidatura } from "@/lib/email";
 import { limiteCandidaturasMes } from "@/lib/planos";
+import { saoPauloStartOfMonthISO } from "@/lib/timezone";
 
 type CandidatarResult =
   | { ok: true; jaAplicou: boolean }
@@ -24,13 +25,11 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
   // Checa limite de candidaturas do mês
   const limite = limiteCandidaturasMes(prof.plano ?? "gratis");
   if (limite !== null) {
-    const inicioMes = new Date();
-    inicioMes.setDate(1); inicioMes.setHours(0, 0, 0, 0);
     const { count } = await supabase
       .from("applications")
       .select("id", { count: "exact", head: true })
       .eq("professional_id", prof.id)
-      .gte("criado_em", inicioMes.toISOString());
+      .gte("criado_em", saoPauloStartOfMonthISO());
     if ((count ?? 0) >= limite) return { ok: false, error: "LIMITE_PLANO" };
   }
 

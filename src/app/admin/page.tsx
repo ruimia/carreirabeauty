@@ -4,18 +4,9 @@ export const metadata = { title: "Admin" };
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import DailySignupsChart from "./DailySignupsChart";
+import { toSaoPauloDay, saoPauloStartOfTodayISO } from "@/lib/timezone";
 
 const CHART_DAYS = 30;
-const TZ = "America/Sao_Paulo";
-
-// Formata uma data (UTC ou qualquer offset) como YYYY-MM-DD no horário de São Paulo
-function toSaoPauloDay(date: Date): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit",
-  }).formatToParts(date);
-  const get = (t: string) => parts.find((p) => p.type === t)?.value;
-  return `${get("year")}-${get("month")}-${get("day")}`;
-}
 
 function bucketByDay(dates: string[], days: number): { date: string; count: number }[] {
   const buckets = new Map<string, number>();
@@ -86,8 +77,7 @@ export default async function AdminPage({ searchParams }: Props) {
       .range(from, to),
   ]);
 
-  const chartSince = new Date();
-  chartSince.setHours(0, 0, 0, 0);
+  const chartSince = new Date(saoPauloStartOfTodayISO());
   chartSince.setDate(chartSince.getDate() - (CHART_DAYS - 1));
   const { data: recentProfiles } = await supabase
     .from("profiles")
