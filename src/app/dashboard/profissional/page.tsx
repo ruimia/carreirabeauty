@@ -185,26 +185,7 @@ export default async function DashboardProfissionalPage() {
 
             {dicas.length > 0 && (
               <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid var(--border-default)", textAlign: "left" }}>
-                <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", marginBottom: 12, textAlign: "center" }}>
-                  Enquanto isso, capricha aqui pra aparecer mais 👇
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {dicas.map((dica) => (
-                    <Link key={dica.texto} href="/dashboard/profissional/perfil" style={{
-                      display: "flex", alignItems: "center", gap: 10, textDecoration: "none",
-                      background: "var(--surface-sunken)", borderRadius: "var(--radius-md)", padding: "10px 14px",
-                    }}>
-                      <span style={{
-                        width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                        background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)",
-                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15,
-                      }}>
-                        <i className={dica.icon}></i>
-                      </span>
-                      <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>{dica.texto}</span>
-                    </Link>
-                  ))}
-                </div>
+                <DicasPerfil dicas={dicas} />
               </div>
             )}
 
@@ -260,6 +241,13 @@ export default async function DashboardProfissionalPage() {
           </div>
         )}
 
+        {/* Dicas de perfil — mesmo com vaga(s) na lista, reforça o que fazer pra se destacar */}
+        {jobs.length > 0 && dicas.length > 0 && (
+          <div className="card card-xl" style={{ padding: "20px 24px", marginBottom: 28 }}>
+            <DicasPerfil dicas={dicas} />
+          </div>
+        )}
+
         {/* Minhas candidaturas */}
         {(applications?.length ?? 0) > 0 && (
           <>
@@ -309,5 +297,32 @@ export default async function DashboardProfissionalPage() {
         )}
       </main>
     </div>
+  );
+}
+
+function DicasPerfil({ dicas }: { dicas: { texto: string; icon: string }[] }) {
+  return (
+    <>
+      <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", marginBottom: 12, textAlign: "center" }}>
+        Capricha aqui pra se destacar mais 👇
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {dicas.map((dica) => (
+          <Link key={dica.texto} href="/dashboard/profissional/perfil" style={{
+            display: "flex", alignItems: "center", gap: 10, textDecoration: "none",
+            background: "var(--surface-sunken)", borderRadius: "var(--radius-md)", padding: "10px 14px",
+          }}>
+            <span style={{
+              width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+              background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15,
+            }}>
+              <i className={dica.icon}></i>
+            </span>
+            <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>{dica.texto}</span>
+          </Link>
+        ))}
+      </div>
+    </>
   );
 }
