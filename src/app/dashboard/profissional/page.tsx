@@ -61,8 +61,9 @@ export default async function DashboardProfissionalPage() {
       .from("conteudos")
       .select("titulo, slug, pro")
       .eq("ativo", true)
+      .eq("pro", false)
       .order("ordem", { ascending: true })
-      .limit(3),
+      .limit(2),
   ]);
 
   const appliedJobIds = new Set((applications ?? []).map((a) => a.job_id));
@@ -133,38 +134,6 @@ export default async function DashboardProfissionalPage() {
               Falta: {faltando.join(", ")}.
             </p>
           </Link>
-        )}
-
-        {/* Conteúdo — chamada pra aba de conteúdo, com as headlines mais recentes */}
-        {(conteudos?.length ?? 0) > 0 && (
-          <div className="card card-xl" style={{ padding: 18, marginBottom: 20 }}>
-            <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", marginBottom: 12 }}>
-              📚 Conteúdo pra você crescer
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {conteudos!.map((c) => (
-                <Link key={c.slug} href={`/dashboard/profissional/conteudo/${c.slug}`} style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
-                  textDecoration: "none", background: "var(--surface-sunken)",
-                  borderRadius: "var(--radius-md)", padding: "10px 14px",
-                }}>
-                  <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
-                    {c.titulo}
-                  </span>
-                  {c.pro ? (
-                    <span className="tag" style={{ background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)", flexShrink: 0 }}>PRO</span>
-                  ) : (
-                    <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
-                  )}
-                </Link>
-              ))}
-            </div>
-            <Link href="/dashboard/profissional/conteudo" style={{
-              display: "block", textAlign: "center", marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", textDecoration: "none",
-            }}>
-              Ver todos os conteúdos →
-            </Link>
-          </div>
         )}
 
         {/* Stats — só aparece quando há algo pra mostrar (placar zerado desanima) */}
@@ -332,6 +301,34 @@ export default async function DashboardProfissionalPage() {
               })}
             </div>
           </>
+        )}
+
+        {/* Conteúdo — chamada pra aba de conteúdo, com as headlines mais recentes */}
+        {(conteudos?.length ?? 0) > 0 && (
+          <div className="card card-xl" style={{ padding: 18, marginTop: 20 }}>
+            <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", marginBottom: 12 }}>
+              📚 Conteúdo pra você crescer
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {conteudos!.map((c) => (
+                <Link key={c.slug} href={`/dashboard/profissional/conteudo/${c.slug}`} style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+                  textDecoration: "none", background: "var(--surface-sunken)",
+                  borderRadius: "var(--radius-md)", padding: "10px 14px",
+                }}>
+                  <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
+                    {c.titulo}
+                  </span>
+                  <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+                </Link>
+              ))}
+            </div>
+            <Link href="/dashboard/profissional/conteudo" style={{
+              display: "block", textAlign: "center", marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", textDecoration: "none",
+            }}>
+              Ver todos os conteúdos →
+            </Link>
+          </div>
         )}
       </main>
     </div>
