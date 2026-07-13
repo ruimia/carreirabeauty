@@ -99,6 +99,7 @@ Opções em discussão:
 - Onde busca vagas hoje: WhatsApp, Instagram, indicação
 - Gatilho de uso: combinação — desemprego/busca ativa, troca por oportunidade melhor, e complemento de renda com freelas
 - O que o faria voltar à plataforma: (a detalhar)
+- **Perfil socioeconômico e de leitura:** majoritariamente baixa renda, lê pouco — copy precisa ser informal, direta e simples (evitar termos formais/técnicos tipo "compatível", "monitorado"), e positiva/aspiracional em toda a jornada, inclusive em estados neutros (ex: "nenhuma vaga ainda" deve soar animador, não clínico ou negativo). Vale reforçar com elementos visuais (ícones, ilustrações), não só texto, dado o baixo hábito de leitura.
 
 ---
 
@@ -220,6 +221,15 @@ Total: 8 telas de cadastro + 1 de publicação da vaga.
 Total: 9-10 telas de cadastro (2 puláveis) + tela de resultado.
 
 - [ ] Prototipar/validar essas sequências com usuários reais antes de codar
+
+### ⚠️ Pendência de decisão — posição do login no fluxo
+
+Achado real (após 2 dias de campanha, ver seção 13): a implementação atual pede login **antes** da escolha de perfil e do preenchimento dos dados, o que diverge do desenho acima e é apontado como possível causa de abandono (tráfego de anúncio perde o gancho ao ser barrado por criação de conta antes de ver qualquer valor).
+
+**Recomendação em avaliação (não decidida ainda):** mover a criação de conta/login para o **fim** do onboarding, não para o início — deixar a pessoa preencher os dados de perfil primeiro (sem exigir conta) e só pedir email/login na tela final, como etapa que salva/ativa o cadastro (padrão "progressive profiling" — aumenta conclusão ao usar o investimento já feito como incentivo). CNPJ pode continuar sendo coletado cedo no fluxo da empresa (é dado, não é autenticação), mesmo que o login em si vá para o fim.
+
+- [ ] Decidir se essa mudança será aplicada e, se sim, atualizar a sequência de telas acima
+- [ ] Se aplicada, considerar captura de evento "iniciou cadastro" via Pixel para permitir remarketing de quem abandona antes do login (já que não há mais email cedo no fluxo para isso)
 
 ---
 
@@ -412,6 +422,7 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 - [x] `slug` do Professional segue a regra da seção 7.9 (nome-sobrenome-cidade + código aleatório em colisão)
 - [x] **`Application` é binária no MVP** (aplicou/não aplicou, sem funil de status) — empresa gerencia o contato com o candidato fora da plataforma (WhatsApp, via telefone salvo no cadastro)
 - [ ] Definir estrutura exata da tabela de log/histórico para o email semanal (quais candidaturas/vagas já foram "consumidas" no envio anterior, para não duplicar)
+- [x] **Fuso horário: servidor roda em UTC (Vercel), mas o produto é 100% Brasil.** Qualquer lógica que faça corte/agrupamento por dia ou mês usando `Date` puro no servidor (`setHours(0,0,0,0)`, `toISOString().slice(0,10)`, etc.) fica ~3h adiantada da fronteira real em São Paulo — já corrigido no gráfico de cadastros diários do admin e no limite mensal de candidaturas do plano grátis, usando o helper compartilhado `src/lib/timezone.ts` (`toSaoPauloDay`, `saoPauloStartOfMonthISO`, `saoPauloStartOfTodayISO`). Qualquer nova feature com corte por dia/mês deve reusar esse helper em vez de `Date` cru.
 
 ---
 
@@ -460,6 +471,24 @@ Objetivo: cada fase gera algo **testável e demonstrável** sozinho, antes de av
 - Portfólio de fotos (profissional, condicional à função)
 - Logo/Instagram da empresa
 - Ajustes de SEO da página pública, performance, revisão de UX do multi-step
+
+### Fase 6.5 — Vagas Agregadas (MVP+, complementar)
+
+Objetivo: mostrar volume de vagas reais na região do profissional mesmo enquanto a base própria de empresas cadastradas ainda é pequena — resolve parte do problema de cold start do lado profissional.
+
+- **Fonte:** API de agregação de vagas legítima — **não scraping não autorizado** de sites de terceiros, por risco jurídico (violação de Termos de Uso) e de propriedade de conteúdo (a vaga pertence à empresa que a publicou originalmente)
+- **Separação clara de UX:** seção distinta ("Vagas de outros sites" / "Vagas parceiras") separada das vagas nativas da plataforma ("Vagas CarreiraBeauty") — evita quebrar a expectativa do profissional (candidatura externa redireciona pra outro site, não é candidatura em 1 clique) e evita contaminar as métricas de conversão usadas na campanha de Meta Ads (seção 13 — os eventos otimizados são sobre vagas nativas)
+- **Filtro:** mesma lógica de raio/localização já usada nas vagas nativas (seção 7.7)
+- **Não substitui a prioridade da Fase 1/4:** essa fase é complementar — o foco continua sendo ativar a campanha de Empresa nativa e crescer a base de vagas própria, que é o que gera receita (seção 4)
+
+- [x] **Adzuna API — confirmado (pesquisa jul/2026):** cobertura no Brasil (código de país `BR`), **gratuita** para uso, com as seguintes condições:
+  - Limites do plano free: 25 chamadas/min, 250/dia, 1.000/semana, 2.500/mês — suficiente para popular vagas por cidade/atualização periódica, não para chamada em tempo real por usuário. Limite maior pode ser negociado com a Adzuna caso o uso cresça
+  - **Obrigação contratual de atribuição:** ao publicar vagas do Adzuna, é obrigatório exibir o selo "Jobs by Adzuna" (mín. 116x23px, linkado) — reforça a necessidade da separação visual já definida acima entre vagas agregadas e vagas nativas
+  - Uso permitido é "publicar listagens de anúncios Adzuna" — dentro dos termos de serviço, não é scraping
+- [x] **Google for Jobs (pesquisa jul/2026): NÃO é fonte de agregação** — a API que permitia "puxar" vagas de lá foi descontinuada. O modelo atual é o inverso: adicionar marcador estruturado (JobPosting/JSON-LD) nas **próprias** páginas de vaga nativas (empresas cadastradas na plataforma) faz o Google exibi-las organicamente na busca, de graça, sem aprovação especial. Recurso confirmado ativo no Brasil. **Ação separada e complementar:** implementar schema JobPosting nas páginas de vaga nativa (relaciona-se com a página pública indexável da seção 7.9) — gera tráfego orgânico direto pras vagas que geram receita, ao contrário da agregação de terceiros
+- [x] **Outras fontes avaliadas e descartadas:** Catho, InfoJobs e Vagas.com são concorrentes diretos no nicho, sem API pública de parceria para redistribuição de vagas. "API BR — Vagas Aggregator" existe mas é focada em vagas de tecnologia via GitHub, não aplicável ao nicho de beleza/estética
+- [ ] Definir se vaga agregada aparece misturada na busca com filtro de raio, ou em aba/seção totalmente separada
+- [ ] Adicionar ação de implementar JobPosting structured data (schema.org) nas vagas nativas — SEO gratuito, complementar à agregação via Adzuna
 
 - [x] Sequência de fases validada
 
@@ -512,6 +541,77 @@ Fase 1.
 - [x] Controle de versão via GitHub, deploy automático via Vercel (integrado ao repo) — instrução incluída no prompt da Fase 0
 - [x] Instrução de manter o `.md` sempre atualizado incluída no prompt inicial
 - [ ] Repetir o padrão "leia o doc, confirme entendimento, execute só a fase X, pare e aguarde" a cada nova fase
+
+---
+
+## 13. Aquisição — Meta Ads
+
+### Estrutura de campanha
+
+- [x] **Duas campanhas totalmente separadas** (não conjuntos dentro da mesma campanha) — uma para Empresa, outra para Profissional, cada uma com orçamento próprio no nível do conjunto de anúncios (ABO). Evita que o algoritmo desvie verba pro público mais barato de converter (historicamente, profissional)
+- [x] **Eventos de conversão distintos:** `CompleteRegistration_Company` (cadastro completo da empresa — seção 7.5) e `CompleteRegistration_Professional` (cadastro completo do profissional) — precisam ser eventos separados no Pixel/Conversions API, não um evento genérico compartilhado
+- [x] **Objetivo de campanha:** Conversão, otimizando para o evento de cadastro completo específico de cada lado (não tráfego, não engajamento)
+- [ ] Configurar os dois eventos distintos no Pixel/Conversions API já nas Fases 1 e 2 do plano de fases (seção 11) — pré-requisito para a campanha de empresa funcionar bem
+
+### Segmentação — campanha Empresa (dono de negócio)
+
+Problema comum: segmentação por interesse ("salão de beleza") tende a capturar consumidor, não dono do negócio. Combinar:
+
+- **Comportamento:** administradores de Página do Facebook / pequenos empresários (Behaviors > Business and Industry, conforme disponibilidade na conta)
+- **Interesses combinados:** empreendedorismo + gestão de salão + marketing para salão (interesse em gerir negócio, não só em beleza)
+- **Exclusão:** público personalizado de quem converteu no evento de cadastro profissional — excluir desse conjunto para evitar canibalização
+- **Lookalike:** assim que houver ~50-100 cadastros de empresa validados, criar público semelhante (1%) baseado neles
+- **Advantage+ Audience:** segmentação mais aberta, com o sinal de "quem é dono" reforçado pelo criativo (ver abaixo), não só por interesse manual
+- **Placements:** priorizar Feed e Stories do Instagram/Facebook; evitar Audience Network e Reels de descoberta pura
+
+### Criativos — Meta Ads
+
+**Campanha Profissional** (cadastro sempre grátis)
+
+| Variante | Título (headline) | Descrição |
+|---|---|---|
+| 1 | Vagas de beleza perto de você | Cabeleireiro, manicure, esteticista e mais. Sem custo pra se candidatar. |
+| 2 | Seu próximo emprego de beleza está aqui | Cadastro 100% grátis. Candidate-se em 1 clique. |
+| 3 | Trabalhe perto de casa. Cadastre-se grátis | Veja vagas por perto e monte seu perfil profissional online. |
+
+Texto principal (sugestão): "Cansou de esperar indicação? Veja vagas de beleza perto de você e se candidate em 1 clique. Cadastro 100% grátis, sempre."
+
+**Campanha Empresa** (dono de salão, esmalteria, clínica) — foco em gestão, não em consumo de beleza
+
+| Variante | Título (headline) | Descrição |
+|---|---|---|
+| 1 | Ache o profissional certo pro seu salão | Publique sua vaga grátis por 7 dias. Sem cartão de crédito. |
+| 2 | Cansado(a) de procurar no Instagram? | Candidatos qualificados perto do seu negócio, direto na plataforma. |
+| 3 | Menos rotatividade, mais candidatos qualificados | Feito para donos(as) de salão, esmalteria e clínica de estética. |
+
+Texto principal (sugestão): "Cansado de procurar profissional bom no Instagram e no boca a boca? Publique sua vaga e receba candidatos qualificados perto do seu salão. Comece grátis."
+
+- [x] Criativo da campanha Empresa deve mostrar **gestão do negócio** (dona no celular vendo candidatos, equipe, recepção), não a execução de serviços (cortar cabelo, fazer unha) — isso ajuda o algoritmo a aprender o sinal certo de "dono", não de "profissional"
+
+### Prompts de imagem (geração por IA) — Campanha Empresa
+
+1. **Dor:** "Dona de salão de beleza brasileira, 35-45 anos, expressão de leve frustração olhando o celular atrás do balcão vazio do salão, cadeiras de cabeleireiro sem clientes ao fundo, luz natural de fim de tarde, fotografia realista, estilo editorial, cores quentes"
+2. **Solução:** "Empreendedora dona de clínica de estética sorrindo enquanto olha o celular com uma lista de candidatos numa tela de app, ambiente de recepção moderno e organizado, luz natural, fotografia realista lifestyle, foco no celular na mão"
+3. **Prova social:** "Equipe pequena e diversa trabalhando em harmonia num salão de beleza moderno, dona do negócio ao centro conversando com uma nova funcionária, ambiente vibrante, fotografia editorial, luz natural, cores da marca (rosa/dourado)"
+4. **CTA direto:** "Mockup de celular mostrando uma tela de app de vagas com o texto 'Publique sua vaga grátis' sobreposto, mão de mulher empreendedora segurando o celular, fundo desfocado de salão de beleza, fotografia de produto lifestyle"
+
+- [ ] Testar A/B as 3 variantes de título por campanha e manter só a de melhor CTR/CPL após volume suficiente
+- [ ] Revisar criativos após ter dados reais de qual "dor" (variante 1) x "solução" (variante 2) converte melhor pra dono de negócio
+
+### Diagnóstico — 2 dias de campanha (achados reais)
+
+Resultado observado: 50 cadastros totais — 29 profissionais, 1 empresa (cadastro manual do fundador, não veio de anúncio), 20 incompletos.
+
+**Causa raiz identificada:**
+1. **Campanha de Empresa nunca foi ativada com verba** — explica diretamente o zero de empresas via anúncio
+2. **Divergência entre o desenho original (seção 7.5) e o que foi implementado:** o plano original assume que o anúncio já leva direto para o fluxo específico (empresa ou profissional pré-selecionado). Na implementação atual, todo tráfego cai numa landing/cadastro genérico, faz login, e **só depois** escolhe o perfil (empresa vs. profissional) — uma etapa extra de decisão que não existia no desenho original e é ponto clássico de abandono, especialmente para quem veio de um anúncio já segmentado (perde o gancho da mensagem do anúncio)
+
+**Ação corretiva:**
+- [ ] **Ativar a campanha de Empresa com verba real**, separada da campanha de Profissional (ver estrutura acima)
+- [ ] **Anúncios devem linkar direto para a URL do fluxo já pré-selecionado** (ex: `/cadastro/profissional` ou `/cadastro/empresa`), pulando a tela de escolha de perfil para tráfego pago — a tela de escolha genérica continua existindo só para quem chega organicamente
+- [ ] Adicionar instrumentação de funil (em qual tela cada cadastro abandona) para visibilidade contínua — hoje não há essa visibilidade, dificultando diagnosticar drop-off por etapa
+
+**Confirmado ao vivo (beta.carreirabeauty.com/login):** a tela de login/signup unificado (Google + código por email, sem senha) está correta e alinhada com a seção 7.6 — não é o problema em si. O problema é a posição: é a primeira tela pra qualquer tráfego, incluindo anúncios, sem diferenciação de público. **Todos os anúncios hoje linkam para a mesma URL genérica `/login`**, sem parâmetro ou rota específica por campanha — confirma a causa raiz nº 2 acima. Próximo passo prático: criar rotas ou parâmetros dedicados (ex: `/login?perfil=empresa`, `/login?perfil=profissional`) e atualizar os links de cada campanha no Meta Ads Manager para apontar para a versão certa.
 
 ---
 
