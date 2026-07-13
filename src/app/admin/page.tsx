@@ -6,20 +6,30 @@ import Link from "next/link";
 import DailySignupsChart from "./DailySignupsChart";
 
 const CHART_DAYS = 30;
+const TZ = "America/Sao_Paulo";
+
+// Formata uma data (UTC ou qualquer offset) como YYYY-MM-DD no horário de São Paulo
+function toSaoPauloDay(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(date);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
 
 function bucketByDay(dates: string[], days: number): { date: string; count: number }[] {
   const buckets = new Map<string, number>();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayKey = toSaoPauloDay(new Date());
+  const today = new Date(`${todayKey}T00:00:00-03:00`);
 
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    buckets.set(d.toISOString().slice(0, 10), 0);
+    buckets.set(toSaoPauloDay(d), 0);
   }
 
   for (const iso of dates) {
-    const day = iso.slice(0, 10);
+    const day = toSaoPauloDay(new Date(iso));
     if (buckets.has(day)) buckets.set(day, (buckets.get(day) ?? 0) + 1);
   }
 
