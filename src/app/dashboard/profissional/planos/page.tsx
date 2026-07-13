@@ -15,10 +15,13 @@ export default async function PlanosProfissionalPage() {
   if (!user) redirect("/login");
 
   const { data: professional } = await supabase
-    .from("professionals").select("plano").eq("user_id", user.id).maybeSingle();
+    .from("professionals").select("id, plano").eq("user_id", user.id).maybeSingle();
   if (!professional) redirect("/onboarding/tipo");
 
   const planoAtual = (professional.plano ?? "gratis") as PlanoProfissional;
+
+  // Tracking interno — permite cruzar quem viu conteúdo PRO com quem chegou aqui
+  await supabase.from("plano_views").insert({ professional_id: professional.id });
 
   return (
     <div>

@@ -21,6 +21,9 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await supabase
     .from("profiles").select("email").eq("id", user.id).single();
 
+  // Tracking interno — fecha o funil (conteúdo PRO -> planos -> clique em assinar)
+  await supabase.from("assinar_clicks").insert({ user_id: user.id, plano_key: planoKey });
+
   // Usa o init_point do plano diretamente — MP gerencia o checkout
   const url = new URL("https://www.mercadopago.com.br/subscriptions/checkout");
   url.searchParams.set("preapproval_plan_id", planId);
