@@ -46,7 +46,7 @@ export default async function DashboardProfissionalPage() {
 
   const funcoes: string[] = professional.funcoes ?? [];
 
-  const [{ data: allJobs }, { data: applications }] = await Promise.all([
+  const [{ data: allJobs }, { data: applications }, { data: conteudos }] = await Promise.all([
     supabase
       .from("jobs")
       .select("id, titulo, funcao, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, cidade, estado, logo_url)")
@@ -57,6 +57,12 @@ export default async function DashboardProfissionalPage() {
       .select("job_id, criado_em, jobs(titulo, funcao, funcao_outro, slug, companies(nome_estabelecimento, logo_url))")
       .eq("professional_id", professional.id)
       .order("criado_em", { ascending: false }),
+    supabase
+      .from("conteudos")
+      .select("titulo, slug, pro")
+      .eq("ativo", true)
+      .order("ordem", { ascending: true })
+      .limit(3),
   ]);
 
   const appliedJobIds = new Set((applications ?? []).map((a) => a.job_id));
@@ -127,6 +133,38 @@ export default async function DashboardProfissionalPage() {
               Falta: {faltando.join(", ")}.
             </p>
           </Link>
+        )}
+
+        {/* Conteúdo — chamada pra aba de conteúdo, com as headlines mais recentes */}
+        {(conteudos?.length ?? 0) > 0 && (
+          <div className="card card-xl" style={{ padding: 18, marginBottom: 20 }}>
+            <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", marginBottom: 12 }}>
+              📚 Conteúdo pra você crescer
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {conteudos!.map((c) => (
+                <Link key={c.slug} href={`/dashboard/profissional/conteudo/${c.slug}`} style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+                  textDecoration: "none", background: "var(--surface-sunken)",
+                  borderRadius: "var(--radius-md)", padding: "10px 14px",
+                }}>
+                  <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
+                    {c.titulo}
+                  </span>
+                  {c.pro ? (
+                    <span className="tag" style={{ background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)", flexShrink: 0 }}>PRO</span>
+                  ) : (
+                    <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+                  )}
+                </Link>
+              ))}
+            </div>
+            <Link href="/dashboard/profissional/conteudo" style={{
+              display: "block", textAlign: "center", marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", textDecoration: "none",
+            }}>
+              Ver todos os conteúdos →
+            </Link>
+          </div>
         )}
 
         {/* Stats — só aparece quando há algo pra mostrar (placar zerado desanima) */}
