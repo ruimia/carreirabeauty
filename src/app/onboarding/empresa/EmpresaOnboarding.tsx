@@ -114,6 +114,13 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
     finally { setLoading(false); }
   }
 
+  async function handleSemCnpj() {
+    setLoading(true); setError("");
+    try { await upsertCompany({ cnpj: null, nome_estabelecimento: nomeEstabelecimento || "" }); setStep(2); }
+    catch { setError("Erro ao salvar. Tente novamente."); }
+    finally { setLoading(false); }
+  }
+
   async function handleLogoInstagram() {
     setLoading(true); setError("");
     try {
@@ -194,6 +201,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
           style={{ ...inputStyle, fontSize: 20, letterSpacing: "0.08em", textAlign: "center" }} />
         {errBox}
         {btn("Consultar CNPJ", handleCnpj, cnpj.replace(/\D/g, "").length !== 14)}
+        {btn("Não tenho CNPJ agora", handleSemCnpj, false, true)}
       </div>
     </StepShell>
   );

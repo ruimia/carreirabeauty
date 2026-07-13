@@ -74,7 +74,7 @@ create policy "Usuário vê e edita apenas o próprio perfil"
 create table companies (
   id                     uuid primary key default uuid_generate_v4(),
   user_id                uuid not null unique references profiles(id) on delete cascade,
-  cnpj                   text not null unique,
+  cnpj                   text unique,
   nome_estabelecimento   text not null,
   responsavel            text not null default '',
   telefone               text not null default '',
