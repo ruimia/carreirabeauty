@@ -70,6 +70,7 @@ export default async function PlanosProfissionalPage() {
                     <Feature text="10 candidaturas por mês" ok />
                     <Feature text="Página pública indexada no Google" ok />
                     <Feature text="Destaque nas buscas" ok={false} />
+                    <Feature text="Acesso exclusivo a conteúdos PRO" ok={false} />
                   </>
                 ) : (
                   <>
@@ -77,6 +78,7 @@ export default async function PlanosProfissionalPage() {
                     <Feature text="Candidaturas ilimitadas" ok />
                     <Feature text="Perfil em destaque nas buscas" ok />
                     <Feature text="Selo Pro no perfil" ok />
+                    <Feature text="Acesso exclusivo a conteúdos PRO" ok />
                   </>
                 )}
 
