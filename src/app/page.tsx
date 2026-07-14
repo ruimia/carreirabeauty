@@ -55,10 +55,10 @@ export default async function Home() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
-                  🏪 Quero anunciar minha vaga!
+                  🏪 Anunciar vaga grátis
                 </Link>
                 <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
-                  Anuncie sua primeira vaga GRÁTIS.
+                  Sem cartão, sem prazo — publique já.
                 </p>
               </div>
             </div>
