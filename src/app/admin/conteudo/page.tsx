@@ -12,6 +12,7 @@ export default async function AdminConteudoPage() {
     { count: totalPlanoViews },
     { data: planoViews },
     { count: cliquesProfissionalPro },
+    { data: assinarClicks },
     { count: profissionaisPro },
   ] = await Promise.all([
     supabase.from("conteudos").select("id, titulo, pro, ativo, ordem").order("ordem", { ascending: true }),
@@ -19,8 +20,11 @@ export default async function AdminConteudoPage() {
     supabase.from("plano_views").select("*", { count: "exact", head: true }),
     supabase.from("plano_views").select("professional_id"),
     supabase.from("assinar_clicks").select("*", { count: "exact", head: true }).eq("plano_key", "profissional_pro"),
+    supabase.from("assinar_clicks").select("user_id").eq("plano_key", "profissional_pro"),
     supabase.from("professionals").select("*", { count: "exact", head: true }).eq("plano", "pro"),
   ]);
+
+  const pessoasQueClicaramAssinar = new Set((assinarClicks ?? []).map((c) => c.user_id)).size;
 
   const viewsPorConteudo = new Map<string, { total: number; unicos: Set<string> }>();
   for (const v of views ?? []) {
@@ -60,9 +64,13 @@ export default async function AdminConteudoPage() {
           <p className="text-3xl font-bold">{profissionaisUnicos}</p>
           <p className="text-sm mt-1 opacity-70">Profissionais únicos</p>
         </div>
-        <div className="rounded-xl p-4 bg-purple-50 text-purple-600 col-span-2 sm:col-span-2">
+        <div className="rounded-xl p-4 bg-purple-50 text-purple-600">
           <p className="text-3xl font-bold">{totalPlanoViews ?? 0}</p>
           <p className="text-sm mt-1 opacity-70">Visitas à página de Planos</p>
+        </div>
+        <div className="rounded-xl p-4 bg-rose-50 text-rose-600">
+          <p className="text-3xl font-bold">{pessoasQueClicaramAssinar}</p>
+          <p className="text-sm mt-1 opacity-70">Pessoas que clicaram em Assinar</p>
         </div>
       </div>
 
