@@ -47,10 +47,13 @@ export default async function Home() {
             <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
-                  👤 Quero me cadastrar!
+                  👤 Cadastro Profissional Grátis
                 </Link>
                 <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
-                  Cadastre-se GRÁTIS para receber vagas na sua área.
+                  Receba vagas na sua área
+                </p>
+                <p style={{ fontSize: 11, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
+                  Manicure · Cabeleireira · Esteticista · Massoterapeuta · Recepcionista
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -59,6 +62,9 @@ export default async function Home() {
                 </Link>
                 <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
                   Sem cartão, sem prazo — publique já.
+                </p>
+                <p style={{ fontSize: 11, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
+                  Salão · Clínica de estética · Spa · Studio Sobrancelha
                 </p>
               </div>
             </div>
