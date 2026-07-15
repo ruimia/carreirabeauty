@@ -206,7 +206,7 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
 
           <div style={{ padding: "16px 12px", borderTop: "1px solid var(--border-default)", display: "flex", flexDirection: "column", gap: 2 }}>
             <a
-              href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
+              href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
               target="_blank"
               rel="noopener noreferrer"
               className="ds-nav-item"

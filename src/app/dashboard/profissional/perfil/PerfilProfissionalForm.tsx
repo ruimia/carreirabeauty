@@ -673,7 +673,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
             padding: "8px 20px", marginBottom: 12,
           }}>
             <a
-              href="https://wa.me/5511987049210?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
+              href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
               target="_blank"
               rel="noopener noreferrer"
               style={{

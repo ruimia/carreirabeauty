@@ -101,6 +101,21 @@ export default async function PlanosEmpresaPage() {
           Pagamentos processados via Mercado Pago. Cancele a qualquer momento.
         </p>
 
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+          <a
+            href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+tenho+d%C3%BAvidas+sobre+os+planos+do+CarreiraBeauty"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              color: "#1ea952", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, textDecoration: "none",
+            }}
+          >
+            <i className="ph ph-whatsapp-logo" style={{ fontSize: 18 }}></i>
+            Dúvidas? Chame no WhatsApp
+          </a>
+        </div>
+
         <style>{`@media (min-width: 860px) { .plans-grid-empresa { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
       </main>
     </div>
