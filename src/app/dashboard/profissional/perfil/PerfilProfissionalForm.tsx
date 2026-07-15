@@ -7,6 +7,8 @@ import Link from "next/link";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 import { compressImage } from "@/lib/compressImage";
+import TemplateSelector from "./visual/TemplateSelector";
+import { PerfilTemplateData } from "@/components/perfilTemplates/types";
 
 const VINCULOS: Record<string, string> = { clt: "CLT", pj: "PJ", freela: "Freela / autônomo" };
 const OUTRA = "Outro";
@@ -83,6 +85,13 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   }, {});
   const initials = nome?.split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase() ?? "?";
 
+  const templateData: PerfilTemplateData = {
+    nome, funcao: funcaoLabel, cidade, estado, fotoUrl: avatarPreview, instagram,
+    tags: [disponibilidade].filter(Boolean),
+    apresentacao: apresentacao || null, experiencia: experiencia || null,
+    disponibilidade: disponibilidade || null, tipoVinculo: VINCULOS[tipoVinculo] || tipoVinculo || null,
+    habilidades: selectedHabilidades, educacao, experienciaProf: experiencias, portfolioUrls,
+  };
   async function handleCepBlur() {
     const raw = cep.replace(/\D/g, "");
     if (raw.length !== 8) return;
@@ -258,6 +267,12 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
           </div>
         )}
 
+        {!editing && (
+          <TemplateSelector data={templateData} templateAtual={p.template_id ?? "classico"} isPro={p.plano === "pro"} />
+        )}
+
+        {editing && (
+        <>
         {/* Avatar + nome */}
         <div style={{ ...card, flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 12 }}>
           <div onClick={() => editing && fileRef.current?.click()} style={{
@@ -651,6 +666,8 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
             </>
           )}
         </div>
+        </>
+        )}
 
         {/* Conta */}
         <div style={card}>
