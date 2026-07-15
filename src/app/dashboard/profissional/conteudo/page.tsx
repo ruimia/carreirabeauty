@@ -44,7 +44,7 @@ export default async function ConteudoListaPage() {
             return (
               <Link
                 key={c.id}
-                href={bloqueado ? "/dashboard/profissional/planos" : `/dashboard/profissional/conteudo/${c.slug}`}
+                href={`/dashboard/profissional/conteudo/${c.slug}`}
                 style={{ textDecoration: "none" }}
               >
                 <div className="job-feed-card" style={{ display: "flex", alignItems: "center", gap: 14 }}>

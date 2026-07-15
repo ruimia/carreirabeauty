@@ -31,9 +31,10 @@ export default async function ConteudoViewerPage({ params }: Props) {
   if (!conteudo) notFound();
 
   const isPro = professional.plano === "pro";
-  if (conteudo.pro && !isPro) redirect("/dashboard/profissional/conteudo");
+  const locked = conteudo.pro && !isPro;
 
-  // Tracking interno — registra a view agora que o acesso foi liberado
+  // Tracking interno — registra a view mesmo pra quem só vê o preview
+  // parcial (conteúdo PRO travado), pra medir interesse real de quem é grátis
   await supabase.from("conteudo_views").insert({
     conteudo_id: conteudo.id,
     professional_id: professional.id,
@@ -46,7 +47,7 @@ export default async function ConteudoViewerPage({ params }: Props) {
           <Link href="/dashboard/profissional/conteudo" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
           <p style={{ font: "600 16px/1.3 var(--font-display)", color: "var(--text-primary)" }}>{conteudo.titulo}</p>
         </div>
-        <PdfPageViewer src={conteudo.pdf_url} />
+        <PdfPageViewer src={conteudo.pdf_url} locked={locked} />
       </main>
     </div>
   );
