@@ -5,6 +5,7 @@ export const metadata = { title: "Vagas para você" };
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import VagaExternaCard from "@/components/VagaExternaCard";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -17,6 +18,35 @@ const FUNCAO_LABEL: Record<string, string> = {
 const VINCULO_LABEL: Record<string, string> = {
   clt: "CLT", pj: "PJ", freela: "Freela", estagio: "Estágio", menor_aprendiz: "Menor aprendiz",
 };
+
+// Palavras-chave pra casar vaga agregada (Adzuna) com a função do profissional.
+// professionals.funcoes guarda o nome livre da profissão (ex: "Cabeleireiro(a)"),
+// não uma chave fixa — então detectamos a partir de qual raiz aparece no texto,
+// em vez de indexar por chave exata. Recepcionista/auxiliar entram aqui porque
+// o cache (scripts/fetch-vagas-adzuna.mjs) já garante que só guarda esses termos
+// genéricos quando o contexto de beleza foi confirmado na ingestão.
+const RAIZES_BELEZA = [
+  "cabeleir", "hair", "manicur", "pedicur", "unha", "esteticist", "estetica",
+  "maquiad", "barbeir", "barber", "massoterap", "massagem", "sobrancel",
+  "cilio", "depilad", "podolog", "recepcion", "auxiliar", "assistente",
+];
+
+function normaliza(s: string) {
+  return (s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+// \b antes do termo evita falso positivo tipo "spa" dentro de "espaços"
+function contemTermo(texto: string, termo: string) {
+  return new RegExp(`\\b${termo}`).test(texto);
+}
+
+function formatoDataRelativa(iso: string | null) {
+  if (!iso) return null;
+  const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (dias <= 0) return "hoje";
+  if (dias === 1) return "há 1 dia";
+  return `há ${dias} dias`;
+}
 
 function Avatar({ name, size = 44 }: { name: string; size?: number }) {
   const initials = name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -46,7 +76,7 @@ export default async function DashboardProfissionalPage() {
 
   const funcoes: string[] = professional.funcoes ?? [];
 
-  const [{ data: allJobs }, { data: applications }, { data: conteudos }] = await Promise.all([
+  const [{ data: allJobs }, { data: applications }, { data: conteudos }, { data: vagasExternas }] = await Promise.all([
     supabase
       .from("jobs")
       .select("id, titulo, funcao, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, cidade, estado, logo_url)")
@@ -64,7 +94,27 @@ export default async function DashboardProfissionalPage() {
       .eq("pro", false)
       .order("ordem", { ascending: true })
       .limit(2),
+    professional.cidade
+      ? supabase
+          .from("vagas_externas")
+          .select("id, titulo, empresa, cidade, estado, url, salario_min, salario_max, descricao, publicado_em")
+          .eq("cidade_busca", professional.cidade)
+          .order("publicado_em", { ascending: false })
+          .limit(30)
+      : Promise.resolve({ data: [] }),
   ]);
+
+  // Casa vaga agregada com a(s) função(ões) do profissional — mesma lógica das
+  // vagas nativas (se não tem função marcada ou marcou "outro", não filtra)
+  const palavrasFuncoes = funcoes.flatMap((f) => {
+    const fNormalizado = normaliza(f);
+    return RAIZES_BELEZA.filter((raiz) => contemTermo(fNormalizado, raiz));
+  });
+  const vagasExternasFiltradas = (vagasExternas ?? []).filter((v) => {
+    if (palavrasFuncoes.length === 0) return true;
+    const t = normaliza(v.titulo);
+    return palavrasFuncoes.some((p) => contemTermo(t, p));
+  }).slice(0, 5);
 
   const appliedJobIds = new Set((applications ?? []).map((a) => a.job_id));
 
@@ -245,6 +295,28 @@ export default async function DashboardProfissionalPage() {
                 </Link>
               );
             })}
+          </div>
+        )}
+
+        {/* Vagas de outros sites — agregadas via Adzuna, separadas das vagas nativas
+            (candidatura externa redireciona pro site de origem, não é 1-clique) */}
+        {vagasExternasFiltradas.length > 0 && (
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <p className="section-label" style={{ margin: 0 }}>Vagas de outros sites</p>
+              <a href="https://www.adzuna.com.br" target="_blank" rel="noopener noreferrer" style={{
+                display: "inline-flex", alignItems: "center", height: 23, padding: "0 8px",
+                borderRadius: "var(--radius-sm)", background: "var(--surface-sunken)",
+                color: "var(--text-tertiary)", fontSize: 10, fontWeight: 700, textDecoration: "none",
+              }}>
+                Jobs by Adzuna
+              </a>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {vagasExternasFiltradas.map((v) => (
+                <VagaExternaCard key={v.id} vaga={v} professionalId={professional.id} publicadoRelativo={formatoDataRelativa(v.publicado_em)} />
+              ))}
+            </div>
           </div>
         )}
 
