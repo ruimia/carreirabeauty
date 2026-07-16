@@ -27,7 +27,7 @@ export default async function PlanosProfissionalPage() {
   const BENEFICIOS = [
     { label: "10 candidaturas/mês", labelPro: "Candidaturas ilimitadas", gratis: true },
     { label: "Página pública no Google", labelPro: "Página pública no Google", gratis: true },
-    { label: "Destaque nas buscas", labelPro: "Destaque nas buscas", gratis: false },
+    { label: "Topo da lista do salão", labelPro: "Topo da lista do salão", gratis: false },
     { label: "Conteúdos exclusivos", labelPro: "Conteúdos exclusivos", gratis: false },
     { label: "Visuais de perfil PRO", labelPro: "Visuais de perfil PRO", gratis: false },
   ];
@@ -35,11 +35,11 @@ export default async function PlanosProfissionalPage() {
   return (
     <div>
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "20px var(--space-page-x) 40px" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 21, color: "var(--text-primary)", marginBottom: 3 }}>
-          Destaque seu perfil
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 21, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.25 }}>
+          Mais chances de conseguir a vaga certa
         </h1>
-        <p style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.4, marginBottom: 18 }}>
-          Apareça primeiro nas buscas de empresas da sua região.
+        <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.45, marginBottom: 18 }}>
+          Com o PRO, o salão vê seu perfil <strong style={{ color: "var(--text-primary)" }}>antes de todo mundo</strong> — e você se candidata a quantas vagas quiser.
         </p>
 
         {/* 2 colunas mesmo no mobile — a pessoa compara os planos sem precisar rolar */}
@@ -104,11 +104,24 @@ export default async function PlanosProfissionalPage() {
                     Fazer downgrade
                   </div>
                 ) : (
-                  <AssinarButton planoKey="profissional_pro" label="Assinar" destaque />
+                  <AssinarButton planoKey="profissional_pro" label="Quero ser PRO" destaque />
                 )}
               </div>
             );
           })}
+        </div>
+
+        {/* Mecanismo: explica POR QUE o PRO aumenta a chance de conseguir vaga */}
+        <div style={{
+          background: "var(--brand-magenta-50)", border: "1px solid var(--brand-magenta-100)",
+          borderRadius: "var(--radius-lg)", padding: "14px 14px 10px", marginTop: 14,
+        }}>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 13, color: "var(--color-brand-primary)", marginBottom: 10 }}>
+            Por que o PRO ajuda a conseguir vaga?
+          </p>
+          <Motivo icon="🔝" text="Seu perfil aparece no topo da lista de candidatos que o salão vê — antes de todo mundo." />
+          <Motivo icon="♾️" text="Sem limite de candidaturas. Quanto mais vagas você tenta, mais chances você tem." />
+          <Motivo icon="✨" text="Perfil com visual profissional e conteúdos que ensinam a se destacar." />
         </div>
 
         <p style={{ fontSize: 11, color: "var(--text-tertiary)", textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
@@ -130,6 +143,15 @@ export default async function PlanosProfissionalPage() {
           </a>
         </div>
       </main>
+    </div>
+  );
+}
+
+function Motivo({ icon, text }: { icon: string; text: string }) {
+  return (
+    <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
+      <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1.4 }}>{icon}</span>
+      <p style={{ fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.45 }}>{text}</p>
     </div>
   );
 }

@@ -28,6 +28,7 @@ interface Props {
       experiencia_prof: { empresa: string; cargo: string; periodo: string }[] | null;
       portfolio_urls: string[] | null;
       instagram: string | null;
+      plano: string | null;
     };
   };
   funcaoVaga: string;
@@ -36,6 +37,7 @@ interface Props {
 export default function CandidatoCard({ app, funcaoVaga }: Props) {
   const [open, setOpen] = useState(false);
   const p = app.professional;
+  const isPro = p.plano === "pro";
 
   const initials = p.nome?.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase() ?? "?";
   const whatsapp = p.telefone?.replace(/\D/g, "");
@@ -68,7 +70,8 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
   return (
     <div style={{
       background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
-      border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+      border: isPro ? "1.5px solid var(--color-brand-primary)" : "1px solid var(--border-default)",
+      boxShadow: isPro ? "var(--shadow-sm)" : "var(--shadow-xs)",
       overflow: "hidden",
     }}>
       {/* Header */}
@@ -90,9 +93,20 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
             )
           }
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>
-              {p.nome}
-            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>
+                {p.nome}
+              </p>
+              {isPro && (
+                <span style={{
+                  background: "var(--color-brand-primary)", color: "#fff",
+                  fontSize: 9, fontWeight: 800, letterSpacing: "0.06em",
+                  padding: "2px 7px", borderRadius: "var(--radius-pill)",
+                }}>
+                  ✦ PRO
+                </span>
+              )}
+            </div>
             <p style={{ fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", marginTop: 1 }}>
               {funcao}
             </p>

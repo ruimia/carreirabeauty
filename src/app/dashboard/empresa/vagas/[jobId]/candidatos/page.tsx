@@ -27,14 +27,25 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
       id, nome, telefone, funcoes, funcao, funcao_outro,
       cidade, estado, experiencia, disponibilidade, tipo_vinculo,
       foto_perfil_url, slug, educacao_basica, habilidades,
-      educacao, experiencia_prof, portfolio_urls, instagram
+      educacao, experiencia_prof, portfolio_urls, instagram, plano
     )`)
     .eq("job_id", jobId)
     .order("criado_em", { ascending: false });
 
+  // Destaque do PRO: candidato PRO aparece no topo da lista da empresa.
+  // É o benefício que a tela de planos vende — ordenar por data só não o
+  // entregava. Dentro de cada grupo, mantém a ordem por data (mais recente
+  // primeiro), que é o comportamento que a empresa já conhecia.
+  const ordenadas = [...(applications ?? [])].sort((a, b) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const proA = (a.professionals as any)?.plano === "pro" ? 1 : 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const proB = (b.professionals as any)?.plano === "pro" ? 1 : 0;
+    return proB - proA;
+  });
 
   const funcaoVaga = job.titulo || job.funcao || "Vaga";
-  const count = applications?.length ?? 0;
+  const count = ordenadas.length;
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--surface-page)" }}>
@@ -74,7 +85,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }} className="candidatos-grid">
-            {applications!.map((app) => {
+            {ordenadas.map((app) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const p = app.professionals as any;
               if (!p) return null;
