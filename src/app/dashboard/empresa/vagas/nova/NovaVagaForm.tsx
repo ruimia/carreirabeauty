@@ -46,7 +46,7 @@ const MODELOS = [
 ];
 
 interface Props {
-  company: { id: string; endereco: string; cidade: string; estado: string; cep: string; logo_url: string | null };
+  company: { id: string; endereco: string; bairro: string; cidade: string; estado: string; cep: string; logo_url: string | null };
   profissoes: string[];
 }
 
@@ -70,6 +70,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
   const temComissao = modeloRemuneracao === "comissao" || modeloRemuneracao === "fixo_comissao";
   const [cep, setCep] = useState(company.cep ?? "");
   const [endereco, setEndereco] = useState(company.endereco ?? "");
+  const [bairro, setBairro] = useState(company.bairro ?? "");
   const [cidade, setCidade] = useState(company.cidade ?? "");
   const [estado, setEstado] = useState(company.estado ?? "");
   const [fotoPreview, setFotoPreview] = useState<string | null>(company.logo_url ?? null);
@@ -83,7 +84,8 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
     setCepLoading(true);
     const data = await fetchCep(raw);
     if (data) {
-      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setEndereco(data.street ?? "");
+      setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
     }
@@ -117,6 +119,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
         comissao: temComissao ? (comissao === "Outro" ? comissaoOutro : comissao) : "",
         cep,
         endereco,
+        bairro,
         cidade,
         estado,
         fotoUrl,
@@ -311,6 +314,7 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <input required value={endereco} onChange={(e) => setEndereco(e.target.value)}
                   placeholder="Logradouro e número" style={inp} />
+                <input value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder="Bairro" style={inp} />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 8 }}>
                   <input required value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
                   <input required value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2}

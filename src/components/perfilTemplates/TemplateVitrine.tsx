@@ -54,7 +54,7 @@ export default function TemplateVitrine({ p, preview }: PerfilTemplateProps) {
         <p style={{ fontSize: 13, fontWeight: 800, color: "#DC00DC", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>
           {p.funcao}
         </p>
-        <p style={{ fontSize: 13, color: "#9b7f96", fontWeight: 600 }}>📍 {p.cidade} · {p.estado}</p>
+        <p style={{ fontSize: 13, color: "#9b7f96", fontWeight: 600 }}>📍 {[p.bairro, p.cidade].filter(Boolean).join(", ")} · {p.estado}</p>
 
         {/* Contatos — o "cartão de visitas" da vitrine */}
         {(p.whatsapp || p.instagram || p.email) && (

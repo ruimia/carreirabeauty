@@ -14,7 +14,7 @@ export default async function EditarVagaPage({ params }: { params: Promise<{ job
 
   const [{ data: job }, { data: company }, profissoes] = await Promise.all([
     supabase.from("jobs").select("*").eq("id", jobId).single(),
-    supabase.from("companies").select("id, endereco, cidade, estado, cep, logo_url").eq("user_id", user.id).single(),
+    supabase.from("companies").select("id, endereco, bairro, cidade, estado, cep, logo_url").eq("user_id", user.id).single(),
     getProfissoes(),
   ]);
 

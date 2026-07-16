@@ -15,6 +15,7 @@ interface Props {
       funcoes: string[] | null;
       funcao: string | null;
       funcao_outro: string | null;
+      bairro: string | null;
       cidade: string | null;
       estado: string | null;
       experiencia: string | null;
@@ -112,7 +113,7 @@ export default function CandidatoCard({ app, funcaoVaga }: Props) {
             </p>
             {p.cidade && (
               <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
-                <i className="ph ph-map-pin"></i> {p.cidade}{p.estado ? ` · ${p.estado}` : ""}
+                <i className="ph ph-map-pin"></i> {[p.bairro, p.cidade].filter(Boolean).join(", ")}{p.estado ? ` · ${p.estado}` : ""}
               </p>
             )}
           </div>

@@ -31,6 +31,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
   const [responsavel, setResponsavel] = useState(company.responsavel ?? "");
   const [telefone, setTelefone] = useState(company.telefone ?? "");
   const [endereco, setEndereco] = useState(company.endereco ?? "");
+  const [bairro, setBairro] = useState(company.bairro ?? "");
   const [cidade, setCidade] = useState(company.cidade ?? "");
   const [estado, setEstado] = useState(company.estado ?? "");
   const [cep, setCep] = useState(company.cep ?? "");
@@ -42,7 +43,8 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
     setCepLoading(true);
     const data = await fetchCep(raw);
     if (data) {
-      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setEndereco(data.street ?? "");
+      setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
     }
@@ -74,7 +76,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
         slug = existing ? `${base}-${randomSuffix()}` : base;
       }
       const { error: upErr } = await supabase.from("companies").update({
-        nome_estabelecimento: nome, responsavel, telefone, endereco, cidade, estado, cep: cep.replace(/\D/g, ""), slug,
+        nome_estabelecimento: nome, responsavel, telefone, endereco, bairro, cidade, estado, cep: cep.replace(/\D/g, ""), slug,
         categoria_negocio: categoria || null,
         categoria_outro: categoria === OUTRA_CATEGORIA ? categoriaOutro || null : null,
         faixa_funcionarios: faixa || null,
@@ -91,7 +93,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
 
   function handleCancel() {
     setNome(company.nome_estabelecimento ?? ""); setResponsavel(company.responsavel ?? "");
-    setTelefone(company.telefone ?? ""); setEndereco(company.endereco ?? "");
+    setTelefone(company.telefone ?? ""); setEndereco(company.endereco ?? ""); setBairro(company.bairro ?? "");
     setCidade(company.cidade ?? ""); setEstado(company.estado ?? ""); setCep(company.cep ?? "");
     setCategoria(company.categoria_negocio ?? ""); setFaixa(company.faixa_funcionarios ?? "");
     setInstagram(company.instagram ?? ""); setLogoPreview(company.logo_url ?? null);
@@ -162,7 +164,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
             </div>
             <div>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)" }}>{nome || "—"}</p>
-              <p style={{ fontSize: 13, color: "var(--text-tertiary)", marginTop: 2 }}>{cidade} · {estado}</p>
+              <p style={{ fontSize: 13, color: "var(--text-tertiary)", marginTop: 2 }}>{[bairro, cidade].filter(Boolean).join(", ")} · {estado}</p>
               {editing && (
                 <button onClick={() => fileRef.current?.click()} style={{
                   marginTop: 6, fontSize: 13, color: "var(--color-brand-primary)", fontWeight: 600,
@@ -216,12 +218,13 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
             {editing ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <input value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Logradouro e número" style={inp} />
+                <input value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder="Bairro" style={inp} />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 8 }}>
                   <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
                   <input value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2} style={{ ...inp, textTransform: "uppercase", textAlign: "center" }} />
                 </div>
               </div>
-            ) : <V>{[endereco, cidade, estado].filter(Boolean).join(", ") || "—"}</V>}
+            ) : <V>{[endereco, bairro, cidade, estado].filter(Boolean).join(", ") || "—"}</V>}
           </F>
           <F label="Tipo de estabelecimento" editing={editing}>
             {editing ? (

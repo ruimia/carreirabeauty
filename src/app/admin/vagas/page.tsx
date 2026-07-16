@@ -13,7 +13,7 @@ export default async function AdminVagasPage() {
     .select(`
       id, titulo, funcao, funcao_outro, status, motivo_rejeicao, criado_em,
       descricao, tipo_vinculo, modelo_remuneracao, faixa_salarial, comissao,
-      endereco, cidade, estado, cep, foto_url,
+      endereco, bairro, cidade, estado, cep, foto_url,
       applications(count), companies(nome_estabelecimento, cidade)
     `)
     .order("criado_em", { ascending: false });
@@ -115,7 +115,7 @@ export default async function AdminVagasPage() {
             </div>
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase">Endereço</p>
-              <p className="text-gray-700">{[v.endereco, v.cidade, v.estado, v.cep].filter(Boolean).join(", ") || "—"}</p>
+              <p className="text-gray-700">{[v.endereco, v.bairro, v.cidade, v.estado, v.cep].filter(Boolean).join(", ") || "—"}</p>
             </div>
           </div>
         </details>

@@ -12,7 +12,7 @@ export default async function NovaVagaPage() {
   if (!user) redirect("/login");
 
   const [{ data: company, error: companyErr }, profissoes] = await Promise.all([
-    supabase.from("companies").select("id, endereco, cidade, estado, cep, logo_url").eq("user_id", user.id).maybeSingle(),
+    supabase.from("companies").select("id, endereco, bairro, cidade, estado, cep, logo_url").eq("user_id", user.id).maybeSingle(),
     getProfissoes().catch(() => [] as string[]),
   ]);
 

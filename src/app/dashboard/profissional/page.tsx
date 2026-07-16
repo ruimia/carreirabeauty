@@ -79,7 +79,7 @@ export default async function DashboardProfissionalPage() {
   const [{ data: allJobs }, { data: applications }, { data: conteudos }, { data: vagasExternas }] = await Promise.all([
     supabase
       .from("jobs")
-      .select("id, titulo, funcao, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, cidade, estado, logo_url)")
+      .select("id, titulo, funcao, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url)")
       .eq("status", "ativa")
       .order("criado_em", { ascending: false }),
     supabase
@@ -288,7 +288,7 @@ export default async function DashboardProfissionalPage() {
                         <div style={{ minWidth: 0 }}>
                           <p style={{ font: "500 11px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 3 }}>
                             {company?.nome_estabelecimento}
-                            {company?.cidade ? ` · ${company.cidade}, ${company.estado}` : ""}
+                            {company?.cidade ? ` · ${[company.bairro, company.cidade].filter(Boolean).join(", ")} - ${company.estado}` : ""}
                           </p>
                           <p style={{ font: "600 17px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
                             {job.titulo || title}

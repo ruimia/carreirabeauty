@@ -46,6 +46,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
   }
   const [cep, setCep] = useState(initialData.cep ?? "");
   const [endereco, setEndereco] = useState(initialData.endereco ?? "");
+  const [bairro, setBairro] = useState(initialData.bairro ?? "");
   const [cidade, setCidade] = useState(initialData.cidade ?? "");
   const [estado, setEstado] = useState(initialData.estado ?? "");
   const [cepLoading, setCepLoading] = useState(false);
@@ -56,7 +57,8 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
     setCepLoading(true);
     const data = await fetchCep(raw);
     if (data) {
-      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setEndereco(data.street ?? "");
+      setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
     }
@@ -235,6 +237,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
           {cepLoading && <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-tertiary)" }}>buscando…</span>}
         </div>
         <input placeholder="Logradouro e número" value={endereco} onChange={(e) => setEndereco(e.target.value)} style={inputStyle} />
+        <input placeholder="Bairro" value={bairro} onChange={(e) => setBairro(e.target.value)} style={inputStyle} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 10 }}>
           <input placeholder="Cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} style={inputStyle} />
           <input placeholder="UF" value={estado} maxLength={2} onChange={(e) => setEstado(e.target.value.toUpperCase())}
@@ -242,7 +245,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
         </div>
         {errBox}
         <PrimaryBtn label="Continuar"
-          onClick={() => go({ cep: cep.replace(/\D/g, ""), endereco, localizacao: `${cidade} - ${estado}`, cidade, estado }, 4)}
+          onClick={() => go({ cep: cep.replace(/\D/g, ""), endereco, bairro, localizacao: `${cidade} - ${estado}`, cidade, estado }, 4)}
           disabled={!cep.replace(/\D/g, "") || !endereco.trim() || !cidade.trim() || !estado.trim()} />
       </div>
     </StepShell>

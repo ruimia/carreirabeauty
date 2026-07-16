@@ -24,7 +24,7 @@ export default function TemplateClassico({ p, preview }: PerfilTemplateProps) {
 
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", marginBottom: 2 }}>{p.nome}</h1>
           <p style={{ fontSize: 15, fontWeight: 600, color: "var(--color-brand-primary)", marginBottom: 6 }}>{p.funcao}</p>
-          <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>📍 {p.cidade} · {p.estado}</p>
+          <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>📍 {[p.bairro, p.cidade].filter(Boolean).join(", ")} · {p.estado}</p>
 
           {p.tags.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>

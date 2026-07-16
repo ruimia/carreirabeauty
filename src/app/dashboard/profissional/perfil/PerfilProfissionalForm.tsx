@@ -65,6 +65,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   }
   const [cep, setCep] = useState(p.cep ?? "");
   const [endereco, setEndereco] = useState(p.endereco ?? "");
+  const [bairro, setBairro] = useState(p.bairro ?? "");
   const [cidade, setCidade] = useState(p.cidade ?? "");
   const [estado, setEstado] = useState(p.estado ?? "");
   const [cepLoading, setCepLoading] = useState(false);
@@ -109,7 +110,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   const initials = nome?.split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase() ?? "?";
 
   const templateData: PerfilTemplateData = {
-    nome, funcao: funcaoLabel, cidade, estado, fotoUrl: avatarPreview, instagram,
+    nome, funcao: funcaoLabel, bairro, cidade, estado, fotoUrl: avatarPreview, instagram,
     whatsapp: telefone || null, email: email || null,
     tags: experiencia ? [`${experiencia} de experiência`] : [],
     apresentacao: apresentacao || null, experiencia: experiencia || null,
@@ -122,7 +123,8 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
     setCepLoading(true);
     const data = await fetchCep(raw);
     if (data) {
-      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setEndereco(data.street ?? "");
+      setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
     }
@@ -187,7 +189,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
       const { error: upErr } = await supabase.from("professionals").update({
         nome, telefone, funcoes, funcao_outro: funcoes.includes(OUTRA) ? funcaoOutro : null,
-        cep: cep.replace(/\D/g, ""), endereco,
+        cep: cep.replace(/\D/g, ""), endereco, bairro,
         cidade, estado, localizacao: `${cidade} - ${estado}`,
         educacao_basica: apresentacao,
         experiencia, disponibilidade,
@@ -214,7 +216,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   function handleCancel() {
     setNome(p.nome ?? ""); setTelefone(p.telefone ?? "");
     setFuncoes(p.funcoes?.length ? p.funcoes : []); setFuncaoOutro(p.funcao_outro ?? "");
-    setCep(p.cep ?? ""); setEndereco(p.endereco ?? ""); setCidade(p.cidade ?? ""); setEstado(p.estado ?? "");
+    setCep(p.cep ?? ""); setEndereco(p.endereco ?? ""); setBairro(p.bairro ?? ""); setCidade(p.cidade ?? ""); setEstado(p.estado ?? "");
     setApresentacao(p.educacao_basica ?? "");
     setExperiencia(p.experiencia ?? ""); setDisponibilidade(p.disponibilidade ?? "");
     setTipoVinculo(p.tipo_vinculo ?? "");
@@ -533,13 +535,14 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
             {editing ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <input value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Logradouro e número" style={inp} />
+                <input value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder="Bairro" style={inp} />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 8 }}>
                   <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" style={inp} />
                   <input value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2}
                     style={{ ...inp, textTransform: "uppercase", textAlign: "center" }} />
                 </div>
               </div>
-            ) : <V>{[endereco, cidade, estado].filter(Boolean).join(", ") || "—"}</V>}
+            ) : <V>{[endereco, bairro, cidade, estado].filter(Boolean).join(", ") || "—"}</V>}
           </F>
           <F label="Disponibilidade" editing={editing}>
             {editing ? (

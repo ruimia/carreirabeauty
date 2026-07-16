@@ -1,6 +1,7 @@
 export interface PerfilTemplateData {
   nome: string;
   funcao: string;
+  bairro: string;
   cidade: string;
   estado: string;
   fotoUrl: string | null;

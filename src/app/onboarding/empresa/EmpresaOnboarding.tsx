@@ -48,6 +48,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
   const [cnpjData, setCnpjData] = useState<Record<string, string> | null>(null);
   const [nomeEstabelecimento, setNomeEstabelecimento] = useState(initialData.nome_estabelecimento ?? "");
   const [endereco, setEndereco] = useState(initialData.endereco ?? "");
+  const [bairro, setBairro] = useState(initialData.bairro ?? "");
   const [cidade, setCidade] = useState(initialData.cidade ?? "");
   const [estado, setEstado] = useState(initialData.estado ?? "");
   const [cep, setCep] = useState(initialData.cep ?? "");
@@ -59,7 +60,8 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
     setCepLoading(true);
     const data = await fetchCep(raw);
     if (data) {
-      setEndereco([data.street, data.neighborhood].filter(Boolean).join(", "));
+      setEndereco(data.street ?? "");
+      setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
     }
@@ -96,7 +98,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
       setCnpjData(data);
       const nome = data.nome_fantasia || data.razao_social || "";
       const end = [data.logradouro, data.numero, data.complemento].filter(Boolean).join(", ");
-      setNomeEstabelecimento(nome); setEndereco(end);
+      setNomeEstabelecimento(nome); setEndereco(end); setBairro(data.bairro || "");
       setCidade(data.municipio || ""); setEstado(data.uf || "");
       setCep((data.cep || "").replace(/\D/g, ""));
       await upsertCompany({ cnpj: raw, nome_estabelecimento: nome });
@@ -224,6 +226,9 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
         <label style={labelStyle}>Endereço (logradouro e número)
           <input value={endereco} onChange={(e) => setEndereco(e.target.value)} style={inputStyle} />
         </label>
+        <label style={labelStyle}>Bairro
+          <input value={bairro} onChange={(e) => setBairro(e.target.value)} style={inputStyle} />
+        </label>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 10 }}>
           <label style={labelStyle}>Cidade
             <input value={cidade} onChange={(e) => setCidade(e.target.value)} style={inputStyle} />
@@ -234,7 +239,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
           </label>
         </div>
         {errBox}
-        {btn("Continuar", () => save({ nome_estabelecimento: nomeEstabelecimento, endereco, cidade, estado, cep: cep.replace(/\D/g, "") }, 3),
+        {btn("Continuar", () => save({ nome_estabelecimento: nomeEstabelecimento, endereco, bairro, cidade, estado, cep: cep.replace(/\D/g, "") }, 3),
           !nomeEstabelecimento || !endereco || !cidade || !estado)}
       </div>
     </StepShell>

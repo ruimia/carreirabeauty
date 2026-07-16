@@ -56,7 +56,7 @@ export default function TemplateElegante({ p, preview }: PerfilTemplateProps) {
         <p style={{ fontSize: 12, fontWeight: 600, color: OURO, textTransform: "uppercase", letterSpacing: "0.28em", margin: "14px 0 8px", fontFamily: "var(--font-body)" }}>
           {p.funcao}
         </p>
-        <p style={{ fontSize: 13, color: "#8d8694", letterSpacing: "0.06em", fontStyle: "italic" }}>{p.cidade} — {p.estado}</p>
+        <p style={{ fontSize: 13, color: "#8d8694", letterSpacing: "0.06em", fontStyle: "italic" }}>{[p.bairro, p.cidade].filter(Boolean).join(", ")} — {p.estado}</p>
 
         {/* Contatos */}
         {(p.whatsapp || p.instagram || p.email) && (

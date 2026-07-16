@@ -25,7 +25,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
     .from("applications")
     .select(`id, criado_em, mensagem, professionals(
       id, nome, telefone, funcoes, funcao, funcao_outro,
-      cidade, estado, experiencia, disponibilidade, tipo_vinculo,
+      bairro, cidade, estado, experiencia, disponibilidade, tipo_vinculo,
       foto_perfil_url, slug, educacao_basica, habilidades,
       educacao, experiencia_prof, portfolio_urls, instagram, plano
     )`)

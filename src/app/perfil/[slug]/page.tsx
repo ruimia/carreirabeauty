@@ -71,6 +71,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
   const templateData: PerfilTemplateData = {
     nome: p.nome,
     funcao,
+    bairro: p.bairro,
     cidade: p.cidade,
     estado: p.estado,
     fotoUrl: p.foto_perfil_url,

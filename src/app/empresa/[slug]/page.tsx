@@ -80,7 +80,7 @@ export default async function EmpresaPage({ params }: Props) {
             </h1>
             {(company.cidade || company.estado) && (
               <p style={{ fontSize: 14, color: "var(--text-tertiary)", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
-                <i className="ph ph-map-pin"></i> {[company.endereco, company.cidade, company.estado].filter(Boolean).join(", ")}
+                <i className="ph ph-map-pin"></i> {[company.endereco, company.bairro, company.cidade, company.estado].filter(Boolean).join(", ")}
               </p>
             )}
             {company.instagram && (

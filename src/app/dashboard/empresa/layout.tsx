@@ -11,7 +11,7 @@ export default async function EmpresaLayout({ children }: { children: React.Reac
 
   const { data: company } = await supabase
     .from("companies")
-    .select("nome_estabelecimento, cidade, estado, logo_url, status_cadastro")
+    .select("nome_estabelecimento, bairro, cidade, estado, logo_url, status_cadastro")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -22,7 +22,7 @@ export default async function EmpresaLayout({ children }: { children: React.Reac
     <Shell
       role="empresa"
       userName={company.nome_estabelecimento}
-      subtitle={`${company.cidade} · ${company.estado}`}
+      subtitle={`${[company.bairro, company.cidade].filter(Boolean).join(", ")} · ${company.estado}`}
       logoUrl={company.logo_url ?? undefined}
     >
       {children}

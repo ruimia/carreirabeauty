@@ -8,7 +8,7 @@ export default async function AdminProfissionaisPage() {
   const supabase = await createClient();
   const { data: profissionais } = await supabase
     .from("professionals")
-    .select("id, nome, funcoes, funcao_outro, cidade, estado, bloqueado, criado_em, slug")
+    .select("id, nome, funcoes, funcao_outro, bairro, cidade, estado, bloqueado, criado_em, slug")
     .order("criado_em", { ascending: false });
 
   return (
@@ -42,7 +42,7 @@ export default async function AdminProfissionaisPage() {
                       ? p.funcoes.map((f: string) => f === "Outro" ? (p.funcao_outro || "Outro") : f).join(", ")
                       : "—"}
                   </td>
-                  <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">{p.cidade} · {p.estado}</td>
+                  <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">{[p.bairro, p.cidade].filter(Boolean).join(", ")} · {p.estado}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                       p.bloqueado ? "bg-red-100 text-red-600" : "bg-green-100 text-green-700"

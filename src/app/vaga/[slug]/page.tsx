@@ -25,7 +25,7 @@ export default async function VagaPage({ params }: Props) {
 
   const { data: vaga } = await supabase
     .from("jobs")
-    .select("*, companies(nome_estabelecimento, logo_url, cidade, estado, instagram, slug, telefone)")
+    .select("*, companies(nome_estabelecimento, logo_url, bairro, cidade, estado, instagram, slug, telefone)")
     .eq("slug", slug)
     .single();
 
@@ -102,7 +102,7 @@ export default async function VagaPage({ params }: Props) {
                 </p>
                 {(company.cidade || company.estado) && (
                   <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
-                    📍 {[company.cidade, company.estado].filter(Boolean).join(", ")}
+                    📍 {[company.bairro, company.cidade].filter(Boolean).join(", ")}{company.estado ? ` - ${company.estado}` : ""}
                   </p>
                 )}
               </div>
@@ -175,7 +175,7 @@ export default async function VagaPage({ params }: Props) {
               Localização
             </p>
             <p style={{ fontSize: 15, color: "var(--text-primary)" }}>
-              📍 {[vaga.endereco, vaga.cidade, vaga.estado].filter(Boolean).join(", ")}
+              📍 {[vaga.endereco, vaga.bairro, vaga.cidade, vaga.estado].filter(Boolean).join(", ")}
             </p>
           </div>
         )}

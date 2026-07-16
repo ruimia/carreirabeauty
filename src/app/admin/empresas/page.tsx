@@ -15,7 +15,7 @@ export default async function AdminEmpresasPage() {
   const supabase = await createClient();
   const { data: empresas } = await supabase
     .from("companies")
-    .select("id, nome_estabelecimento, cnpj, cidade, estado, categoria_negocio, status_assinatura, status_cadastro, bloqueado, criado_em")
+    .select("id, nome_estabelecimento, cnpj, bairro, cidade, estado, categoria_negocio, status_assinatura, status_cadastro, bloqueado, criado_em")
     .order("criado_em", { ascending: false });
 
   return (
@@ -45,7 +45,7 @@ export default async function AdminEmpresasPage() {
                     <p className="text-xs text-gray-400">{e.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}</p>
                     {e.bloqueado && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">Bloqueada</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{e.cidade} · {e.estado}</td>
+                  <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{[e.bairro, e.cidade].filter(Boolean).join(", ")} · {e.estado}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLOR[e.status_assinatura] ?? "bg-gray-100 text-gray-500"}`}>
                       {STATUS_LABEL[e.status_assinatura] ?? e.status_assinatura}

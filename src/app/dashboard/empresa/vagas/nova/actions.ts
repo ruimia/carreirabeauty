@@ -15,6 +15,7 @@ interface CriarVagaInput {
   comissao: string;
   cep: string;
   endereco: string;
+  bairro: string;
   cidade: string;
   estado: string;
   fotoUrl: string | null;
@@ -65,6 +66,7 @@ export async function criarVaga(input: CriarVagaInput): Promise<CriarVagaResult>
     comissao: input.comissao,
     cep: input.cep.replace(/\D/g, ""),
     endereco: input.endereco,
+    bairro: input.bairro,
     cidade: input.cidade,
     estado: input.estado,
     foto_url: input.fotoUrl,

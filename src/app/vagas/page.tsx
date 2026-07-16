@@ -25,7 +25,7 @@ export default async function VagasPage({ searchParams }: Props) {
   const [{ data: vagas }, { data: profissoes }] = await Promise.all([
     supabase
       .from("jobs")
-      .select("id, titulo, funcao, funcao_outro, faixa_salarial, comissao, modelo_remuneracao, tipo_vinculo, cidade, estado, slug, foto_url, criado_em, companies(nome_estabelecimento, logo_url, slug)")
+      .select("id, titulo, funcao, funcao_outro, faixa_salarial, comissao, modelo_remuneracao, tipo_vinculo, bairro, cidade, estado, slug, foto_url, criado_em, companies(nome_estabelecimento, logo_url, slug)")
       .eq("status", "ativa")
       .order("criado_em", { ascending: false }),
     supabase.from("profissoes").select("nome").eq("ativo", true).order("ordem"),
@@ -154,7 +154,7 @@ export default async function VagasPage({ searchParams }: Props) {
                       {empresa && (
                         <p style={{ fontSize: 13, color: "var(--text-tertiary)", margin: "0 0 8px" }}>
                           {empresa.nome_estabelecimento}
-                          {(vaga.cidade || vaga.estado) && ` · ${[vaga.cidade, vaga.estado].filter(Boolean).join(", ")}`}
+                          {(vaga.cidade || vaga.estado) && ` · ${[vaga.bairro, vaga.cidade].filter(Boolean).join(", ")}${vaga.estado ? ` - ${vaga.estado}` : ""}`}
                         </p>
                       )}
 
