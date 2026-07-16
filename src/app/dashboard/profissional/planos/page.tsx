@@ -4,7 +4,7 @@ export const metadata = { title: "Planos — Pro" };
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { PLANOS_PROFISSIONAL, PlanoProfissional } from "@/lib/planos";
+import { PLANOS_PROFISSIONAL, PlanoProfissional, formatPreco } from "@/lib/planos";
 import AssinarButton from "../../empresa/planos/AssinarButton";
 
 const PLANOS_ORDER: PlanoProfissional[] = ["gratis", "pro"];
@@ -64,7 +64,7 @@ export default async function PlanosProfissionalPage() {
                 </p>
                 <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 30, color: "var(--text-primary)", marginBottom: 16 }}>
                   {plano.preco === 0 ? "R$ 0" : (
-                    <>R$ {plano.preco}<span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
+                    <>R$ {formatPreco(plano.preco)}<span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
                   )}
                 </p>
 

@@ -4,7 +4,7 @@ export const metadata = { title: "Planos — Empresa" };
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { PLANOS_EMPRESA, PlanoEmpresa } from "@/lib/planos";
+import { PLANOS_EMPRESA, PlanoEmpresa, formatPreco } from "@/lib/planos";
 import AssinarButton from "./AssinarButton";
 
 const PLANOS_ORDER: PlanoEmpresa[] = ["gratis", "basic", "plus", "premium"];
@@ -66,7 +66,7 @@ export default async function PlanosEmpresaPage() {
                 </p>
                 <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: plano.preco === 0 ? "var(--text-primary)" : "var(--color-brand-primary)", margin: "4px 0 16px" }}>
                   {plano.preco === 0 ? "Grátis" : (
-                    <>R$ {plano.preco}<span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
+                    <>R$ {formatPreco(plano.preco)}<span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
                   )}
                 </p>
 

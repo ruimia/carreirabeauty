@@ -39,7 +39,7 @@ const planos = [
   {
     key: "profissional_pro",
     reason: "CarreiraBeauty Profissional Pro",
-    amount: 29,
+    amount: 14.90, // preço promocional de lançamento (jul/2026)
     back_url: `${APP_URL}/dashboard/profissional/planos/sucesso`,
   },
 ];

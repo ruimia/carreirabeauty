@@ -7,11 +7,18 @@ export const PLANOS_EMPRESA = {
 
 export const PLANOS_PROFISSIONAL = {
   gratis: { nome: "Grátis", candidaturas_mes: 10,    preco: 0 },
-  pro:    { nome: "Pro",    candidaturas_mes: null,  preco: 29 },
+  pro:    { nome: "Pro",    candidaturas_mes: null,  preco: 14.90 },
 } as const;
 
 export type PlanoEmpresa = keyof typeof PLANOS_EMPRESA;
 export type PlanoProfissional = keyof typeof PLANOS_PROFISSIONAL;
+
+/** Preço no formato brasileiro — só mostra centavos quando existem (49 → "49", 14.9 → "14,90") */
+export function formatPreco(preco: number): string {
+  return Number.isInteger(preco)
+    ? String(preco)
+    : preco.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 export function limiteVagasEmpresa(plano: string): number {
   return PLANOS_EMPRESA[plano as PlanoEmpresa]?.vagas ?? PLANOS_EMPRESA.gratis.vagas;
