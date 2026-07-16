@@ -111,7 +111,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
   const templateData: PerfilTemplateData = {
     nome, funcao: funcaoLabel, bairro, cidade, estado, fotoUrl: avatarPreview, instagram,
-    whatsapp: telefone || null, email: email || null,
+    whatsapp: p.plano === "pro" ? (telefone || null) : null, email: p.plano === "pro" ? (email || null) : null,
     tags: experiencia ? [`${experiencia} de experiência`] : [],
     apresentacao: apresentacao || null, experiencia: experiencia || null,
     disponibilidade: disponibilidade || null, tipoVinculo: VINCULOS[tipoVinculo] || tipoVinculo || null,

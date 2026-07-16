@@ -9,22 +9,37 @@ export default function TemplateClassico({ p, preview }: PerfilTemplateProps) {
         boxShadow: "var(--shadow-md)", overflow: "hidden", marginBottom: 16,
       }}>
         <div style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 16 }}>
+          <div style={{ marginBottom: 16 }}>
             {p.fotoUrl
               // eslint-disable-next-line @next/next/no-img-element
               ? <img src={p.fotoUrl} alt={p.nome} style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: "4px solid var(--surface-card)", flexShrink: 0 }} />
               : <div style={{ width: 80, height: 80, borderRadius: "50%", background: "var(--brand-blush-100)", color: "var(--brand-magenta-500)", border: "4px solid var(--surface-card)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, flexShrink: 0 }}>{iniciais(p.nome)}</div>
             }
-            {p.instagram && (
-              <a href={`https://instagram.com/${p.instagram}`} target="_blank" rel="noreferrer" style={{ height: 36, padding: "0 14px", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
-                <span style={{ fontSize: 15 }}>📷</span> @{p.instagram}
-              </a>
-            )}
           </div>
 
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", marginBottom: 2 }}>{p.nome}</h1>
           <p style={{ fontSize: 15, fontWeight: 600, color: "var(--color-brand-primary)", marginBottom: 6 }}>{p.funcao}</p>
           <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>📍 {[p.bairro, p.cidade].filter(Boolean).join(", ")} · {p.estado}</p>
+
+          {(p.whatsapp || p.instagram || p.email) && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
+              {p.whatsapp && (
+                <a href={`https://wa.me/55${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{ height: 36, padding: "0 14px", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+                  <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 16, color: "#1ea952" }}></i> WhatsApp
+                </a>
+              )}
+              {p.instagram && (
+                <a href={`https://instagram.com/${p.instagram}`} target="_blank" rel="noreferrer" style={{ height: 36, padding: "0 14px", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+                  <span style={{ fontSize: 15 }}>📷</span> @{p.instagram}
+                </a>
+              )}
+              {p.email && (
+                <a href={`mailto:${p.email}`} style={{ height: 36, padding: "0 14px", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+                  <i className="ph-fill ph-envelope-simple" style={{ fontSize: 16 }}></i> Email
+                </a>
+              )}
+            </div>
+          )}
 
           {p.tags.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>

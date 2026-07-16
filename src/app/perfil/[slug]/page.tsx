@@ -76,7 +76,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
     estado: p.estado,
     fotoUrl: p.foto_perfil_url,
     instagram: p.instagram,
-    whatsapp: p.telefone || null,
+    whatsapp: p.plano === "pro" ? (p.telefone || null) : null,
     email,
     tags,
     apresentacao: p.educacao_basica || null,
@@ -100,21 +100,11 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
       <header style={{
         background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
         padding: "0 var(--space-page-x)", height: 52,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center",
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-square.jpg" alt="" style={{ width: 24, height: 24, borderRadius: 6, objectFit: "cover" }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="CarreiraBeauty" style={{ height: 20, objectFit: "contain" }} />
-        </Link>
-        <Link href="/login" style={{
-          height: 36, padding: "0 16px", borderRadius: "var(--radius-pill)",
-          background: "var(--color-brand-primary)", color: "#fff",
-          fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13,
-          display: "flex", alignItems: "center", textDecoration: "none",
-        }}>
-          Entrar
         </Link>
       </header>
 
@@ -123,34 +113,18 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
       {templateId === "classico" && <TemplateClassico p={templateData} />}
 
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 var(--space-page-x) 48px" }}>
-        {/* CTA */}
-        <div style={{
-          background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
-          border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
-          padding: 24, textAlign: "center", marginTop: 16,
-        }}>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)", marginBottom: 8 }}>
-            Quer contratar {p.nome.split(" ")[0]}?
-          </p>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
-            Cadastre seu estabelecimento no CarreiraBeauty e publique vagas gratuitamente por 7 dias.
-          </p>
-          <Link href="/login" style={{
-            display: "block", height: 48, borderRadius: "var(--radius-pill)",
-            background: "var(--color-brand-primary)", color: "#fff",
-            fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
-            textDecoration: "none", lineHeight: "48px",
-          }}>
-            Cadastrar meu estabelecimento
-          </Link>
-        </div>
-
         {/* Footer */}
-        <p style={{ textAlign: "center", fontSize: 12, color: "var(--neutral-400)", marginTop: 32 }}>
-          Perfil no{" "}
-          <Link href="/" style={{ color: "var(--text-link)" }}>CarreiraBeauty</Link>
-          {" "}— marketplace de empregos do setor de beleza
-        </p>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, marginTop: 32 }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="CarreiraBeauty" style={{ height: 16, objectFit: "contain" }} />
+          </Link>
+          <p style={{ fontSize: 12, color: "var(--neutral-400)" }}>
+            <Link href="/termos" style={{ color: "var(--neutral-400)" }}>Termos</Link>
+            {" "}·{" "}
+            <Link href="/privacidade" style={{ color: "var(--neutral-400)" }}>Privacidade</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
