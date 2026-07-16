@@ -19,21 +19,9 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://beta.carreirabeauty.
 
 const planos = [
   {
-    key: "empresa_basic",
-    reason: "CarreiraBeauty Empresa Basic",
-    amount: 49,
-    back_url: `${APP_URL}/dashboard/empresa/planos/sucesso`,
-  },
-  {
-    key: "empresa_plus",
-    reason: "CarreiraBeauty Empresa Plus",
-    amount: 99,
-    back_url: `${APP_URL}/dashboard/empresa/planos/sucesso`,
-  },
-  {
     key: "empresa_premium",
     reason: "CarreiraBeauty Empresa Premium",
-    amount: 179,
+    amount: 49, // 5 vagas ativas, 50 candidatos/vaga (jul/2026 — era R$179 com Basic/Plus/Premium separados)
     back_url: `${APP_URL}/dashboard/empresa/planos/sucesso`,
   },
   {

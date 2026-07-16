@@ -3,8 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { MercadoPagoConfig, PreApproval } from "mercadopago";
 
 const PLANO_KEY_MAP: Record<string, { plano: string; tabela: "companies" | "professionals" }> = {
-  empresa_basic:    { plano: "basic",   tabela: "companies" },
-  empresa_plus:     { plano: "plus",    tabela: "companies" },
   empresa_premium:  { plano: "premium", tabela: "companies" },
   profissional_pro: { plano: "pro",     tabela: "professionals" },
 };
@@ -34,8 +32,6 @@ export async function POST(req: NextRequest) {
 
     // Descobre qual plano pelo plan_id
     const MP_PLAN_IDS: Record<string, string> = {
-      [process.env.MP_PLAN_EMPRESA_BASIC    ?? ""]: "empresa_basic",
-      [process.env.MP_PLAN_EMPRESA_PLUS     ?? ""]: "empresa_plus",
       [process.env.MP_PLAN_EMPRESA_PREMIUM  ?? ""]: "empresa_premium",
       [process.env.MP_PLAN_PROFISSIONAL_PRO ?? ""]: "profissional_pro",
     };

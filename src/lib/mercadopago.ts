@@ -10,8 +10,6 @@ export const preApprovalClient = new PreApproval(mp);
 // IDs dos planos criados no MP (preenchidos após criar via API)
 export const MP_PLAN_IDS: Record<string, string> = {
   // empresa
-  "empresa_basic":   process.env.MP_PLAN_EMPRESA_BASIC   ?? "",
-  "empresa_plus":    process.env.MP_PLAN_EMPRESA_PLUS    ?? "",
   "empresa_premium": process.env.MP_PLAN_EMPRESA_PREMIUM ?? "",
   // profissional
   "profissional_pro": process.env.MP_PLAN_PROFISSIONAL_PRO ?? "",

@@ -1,8 +1,6 @@
 export const PLANOS_EMPRESA = {
-  gratis:  { nome: "Grátis",  vagas: 1,  candidatos: 10,  preco: 0 },
-  basic:   { nome: "Basic",   vagas: 3,  candidatos: 100, preco: 49 },
-  plus:    { nome: "Plus",    vagas: 5,  candidatos: null, preco: 99 },
-  premium: { nome: "Premium", vagas: 10, candidatos: null, preco: 179 },
+  gratis:  { nome: "Grátis",  vagas: 3, candidatos: 20, preco: 0 },
+  premium: { nome: "Premium", vagas: 5, candidatos: 50, preco: 49 },
 } as const;
 
 export const PLANOS_PROFISSIONAL = {

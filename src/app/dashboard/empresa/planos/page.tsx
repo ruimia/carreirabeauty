@@ -7,9 +7,7 @@ import { redirect } from "next/navigation";
 import { PLANOS_EMPRESA, PlanoEmpresa, formatPreco } from "@/lib/planos";
 import AssinarButton from "./AssinarButton";
 
-const PLANOS_ORDER: PlanoEmpresa[] = ["gratis", "basic", "plus", "premium"];
-
-const DESTAQUES: Partial<Record<PlanoEmpresa, boolean>> = { plus: true };
+const PLANOS_ORDER: PlanoEmpresa[] = ["gratis", "premium"];
 
 export default async function PlanosEmpresaPage() {
   const supabase = await createClient();
@@ -22,111 +20,118 @@ export default async function PlanosEmpresaPage() {
 
   const planoAtual = (company.plano ?? "gratis") as PlanoEmpresa;
 
+  // Mesmas linhas nos dois cards — comparação direta, linha a linha
+  const BENEFICIOS = [
+    { label: "3 vagas ativas", labelPremium: "5 vagas ativas", gratis: true },
+    { label: "Até 20 candidatos/vaga", labelPremium: "Até 50 candidatos/vaga", gratis: true },
+    { label: "Badge de empresa verificada", labelPremium: "Badge de empresa verificada", gratis: false },
+    { label: "Destaque na listagem de vagas", labelPremium: "Destaque na listagem de vagas", gratis: false },
+  ];
+
   return (
     <div>
-      <main style={{ maxWidth: 860, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", marginBottom: 6 }}>
+      <main style={{ maxWidth: 720, margin: "0 auto", padding: "20px var(--space-page-x) 40px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 21, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.25 }}>
           Planos
         </h1>
-        <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 24 }}>
-          Escolha o plano ideal para o tamanho da sua equipe. Cancele quando quiser.
+        <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.45, marginBottom: 18 }}>
+          Escolha o plano ideal para o tamanho da sua equipe.
         </p>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }} className="plans-grid-empresa">
+        {/* 2 colunas mesmo no mobile — comparação sem precisar rolar */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignItems: "start" }}>
           {PLANOS_ORDER.map((key) => {
             const plano = PLANOS_EMPRESA[key];
             const ativo = key === planoAtual;
-            const destaque = DESTAQUES[key];
+            const destaque = key === "premium";
 
             return (
               <div key={key} style={{
                 background: "var(--surface-card)",
-                borderRadius: "var(--radius-xl)",
-                border: ativo
-                  ? "2px solid var(--color-success-fg, #16a34a)"
-                  : destaque
-                    ? "2px solid var(--color-brand-primary)"
-                    : "2px solid var(--border-default)",
+                borderRadius: "var(--radius-lg)",
+                border: destaque ? "2px solid var(--color-brand-primary)" : "1.5px solid var(--border-default)",
                 boxShadow: destaque ? "var(--shadow-md)" : "none",
-                padding: "20px 24px 24px", position: "relative",
+                padding: "16px 12px 12px", position: "relative",
               }}>
-                {(ativo || destaque) && (
+                {destaque && (
                   <span style={{
-                    position: "absolute", top: -12, left: 20,
-                    background: ativo ? "var(--color-success-fg, #16a34a)" : "var(--color-brand-primary)",
-                    color: "#fff", fontSize: 11, fontWeight: 700,
-                    padding: "5px 12px", borderRadius: "var(--radius-pill)",
+                    position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)",
+                    background: "var(--color-brand-primary)", color: "#fff", whiteSpace: "nowrap",
+                    fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: "var(--radius-pill)",
+                    letterSpacing: "0.04em",
                   }}>
-                    {ativo ? "Plano atual" : "Mais popular"}
+                    {ativo ? "SEU PLANO" : "MAIS POPULAR"}
                   </span>
                 )}
 
-                <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--text-primary)", marginTop: 4 }}>
+                <p style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: destaque ? "var(--color-brand-primary)" : "var(--text-tertiary)", marginBottom: 4, textAlign: "center" }}>
                   {plano.nome}
                 </p>
-                <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: plano.preco === 0 ? "var(--text-primary)" : "var(--color-brand-primary)", margin: "4px 0 16px" }}>
-                  {plano.preco === 0 ? "Grátis" : (
-                    <>R$ {formatPreco(plano.preco)}<span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
-                  )}
-                </p>
 
-                <Feature text={`${plano.vagas} vaga${plano.vagas > 1 ? "s" : ""} ativa${plano.vagas > 1 ? "s" : ""}`} />
-                <Feature text={plano.candidatos === null ? "Candidatos ilimitados" : `Ver até ${plano.candidatos} candidatos por vaga`} />
-                {key !== "gratis" && <Feature text="Badge de empresa verificada" />}
-                {key === "premium" && <Feature text="Destaque na listagem de vagas" />}
+                <div style={{ height: 40, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", lineHeight: 1.2 }}>
+                    {plano.preco === 0 ? "Grátis" : (
+                      <>R$ {formatPreco(plano.preco)}<span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
+                    )}
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  {BENEFICIOS.map((b) => (
+                    <Feature
+                      key={b.label}
+                      text={destaque ? b.labelPremium : b.label}
+                      ok={destaque ? true : b.gratis}
+                    />
+                  ))}
+                </div>
 
                 {ativo ? (
-                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 14, fontWeight: 600, marginTop: 8 }}>
+                  <div style={{ height: 40, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 12, fontWeight: 700 }}>
                     Plano atual
                   </div>
                 ) : plano.preco === 0 ? (
-                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 14, marginTop: 8 }}>
+                  <div style={{ height: 40, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 12 }}>
                     Fazer downgrade
                   </div>
                 ) : (
-                  <div style={{ marginTop: 8 }}>
-                    <AssinarButton
-                      planoKey={`empresa_${key}`}
-                      label={`Assinar ${plano.nome}`}
-                      destaque={destaque}
-                    />
-                  </div>
+                  <AssinarButton planoKey="empresa_premium" label="Assinar Premium" destaque />
                 )}
               </div>
             );
           })}
         </div>
 
-        <p style={{ fontSize: 12, color: "var(--text-tertiary)", textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          Pagamentos processados via Mercado Pago. Cancele a qualquer momento.
+        <p style={{ fontSize: 11, color: "var(--text-tertiary)", textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
+          Pagamento seguro via Mercado Pago. O cancelamento é feito pela sua conta do Mercado Pago.
         </p>
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-          <a
-            href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+tenho+d%C3%BAvidas+sobre+os+planos+do+CarreiraBeauty"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              color: "#1ea952", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, textDecoration: "none",
-            }}
-          >
-            <i className="ph ph-whatsapp-logo" style={{ fontSize: 18 }}></i>
-            Dúvidas? Chame no WhatsApp
-          </a>
-        </div>
-
-        <style>{`@media (min-width: 860px) { .plans-grid-empresa { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
+        {/* CTA de vendas assistidas pra quem precisa de mais capacidade do
+            que o Premium oferece — em vez de travar num limite fixo */}
+        <a
+          href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+preciso+de+mais+vagas+no+CarreiraBeauty"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            height: 48, borderRadius: "var(--radius-pill)", marginTop: 16,
+            background: "#1ea952", color: "#fff",
+            fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, textDecoration: "none",
+          }}
+        >
+          <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 18 }}></i>
+          Precisa de mais vagas? Fale com a gente!
+        </a>
       </main>
     </div>
   );
 }
 
-function Feature({ text }: { text: string }) {
+function Feature({ text, ok }: { text: string; ok: boolean }) {
   return (
-    <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-      <i className="ph-fill ph-check-circle" style={{ fontSize: 16, color: "var(--color-success-fg)", flexShrink: 0, marginTop: 1 }}></i>
-      <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.4 }}>{text}</p>
+    <div style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 7 }}>
+      <i className={ok ? "ph-fill ph-check-circle" : "ph ph-x"} style={{ fontSize: 14, color: ok ? "var(--color-success-fg)" : "var(--neutral-300)", flexShrink: 0, marginTop: 1 }}></i>
+      <p style={{ fontSize: 12, color: ok ? "var(--text-secondary)" : "var(--text-tertiary)", lineHeight: 1.35 }}>{text}</p>
     </div>
   );
 }

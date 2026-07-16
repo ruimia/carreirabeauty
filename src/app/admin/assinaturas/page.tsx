@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PLANOS_EMPRESA, PLANOS_PROFISSIONAL } from "@/lib/planos";
 import PlanoSelect from "./PlanoSelect";
 
-const PLANOS_EMPRESA_KEYS = ["gratis", "basic", "plus", "premium"] as const;
+const PLANOS_EMPRESA_KEYS = ["gratis", "premium"] as const;
 const PLANOS_PROF_KEYS = ["gratis", "pro"] as const;
 
 export default async function AssinaturasPage() {
@@ -129,7 +129,7 @@ export default async function AssinaturasPage() {
                   id={e.id}
                   tipo="empresa"
                   planoAtual={e.plano ?? "gratis"}
-                  opcoesPlano={["gratis", "basic", "plus", "premium"]}
+                  opcoesPlano={["gratis", "premium"]}
                 />
               </div>
             </div>
