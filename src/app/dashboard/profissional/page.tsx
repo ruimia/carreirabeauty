@@ -210,8 +210,20 @@ export default async function DashboardProfissionalPage() {
           </div>
         )}
 
-        {/* Vagas compatíveis */}
-        <p className="section-label">Vagas para você</p>
+        {/* Vagas compatíveis — vaga nativa é o produto principal, por isso o
+            selo de marca e o destaque visual mais forte que o das agregadas */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <p className="section-label" style={{ margin: 0 }}>Vagas para você</p>
+          {jobs.length > 0 && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4, height: 23, padding: "0 8px",
+              borderRadius: "var(--radius-sm)", background: "var(--brand-magenta-50)",
+              color: "var(--color-brand-primary)", fontSize: 10, fontWeight: 700,
+            }}>
+              <i className="ph-fill ph-seal-check"></i> CarreiraBeauty
+            </span>
+          )}
+        </div>
 
         {jobs.length === 0 ? (
           <div className="card card-xl" style={{ padding: "28px 24px", textAlign: "center", marginBottom: 28 }}>
@@ -261,22 +273,33 @@ export default async function DashboardProfissionalPage() {
 
               return (
                 <Link key={job.id} href={`/vaga/${job.slug}`} style={{ textDecoration: "none" }}>
-                  <div className="job-feed-card">
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
-                      <div style={{ minWidth: 0 }}>
-                        <p style={{ font: "500 11px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 3 }}>
-                          {company?.nome_estabelecimento}
-                          {company?.cidade ? ` · ${company.cidade}, ${company.estado}` : ""}
-                        </p>
-                        <p style={{ font: "600 17px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
-                          {job.titulo || title}
-                        </p>
+                  <div className="job-feed-card" style={{
+                    borderLeft: "3px solid var(--color-brand-primary)",
+                    boxShadow: "var(--shadow-sm)",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                      {company?.logo_url
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={company.logo_url} alt={company.nome_estabelecimento}
+                            style={{ width: 48, height: 48, borderRadius: "var(--radius-md)", objectFit: "cover", flexShrink: 0 }} />
+                        : <Avatar name={company?.nome_estabelecimento ?? "?"} size={48} />
+                      }
+                      <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ font: "500 11px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 3 }}>
+                            {company?.nome_estabelecimento}
+                            {company?.cidade ? ` · ${company.cidade}, ${company.estado}` : ""}
+                          </p>
+                          <p style={{ font: "600 17px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                            {job.titulo || title}
+                          </p>
+                        </div>
+                        {job.faixa_salarial && (
+                          <span className="chip" style={{ background: "var(--brand-magenta-50)", color: "var(--brand-magenta-700)", flexShrink: 0 }}>
+                            <i className="ph ph-currency-circle-dollar"></i> {job.faixa_salarial}
+                          </span>
+                        )}
                       </div>
-                      {job.faixa_salarial && (
-                        <span className="chip" style={{ background: "var(--brand-magenta-50)", color: "var(--brand-magenta-700)", flexShrink: 0 }}>
-                          <i className="ph ph-currency-circle-dollar"></i> {job.faixa_salarial}
-                        </span>
-                      )}
                     </div>
 
                     {job.descricao && (
