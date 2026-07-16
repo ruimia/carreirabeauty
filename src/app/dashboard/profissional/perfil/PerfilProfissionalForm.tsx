@@ -299,7 +299,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
               }}></i>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ font: "700 14px/1.3 var(--font-display)", color: "var(--color-brand-primary)" }}>
-                  {p.plano === "pro" ? "Você é PRO" : "Acelere sua carreira"}
+                  {p.plano === "pro" ? "Você é PRO" : "Seja PRO!"}
                 </p>
                 <p style={{ font: "var(--text-caption)", color: p.plano === "pro" ? "var(--color-brand-primary)" : "var(--text-secondary)" }}>
                   {p.plano === "pro"
