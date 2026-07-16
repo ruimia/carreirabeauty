@@ -5,6 +5,7 @@ export const metadata = { title: "Conteúdo" };
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
 
 export default async function ConteudoListaPage() {
   const supabase = await createClient();
@@ -29,6 +30,32 @@ export default async function ConteudoListaPage() {
     <div>
       <main className="page-x">
         <p className="section-label">Conteúdo pra você crescer</p>
+
+        <Link href="/dashboard/profissional/quiz" style={{ textDecoration: "none" }}>
+          <div style={{
+            background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+            borderRadius: "var(--radius-xl)", border: "1px solid var(--brand-magenta-100)",
+            boxShadow: "var(--shadow-xs)", padding: 16, marginBottom: 16,
+            display: "flex", alignItems: "center", gap: 14,
+          }}>
+            <span style={{
+              width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
+              background: "var(--color-brand-primary)", color: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
+            }}>
+              <i className="ph-fill ph-seal-check"></i>
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                {TRILHA_AUTOESTIMA.titulo}
+              </p>
+              <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
+                Complete a trilha e ganhe um certificado pro seu perfil
+              </p>
+            </div>
+            <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+          </div>
+        </Link>
 
         {(conteudos ?? []).length === 0 && (
           <div className="card card-xl" style={{ padding: "28px 24px", textAlign: "center", marginBottom: 28 }}>
