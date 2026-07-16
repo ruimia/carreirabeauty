@@ -80,6 +80,80 @@ Opções em discussão:
 - [ ] Ticket médio esperado por empresa/profissional: a validar com dados reais de conversão
 - [x] Dados do negócio anterior: não disponíveis no momento — relançamento sem histórico de referência
 
+### 4.1. Brainstorm — Evolução do modelo de monetização (não decidido, guardado para depois)
+
+Aprendizado de campo (jul/2026): empresa resiste a pagar por exposição/anúncio, mas paga por **resultado** (ver candidatos reais). Profissional não paga pelo básico, mas historicamente paga por **elevação de status** (padrão visto em outras plataformas: LinkedIn Premium, Upwork, apps de namoro, etc.). O modelo freemium já implementado (acima) é a base — as ideias abaixo são possíveis evoluções/refinamentos dele, ainda não implementadas.
+
+**Lado Empresa — modelos de "pagar por resultado" avaliados:**
+
+1. **Faixas de volume mensal (planos fixos)** — próximo do que já está implementado hoje (tabela acima já é isso, na prática: grátis até 10 candidatos, Basic/Plus/Premium por faixa). Validar se os limites/preços atuais capturam bem a disposição a pagar.
+2. **Créditos avulsos (pay-as-you-go)** — empresa compra pacotes de desbloqueio de currículo sem assinatura fixa, mais flexível pra quem contrata raramente (hoje não existe essa opção, só planos fixos)
+3. **Híbrido** — assinatura base barata + créditos extras avulsos se estourar o limite do plano
+
+**Lado Profissional — monetizar "status", conectando com itens já listados como v2 na seção 7:**
+
+- **Selo verificado** (identidade/certificado confirmado) — hoje listado como feature de v2 gratuita; considerar torná-la paga
+- ~~**Destaque no perfil/busca**~~ — ✅ **implementado (jul/2026)**, virou benefício central do PRO: candidato PRO vai pro topo da lista de candidatos da vaga, com selo "✦ PRO" e borda destacada no card que a empresa vê. Ver nota de correção abaixo
+- **Analytics de perfil** ("quem viu seu currículo") — gatilho de status clássico, implementação relativamente simples
+- **Distribuição ampliada** — engine que sugere o perfil pago pra mais empresas/vagas automaticamente, mesmo sem candidatura ativa (reconecta com "acesso a banco de currículos" — hoje fora do MVP, seção 7.9)
+- **Selo "Top Rated"** pós-avaliações — pode ser ganho de graça por performance, com opção paga de destaque adicional (conecta com "sistema de avaliação", hoje v2)
+
+- [ ] **Decisão adiada** — usuário optou por guardar essas ideias para revisitar depois, sem comprometer implementação agora
+- [ ] Quando retomar: decidir prioridade entre as 3 opções de empresa e entre as 4-5 opções de status do profissional
+- [x] Avaliar se o plano PRO do profissional deveria incorporar features de status → **sim, incorporou** (jul/2026): destaque na lista de candidatos + visuais de perfil PRO + conteúdos entraram no mesmo PRO (R$14,90), sem criar tier adicional — mantém a lógica de "um sim só" de compra (seção 7.9.5)
+
+> **⚠️ Correção importante (jul/2026) — o destaque era vaporware e foi corrigido.** A tela de planos vendia "Destaque nas buscas" / "Apareça primeiro nas buscas de empresas da sua região" desde antes, mas isso **não existia**: não há busca/listagem de profissionais no app (empresa só vê quem se candidatou à vaga dela), e essa lista era ordenada só por data de candidatura, ignorando o plano. Ou seja, o PRO cobrava por um benefício que o produto não entregava. Foi detectado ao escrever copy persuasiva em cima da promessa, e corrigido antes de qualquer assinatura existir (base tinha 0 PROs).
+>
+> **Lição pro futuro:** o benefício foi renomeado de "Destaque nas buscas" pra **"Topo da lista do salão"** — descreve o que de fato acontece. "Busca" sugeria um produto que não existe (banco de currículos navegável, fora do MVP na seção 7.9).
+
+### 4.2. Brainstorm — Receita recorrente do profissional independente de vaga (não decidido)
+
+**Contexto/motivação (jul/2026):** CAC atual de cadastro profissional ≈ R$2/lead — muito barato. Se essa receita recorrente do profissional não depender do volume de vagas disponíveis, o marketplace escala de forma muito mais independente (não fica refém de crescer o lado empresa em paralelo).
+
+**Problema identificado com o plano Pro atual (R$29/mês, candidaturas ilimitadas):** busca de emprego é um evento **esporádico**, não um hábito diário — hipótese é que o profissional cancela a assinatura assim que consegue emprego, porque o valor vendido (mais candidaturas) desaparece quando o problema dele é resolvido. Isso limita o LTV do plano tal como existe hoje. **Ainda não instrumentado/validado** — não há dado real de churn pós-contratação ainda.
+
+> **Atualização (jul/2026):** o problema acima foi endereçado na prática — o PRO deixou de ser só "candidaturas ilimitadas" e passou a R$14,90 incluindo conteúdos recorrentes e visuais de perfil (vitrine pra clientela própria), justamente as camadas que continuam valendo depois de contratada. Segue **não validado**: com 0 assinantes, ainda não há dado de churn pós-contratação.
+
+**Insight estratégico central:** boa parte do público profissional (freela, autônomo, cadeira alugada) não é só candidato a emprego — também está buscando **clientes próprios**. Monetizar essa camada (ferramenta de marca pessoal / captação de cliente particular) desacopla a receita de "está desempregado ou não", porque o valor continua existindo mesmo depois de contratada ou com clientela própria.
+
+**Direções avaliadas:**
+
+1. **Perfil público (seção 7.9) como ferramenta de captação de cliente próprio** — link personalizado pra compartilhar com cliente particular, analytics de visitas ("quantos clientes em potencial viram seu perfil essa semana"), foco em geração de renda própria, não só emprego CLT
+2. **Agenda/portfólio leve integrado** — ferramenta de uso diário (cliente marca horário, mostra fotos de trabalho) — gera hábito de uso constante, não só durante busca de emprego
+3. **Produtos financeiros via parceria (receita recorrente indireta)** — antecipação de recebíveis, seguro/acidente para autônomo, conta digital — modelo validado em plataformas de trabalhador informal no Brasil (iFood, 99); receita via comissão, não cobrança direta ao profissional
+4. **Assinatura de comunidade/conteúdo** — grupo exclusivo, dicas de precificação/gestão do próprio negócio de beleza — conecta com "cursos/certificações parceiras" já listado em v2 (seção 7)
+
+- [ ] **Pré-requisito antes de escolher direção:** instrumentar e medir churn real do plano Pro (R$29) — validar se cancelamento está de fato correlacionado com "conseguiu emprego", ou se é outro fator (preço, desconhecimento da feature)
+- [ ] **Decisão adiada** — usuário optou por guardar as 4 direções para revisitar depois, sem comprometer implementação agora
+
+### 4.3. Síntese estratégica de monetização e meta de faturamento (jul/2026)
+
+**Recomendação de modelo (pesquisa comparativa Catho vs. InfoJobs):**
+- [x] **Pilar principal: empresa paga** (freemium por CNPJ, já implementado) — alinhado ao modelo InfoJobs (dominante no Brasil: candidato sempre grátis, empresa paga por vaga/visibilidade), não ao modelo Catho (candidato paga pra "furar fila" — historicamente arriscado: Catho teve EBITDA negativo em 2021 e foi vendida pelo grupo controlador Seek à Redarbor em 2024; hoje Catho e InfoJobs pertencem ao **mesmo grupo controlador**, Redarbor)
+- [x] **Pilar de diferenciação: Perfil PRO unificado do profissional** (seção 7.9.5) — nem Catho nem InfoJobs oferecem ferramenta de marca pessoal/captação de cliente para o profissional autônomo; é o "oceano azul" dentro do nicho, além de gerar receita desacoplada do ciclo de vaga (seção 4.2)
+- [x] Evitar replicar modelo de "pagar para furar fila de candidatura" (Catho) — mal ajustado ao público de baixa renda (seção 5)
+
+**Modelagem de cenários de receita (Brasil, nicho beleza, regime maduro — não é projeção de curto prazo):**
+
+Premissas: TAM nacional ~1,26M estabelecimentos e ~1,25M profissionais formalizados (seção de pesquisa de mercado, jul/2026). Ticket médio empresa pagante ~R$75/mês (mix Basic/Plus/Premium). Ticket médio profissional pagante ~R$15/mês (mix Perfil PRO R$9,90 + legado Pro R$29). **Atualização jul/2026:** a premissa de ~R$15/mês seguiu válida por outro caminho — em vez do mix de dois SKUs, virou um PRO unificado a R$14,90 (seção 7.9.5).
+
+| Cenário | Penetração empresa | Penetração profissional | Receita empresa/ano | Receita profissional/ano | ARR total |
+|---|---|---|---|---|---|
+| Conservador | 0,5% (~6.300) | 1% (~12.600) | R$ 5,7M | R$ 2,3M | ~R$ 8M/ano (~R$667k/mês) |
+| Base | 2% (~25.000) | 3% (~37.700) | R$ 22,6M | R$ 6,8M | ~R$ 29M/ano |
+| Otimista | 5% (~63.000) | 8% (~100.600) | R$ 56,6M | R$ 18,1M | ~R$ 75M/ano |
+
+**Meta de referência: R$500 mil/mês (~R$6M/ano) — avaliada como factível.**
+- Exige aproximadamente **~4.700 empresas pagantes** (~0,37% do TAM nacional) + **~9.700 profissionais PRO pagantes** (~0,77% do TAM nacional), mantendo a proporção 71% empresa / 29% profissional do cenário conservador
+- **Achado-chave:** essa meta é atingível **só com penetração forte em São Paulo capital**, sem precisar de expansão geográfica — SP capital sozinha já tem ~79.226 estabelecimentos formalizados (seção de pesquisa de mercado); 4.700 empresas pagantes representa ~6% de conversão desse universo local, e ~9.700 profissionais PRO representa ~10-11% da base formal de profissionais da capital
+- **Ressalvas:** (a) é faturamento bruto, não lucro líquido — taxas de gateway (Mercado Pago), CAC e infraestrutura reduzem a margem; (b) 6-11% de penetração de mercado endereçável é taxa saudável mas não trivial, exige anos de execução consistente e boa retenção (ainda não medida — ver pré-requisito de churn acima); (c) não é uma previsão de prazo, só uma validação de que a meta é estruturalmente plausível dado o tamanho do mercado
+
+**Primeiro milestone de curto prazo: R$50 mil/mês (~R$600k/ano) — 1/10 da meta de R$500k/mês.**
+- Exige proporcionalmente **~470 empresas pagantes** + **~970 profissionais PRO pagantes**
+- Em relação a São Paulo capital: ~0,6% de conversão dos estabelecimentos formalizados (~79.226) + ~1,1% da base formal de profissionais — fração pequena da cidade, não exige dominância nem expansão geográfica
+- Em relação ao Brasil: ~0,04% dos estabelecimentos nacionais e ~0,08% dos profissionais formalizados — marginal
+- Avaliado como meta de tração inicial bem dimensionada, anterior à meta de R$500 mil/mês acima
+
 ---
 
 ## 5. Personas (a detalhar)
@@ -240,6 +314,20 @@ Achado real (após 2 dias de campanha, ver seção 13): a implementação atual 
 - [x] **Telefone/WhatsApp:** permanece no cadastro como dado de contato, mas **não é usado para login/autenticação**
 - [x] Sem validação OTP por SMS no MVP
 
+**Estado real de implementação (atualizado):** login hoje é via botão Google OAuth ou email com código enviado (via Supabase) — o magic link original não performou bem e foi substituído por código.
+
+### ✅ Decisão fechada — login via WhatsApp (avaliado e descartado por ora)
+
+Contexto: público real do CarreiraBeauty é B2C Brasil, profissionais de beleza em geral de baixa renda/menor nível educacional. Pesquisa (jul/2026) mostra que WhatsApp tem penetração de ~98-99% entre usuários de internet móvel no Brasil, independente de faixa de renda, com abertura quase imediata — contra taxa média de abertura de email de ~18%. Custo também não seria impeditivo (categoria Autenticação: R$ 0,034/mensagem).
+
+**Decisão: manter autenticação como está hoje (Google OAuth + código por email via Supabase), sem adicionar WhatsApp como método de login.**
+
+Motivo: o objetivo estratégico do email não é só autenticar — é alimentar a régua de retenção (seção 7.7, email semanal), que depende de ter um email de qualidade coletado. Os métodos atuais **forçam** captura de email de verdade, porque a autenticação não funciona sem ele. Se WhatsApp virasse porta de entrada alternativa, o campo de email perderia essa obrigatoriedade funcional — as pessoas tenderiam a preencher qualquer coisa nele (já que não seria mais necessário pra acessar a conta), enfraquecendo a base de email que a régua de retenção precisa no longo prazo. Prioriza-se o relacionamento futuro (régua barata via email) sobre o ganho de conversão de curto prazo no login.
+
+- [x] WhatsApp como método de **login** — descartado, mantendo email/Google como estão
+- [x] WhatsApp como canal da **régua de retenção semanal** — também descartado (seção 7.7), por custo (categoria Marketing bem mais cara que email em escala)
+- [x] Uso de WhatsApp fica restrito a dado de contato (empresa liga/manda mensagem pro candidato), não a canal de autenticação ou marketing da plataforma
+
 ---
 
 ## 7.7. Email Semanal (engajamento e retenção)
@@ -323,6 +411,224 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 - [x] **Colisão de slug:** quando nome+cidade já existir, adicionar código curto aleatório no final (ex: `joana-silva-campinas-x7k9`)
 - [x] Campo "Educação básica" já adicionado na tabela de cadastro do profissional (seção 7.5) e na sequência de telas
 
+### 7.9.1. Evolução v2 concreta — "Mini site builder" (âncora de monetização recorrente, conecta com 4.2 direção 1)
+
+**Reposicionamento do produto:** a página pública deixa de ser "só um currículo pra empresa ver" e passa a ser uma **ferramenta de marca pessoal e captação de cliente particular**, no estilo Linktree/Contra verticalizado para beleza. Justificativa: boa parte do público é freela/autônomo que busca cliente próprio, não só vaga CLT — esse uso é contínuo, independente de estar empregado (ver seção 4.2, insight de receita recorrente desacoplada de volume de vaga).
+
+> **⚠️ Unificado com Conteúdo PRO (jul/2026) — ver seção 7.9.5.** A tabela abaixo descreve os recursos do "perfil PRO" isoladamente, mas a decisão final é vender isso **junto** com micro-conteúdos recorrentes (seção 7.9.4) num único plano PRO, não como produtos separados. Motivo: reduz fricção de decisão de compra (público de baixa sofisticação/baixa leitura se beneficia de uma única escolha), aumenta valor percebido pelo mesmo preço, e transforma conteúdo (que seria venda avulsa de baixo LTV) em parte de uma assinatura recorrente — reforça o objetivo de receita recorrente desacoplada de vaga (seção 4.2).
+
+**Tabela Grátis vs. PRO (recursos de perfil/site — ver 7.9.5 para a oferta PRO completa e unificada):**
+
+| Recurso | Grátis (hoje) | PRO (proposto) |
+|---|---|---|
+| Nome, funções (múltiplas), localização, experiência | ✅ | ✅ |
+| Educação básica | ✅ | ✅ |
+| Fotos de portfólio | Limitado (poucas, upload manual) | Ilimitado, com álbuns |
+| Importar fotos do Instagram | ❌ | ✅ (ver viabilidade técnica abaixo) |
+| Captura de avaliação de cliente | ❌ | ✅ (link enviado ao cliente após atendimento, aparece na página) |
+| Slug/link personalizado | genérico (nome-cidade-código) | escolha de slug melhor, domínio próprio no futuro |
+| Analytics de visitas | ❌ | ✅ ("X pessoas viram seu perfil essa semana") |
+| Selo verificado | ❌ | ✅ (reconecta com seção 3 — diferencial de confiança) |
+
+**Viabilidade técnica — importar fotos do Instagram (pesquisa jul/2026):**
+- Instagram Basic Display API (a antiga forma simples de importar fotos de qualquer perfil) foi **desativada permanentemente em dez/2024** — não existe mais
+- Caminho atual: a própria profissional autoriza via OAuth (**Instagram API with Instagram Login**, para contas pessoais/consumidor, ou **Instagram Graph API** se ela tiver conta Business/Creator) — ela conecta a conta, o app lê as fotos dela com consentimento explícito
+- **Não é scraping de terceiro** — é a profissional autorizando acesso às próprias fotos, fluxo legítimo e dentro dos termos da Meta
+- Implica em fluxo de "Conectar Instagram" na área PRO, com tela de permissão OAuth padrão
+
+- [x] Direção validada e priorizada pelo usuário como próxima evolução concreta do produto (jul/2026)
+- [ ] Detalhar backend: novo campo/relação para fotos importadas do Instagram (extensão do `PortfolioItem`, seção 10)
+- [ ] Detalhar fluxo de captura de avaliação (como o link chega ao cliente — WhatsApp? SMS? — e onde fica armazenado, nova entidade tipo `Review`/`Avaliacao`)
+
+### 7.9.2. Pricing — "Perfil PRO" (pesquisa jul/2026)
+
+**Benchmarks avaliados:** Linktree Pro R$22-29/mês, Canva Pro R$35-45/mês (público de renda mais alta que o nosso, referência alta demais). Trinks (gestão de salão, não indivíduo autônomo) R$89-249/mês — não aplicável, público diferente (dono de negócio com funcionários).
+
+**Raciocínio de precificação:** público-alvo é baixa renda e iniciante na profissão — ainda sem clientela formada, então a ferramenta é uma aposta de investimento, não gasto de quem já fatura bem. Preço precisa ficar abaixo da barreira psicológica de R$20/mês, que é a âncora usada por apps de assinatura de massa mirando esse perfil de renda no Brasil (streaming, apps populares costumam ancorar em R$9,90/R$14,90/R$19,90).
+
+- [x] **Decisão: R$ 9,90/mês como preço de lançamento/teste** — mais agressivo, usado para validar conversão antes de eventualmente subir para a faixa R$14,90 recomendada
+- [x] **Perfil PRO fica separado do plano Pro de candidaturas (R$29/mês)** — não faz bundle automático; são públicos com necessidade diferente (busca ativa de emprego vs. vitrine para clientela própria), forçar pacote único aumentaria a barreira de entrada de quem só quer uma das duas coisas
+- [ ] Considerar desconto anual (~R$99-119/ano, equivalente a R$8-10/mês) após validar conversão do mensal, para aumentar LTV/retenção
+- [ ] Revisitar preço após dados reais de conversão no lançamento a R$9,90 — pode subir para R$14,90 se a demanda validar disposição a pagar mais
+
+### 7.9.3. Domínio próprio conectado ao perfil (tier acima do Perfil PRO)
+
+**Conceito:** profissional conecta um domínio próprio (ex: `joanasilva.com.br`, comprado por ela num registrador como Registro.br) que aponta pro mesmo conteúdo já publicado em `carreirabeauty.com/perfil/slug` — mesmo padrão técnico usado por Linktree, Carrd, Webflow para domínio customizado por usuário.
+
+**Viabilidade técnica (pesquisa jul/2026) — confirmada via Vercel (já é a hospedagem escolhida, seção 9):**
+- Fluxo: profissional compra o domínio própria (custo dela, à parte — ~R$40/ano para `.com.br`), insere na área PRO, sistema gera registro DNS (CNAME) para ela configurar no registrador, Vercel verifica automaticamente e emite SSL grátis após propagação (24-48h)
+- **Limite técnico real:** plano Hobby (gratuito) do Vercel permite até **50 domínios customizados por projeto** — suficiente para validar a feature com um grupo inicial, mas exige migração para o plano Pro do Vercel (pago, US$20/mês por membro, domínios ilimitados) se a adoção passar de 50 profissionais com domínio próprio conectado
+- SSL automático e gratuito em todos os planos, sem custo adicional por certificado
+
+**Posicionamento de monetização:** não incluído no Perfil PRO (R$9,90/mês) — vira um **tier/add-on superior**, já que exige investimento adicional da própria profissional (compra do domínio) e gera custo de infraestrutura crescente para a plataforma (upgrade de plano Vercel além de 50 domínios). Faz mais sentido para profissional já mais madura/estabelecida, não para quem está só começando (perfil do Perfil PRO básico).
+
+- [x] Feature validada como tecnicamente viável e registrada como próximo tier/add-on
+- [ ] Definir preço do add-on de domínio próprio (acima dos R$9,90 do Perfil PRO)
+- [ ] Monitorar contagem de domínios customizados conectados — gatilho de decisão para upgrade do plano Vercel (Hobby → Pro) ao se aproximar de 50
+- [ ] Detalhar UX do fluxo de conexão de domínio (tela de instruções DNS, estado de verificação pendente/ativo)
+
+> **⚠️ Prioridade rebaixada (jul/2026):** questionamento levantou dúvida se domínio próprio é algo que o público de baixa renda/iniciante valoriza de verdade — percepção é que esse público enxerga mais valor em **cursos** (crença de que investir em conteúdo/capacitação aumenta renda diretamente). Ver seção 7.9.4 abaixo, que assume prioridade mais alta que esta feature. Domínio próprio permanece registrado como ideia validada tecnicamente, mas não é o próximo passo.
+
+---
+
+## 7.9.4. Cursos/conteúdo próprio (nova prioridade — conecta com seção 7 v2 e seção 4.2 direção 4)
+
+**Contexto/motivação (jul/2026):** mercado de infoprodutos no Brasil é grande e crescente — mais de R$ 30 bilhões em vendas acumuladas só na Hotmart, estética/beleza citado como um dos nichos mais promissores, carreira/desenvolvimento pessoal entre os pilares de maior volume, 77% das compras de produtos digitais já via mobile (alinhado ao público mobile-first do CarreiraBeauty). Diferente do domínio próprio (conceito abstrato, baixa urgência percebida), "curso que ensina a ganhar mais" conecta direto com a crença que esse público já tem — gatilho de compra mais forte e validado no nicho.
+
+**Decisão: conteúdo próprio (CarreiraBeauty cria os cursos), não afiliação/comissão de terceiros.** Mais controle de qualidade, marca e margem — ainda que exija maior esforço de produção inicial do que um modelo de afiliado puro.
+
+- [x] Direção escolhida: produção de conteúdo próprio, prioridade acima do domínio próprio (seção 7.9.3)
+- [x] Conecta com item já listado como v2 na seção 7 ("Cursos/certificações parceiras" — a redefinir como "cursos próprios", não parceria externa)
+- [x] Conecta com a direção 4 da seção 4.2 ("assinatura de comunidade/conteúdo")
+
+### MVP de validação (jul/2026) — 5 micro-conteúdos via Gamma: 2 grátis + 3 paywall PRO (revisado)
+
+**Pivô final:** em vez de um lote 100% grátis, o teste combina demanda e monetização no mesmo lote — 2 conteúdos abertos a todos (isca de confiança, baixo compromisso) e 3 atrás de paywall, liberados só para assinantes PRO (seção 7.9.5). Isso acelera o aprendizado: consumo dos grátis sinaliza demanda por conteúdo; tentativa de abrir os pagos sinaliza intenção de compra — os dois sinais no mesmo teste.
+
+## 7.9.6. Templates visuais de perfil (nova hipótese de teste, jul/2026 — 1ª prioridade)
+
+**Hipótese:** oferecer templates/temas visuais prontos para a página pública do profissional (cores, layout, disposição dos blocos) deixa o perfil com aparência mais profissional e aumenta o valor percebido do Perfil PRO — sem exigir que a profissional saiba nada de design.
+
+**Estratégia de monetização (jul/2026 — decisão de sequenciamento):** provar valor antes de trancar. Diferente da tabela grátis/PRO original da seção 7.9.1 (que já nascia trancada), os templates entram **abertos pra visualização de todo mundo** — a exclusividade PRO acontece só no momento de salvar/aplicar, não na navegação. Objetivo: medir se a existência dos templates de fato gera desejo de compra antes de decidir preço/gate definitivo.
+
+**Fluxo de preview e paywall:**
+- [ ] Preview renderizado **com os dados reais da própria profissional** (nome, função, cidade, foto de perfil se houver) — não um profissional fictício genérico, pra reduzir a distância psicológica ("é o MEU perfil, só que bonito")
+- [ ] Campos que ela ainda não preencheu (ex: fotos de portfólio, educação) aparecem como **placeholder óbvio de exemplo** dentro do próprio template (ex: silhueta + "adicione fotos do seu trabalho aqui") — serve de empurrão extra pra completar o cadastro, não só de preview
+- [ ] Navegação entre os 2-3 templates é livre, sem bloqueio nenhum — ela pode alternar e comparar à vontade
+- [ ] **Paywall só no clique de "salvar"/"aplicar"**, e só para templates diferentes do padrão grátis — modal "Esse visual é exclusivo do PRO" com CTA de assinatura
+- [ ] Template padrão (grátis) continua salvável sem fricção, a qualquer momento
+
+**Escopo do MVP (build mínimo funcional): ✅ IMPLEMENTADO (jul/2026)**
+- [x] 3 templates fixos pré-definidos (não customização livre de cor/fonte — reduz complexidade de build e de decisão pra um público de baixa sofisticação, mesma lógica já usada na decisão do PRO unificado, seção 7.9.5)
+- [x] Seletor com preview ao vivo usando dado real + placeholder — campos ainda vazios (portfólio, apresentação, experiência, formação) aparecem como placeholder de exemplo em vez de sumir, servindo de empurrão pra completar o cadastro
+- [x] Aplica-se sobre os mesmos campos/dados já existentes da página pública (seção 7.9) — troca só a apresentação visual, não estrutura de dados
+- [x] Navegação livre entre os 3 + paywall só no clique de "aplicar" (modal "Esse visual é exclusivo do PRO")
+- [x] **Fallback de plano:** se o profissional deixa de ser PRO, a página pública volta pro Clássico sozinha, mesmo com um tema PRO ainda salvo em `template_id` — evita visual pago travado pra quem não paga mais
+- [ ] Métrica de validação: (a) quantas profissionais chegam até o preview de um template PRO, (b) taxa de conversão do modal de paywall (tentativa de salvar → assinatura), (c) se isso supera a conversão free→PRO da baseline atual (sem preview aberto) — **instrumentado, aguardando dado real**
+
+- [x] Backend: campo `template_id` em `professionals` (migração `033_templates_perfil.sql`), default `'classico'`
+- [x] Tracking em `template_eventos` (`professional_id`, `template_id`, `tipo`) com os 3 sinais do teste: `preview` (chegou a ver um tema PRO), `paywall_hit` (tentou aplicar sem ser PRO), `aplicado`
+- [x] **Templates definidos:** `classico` (grátis, visual de sempre), `vitrine` (PRO — header curvo com foto sobreposta, nome como logomarca, portfólio em mosaico estilo feed), `elegante` (PRO — monograma dourado, foto emoldurada, tipografia serifada, portfólio em galeria)
+- [x] **Contatos (WhatsApp/Instagram/Email) só nos templates PRO** — vira benefício exclusivo, transforma a página em "cartão de visitas que fecha cliente" (conecta com a tese da seção 4.2: valor que não depende de estar desempregada)
+- [x] **Decisão de UX (jul/2026):** o seletor não virou tela separada — "Meu Perfil" em modo visualização **é** o seletor (abas + preview ao vivo + aplicar). Duas telas ("Meu Perfil" com resumo estático + "Visual do Perfil") eram redundantes, e um botão discreto de "trocar visual" escondia a decisão que a gente quer provocar
+- [x] Disponibilidade e tipo de vínculo saíram dos templates PRO — baixa relevância numa vitrine; a tag do hero passou a ser "X anos de experiência", que é o dado que vende
+
+**Lógica de divisão:** grátis = temas universais, de baixo compromisso, úteis pra qualquer pessoa (funcionam como isca de confiança). PRO = temas de "crescimento de negócio próprio", que conectam com quem já tem motivo de virar assinante (vitrine, portfólio, clientela).
+
+**Temas e prompts de geração (Gamma Generate API v1.0):**
+
+**1. Como impressionar no primeiro atendimento — GRÁTIS**
+> Crie uma apresentação visual e motivacional em português do Brasil, em formato de cartões (não texto corrido), para profissionais de beleza autônomos e iniciantes (cabeleireiras, manicures, esteticistas, barbeiros) com baixo hábito de leitura. Tema: "Como impressionar no primeiro atendimento com um cliente". Linguagem simples, direta, informal, aspiracional — sem termos técnicos. Cada slide com no máximo 1-2 frases curtas ou 3 bullets curtos, com espaço para ícone/imagem grande. Estrutura: (1) capa com título chamativo, (2) por que a primeira impressão importa, (3) 3 erros comuns que afastam cliente, (4-6) dicas práticas (pontualidade, escuta ativa, comunicação, apresentação pessoal), (7) frase motivacional de fechamento, (8) convite para conhecer o CarreiraBeauty. Tom: acolhedor, como uma mentora experiente. Gere 8-10 cards.
+
+**2. Como se destacar numa entrevista/seleção de vaga — GRÁTIS**
+> Crie uma apresentação visual e motivacional em português do Brasil, em formato de cartões, para profissionais de beleza buscando emprego formal (CLT), com baixo hábito de leitura. Tema: "Como se destacar numa entrevista ou seleção de vaga na área da beleza". Linguagem simples, direta, encorajadora. Cada slide curto, com apoio visual forte. Estrutura: (1) capa, (2) o que o empregador realmente observa, (3) como se vestir e se portar, (4-6) o que falar (experiência, disponibilidade, portfólio) e o que evitar, (7) frase de confiança/motivação, (8) convite para completar o perfil no CarreiraBeauty. Tom: acolhedor, prático. Gere 8-10 cards.
+
+**3. Como montar um portfólio que atrai cliente — PRO (paywall)**
+> Crie uma apresentação visual em português do Brasil, em cartões, para profissionais de beleza autônomos, com baixo hábito de leitura. Tema: "Como montar um portfólio que atrai cliente". Linguagem simples e prática. Estrutura: (1) capa, (2) por que portfólio importa mais que diploma pra conquistar cliente novo, (3) o que fotografar (antes/depois, ângulos, iluminação básica com celular), (4) erros comuns que afastam cliente (fotos escuras, sem contexto), (5) como organizar por tipo de serviço, (6) como usar o portfólio no perfil CarreiraBeauty PRO, (7) frase de fechamento motivacional. Tom: mentora prática, sem jargão técnico de fotografia. Gere 8-10 cards.
+
+**4. Como pedir indicação e fidelizar cliente — PRO (paywall)**
+> Crie uma apresentação visual em português do Brasil, em cartões, para profissionais de beleza autônomos, com baixo hábito de leitura. Tema: "Como pedir indicação e fidelizar cliente sem parecer inconveniente". Linguagem simples, tom de conversa entre amigas. Estrutura: (1) capa, (2) por que cliente fiel vale mais que cliente novo, (3) o momento certo de pedir indicação, (4) frases prontas pra usar (scripts simples), (5) como agradecer e recompensar quem indica, (6) erro comum: pedir demais, cedo demais, (7) frase de fechamento. Tom: acolhedor, direto. Gere 8-10 cards.
+
+**5. Como precificar seus serviços sem perder cliente — PRO (paywall)**
+> Crie uma apresentação visual em português do Brasil, em cartões, para profissionais de beleza autônomos iniciantes, com baixo hábito de leitura. Tema: "Como precificar seus serviços sem perder cliente". Linguagem simples, sem termos financeiros complicados. Estrutura: (1) capa, (2) por que cobrar barato demais prejudica você, (3) como calcular o mínimo que precisa cobrar (custo + tempo + lucro, de forma simplificada), (4) como reajustar preço sem perder cliente antigo, (5) o que fazer quando cliente reclama do preço, (6) frase de confiança ("seu trabalho vale o que você cobra"), (7) fechamento motivacional. Tom: encorajador, prático, sem soar como aula de matemática. Gere 8-10 cards.
+
+- [x] Divisão final: 2 grátis (universais, isca de confiança) + 3 PRO/paywall (crescimento de negócio próprio, reforça valor do PRO unificado)
+- [x] Prompts de geração definidos para os 5 conteúdos (acima), prontos para uso na Gamma Generate API
+- [x] Geração via Gamma Generate API (v1.0, GA desde nov/2025) — usuário tem plano pago com acesso à API
+
+### 6º conteúdo — sazonal de julho (PRO)
+
+**Gancho sazonal:** julho no Brasil combina dois gatilhos — frio (mudança de rotina de cuidado com cabelo/pele) e férias escolares (mães com mais tempo livre, pico de corte infantil). Conteúdo sazonal tende a ter taxa de abertura mais alta por parecer urgente/atual, e serve de gancho de reengajamento (conecta com a régua de email semanal, seção 7.7).
+
+**6. Como aproveitar as férias de julho pra vender mais — PRO (paywall)**
+> Crie uma apresentação visual e motivacional em português do Brasil, em formato de cartões, para profissionais de beleza autônomos no Brasil, com baixo hábito de leitura. Tema: "Como aproveitar as férias de julho para vender mais" — combine os gatilhos de frio (mudança na rotina de cuidados) e férias escolares (mães com mais tempo livre, pico de corte infantil). Linguagem simples, direta, com senso de urgência/oportunidade sazonal. Cada slide curto, com apoio visual forte. Estrutura: (1) capa com gancho de "aproveite julho antes que passe", (2) por que julho é oportunidade (frio + férias = mais demanda de determinados serviços), (3) ideia de pacote família (mãe + filho), (4) serviços de inverno pra oferecer como upsell (hidratação, tratamento pra pele ressecada), (5) como divulgar uma promoção sazonal simples (Instagram, WhatsApp, perfil CarreiraBeauty), (6) erro comum: não aproveitar a época e perder demanda pro concorrente, (7) frase de fechamento motivacional com senso de urgência. Tom: mentora prática, animada, focada em ação imediata. Gere 8-10 cards.
+
+- [x] Tema escolhido: "Como aproveitar as férias de julho pra vender mais"
+- [x] Status: PRO (paywall) — reforça valor da assinatura, junto dos demais 3 conteúdos PRO
+- [x] Prompt de geração definido, pronto para uso na Gamma Generate API
+- [ ] Considerar calendário de conteúdo sazonal recorrente (próximas datas: agosto/Dia dos Pais, dezembro/festas, etc.) como estratégia contínua, não conteúdo pontual único
+
+### Medição de consumo (jul/2026)
+
+**Decisão: tracking interno como fonte principal, GA4 como complemento — não depender só de ferramenta externa.**
+
+- [x] **Tracking interno (prioritário):** nova entidade `ContentView` no banco (user_id, content_id, viewed_at, opcionalmente % de scroll/tempo na página) — grava toda vez que o profissional autenticado abre um conteúdo dentro do app. Permite cruzar diretamente "quem consumiu o quê" com "quem virou assinante PRO depois" via query direta no próprio banco (Postgres/Supabase, seção 9) — não depende de exportação de ferramenta terceira
+- [x] **GA4 como complemento (não fonte principal):** gratuito, suporta User-ID para rastrear usuário logado entre sessões/dispositivos (confirmado disponível no tier grátis, jul/2026) — bom para visão agregada de comportamento (tempo na página, origem de tráfego, funil de abandono). **Restrição importante:** Termos de Serviço do Google proíbem enviar dado pessoalmente identificável (email, nome) — só é permitido enviar um ID interno anônimo (ex: UUID do usuário no banco), nunca o email direto
+- [x] Conteúdo deve ficar hospedado **dentro do próprio app CarreiraBeauty** (não em link externo gamma.app) — necessário para o tracking interno funcionar por usuário autenticado
+
+- [ ] Verificação de status de assinatura PRO já precisa existir para liberar os 3 conteúdos com paywall (reutiliza checagem de `Subscription` já implementada para o plano Pro de candidaturas, seção 4/10)
+- [ ] Medir: (a) taxa de consumo dos 2 conteúdos grátis, (b) taxa de tentativa de acesso aos 3 conteúdos PRO por não-assinantes (sinal de intenção de compra/paywall hit), (c) taxa de conversão paywall → assinatura PRO unificada (seção 7.9.5)
+- [ ] Implementar tabela `ContentView` e instrumentação GA4 (User-ID) como pré-requisito técnico antes de publicar os 5 conteúdos piloto
+
+---
+
+## 7.9.7. Quiz-certificado e prova social (novas hipóteses, jul/2026 — conectam com hipótese de status)
+
+**Contexto:** conecta diretamente com a hipótese de status levantada acima (seção 7.9.6/discussão jul/2026) — a ideia de que esse público paga por **sinais visíveis de investimento/competência**, não necessariamente pela utilidade em si. Três hipóteses novas, todas no mesmo racional:
+
+### a) Quiz-certificado (estilo Duolingo, aplicado à carreira)
+
+**Hipótese:** quiz curto e gamificado sobre temas da profissão (atendimento, técnica, precificação, etc.), com certificado/badge ao final — o valor percebido está no certificado (objeto de status, compartilhável), não necessariamente no conteúdo do quiz em si.
+
+**Modelo proposto:**
+- [ ] **Quiz em si: sempre grátis**, com limite de **1 quiz/dia no plano grátis** (mecânica de rate-limit estilo Duolingo — cria hábito de abertura diária e urgência de "quero fazer mais um agora")
+- [ ] **PRO: quizzes ilimitados**, sem limite diário
+- [ ] **Certificado/badge: paywall separado do acesso ao quiz** — ela pode responder de graça, mas "destravar" o certificado pra postar/adicionar ao perfil é o que é pago. Separa "aprender" (grátis, gera engajamento e hábito) de "provar que aprendeu" (pago, é o objeto de status)
+- [ ] Certificado desbloqueado fica **liberado dentro do PRO unificado** (seção 7.9.5, R$14,90) — não cria SKU extra, mantém a lógica de "um sim só" de compra
+- [ ] **Testar variante de baixo compromisso:** certificado avulso (compra única, ex: R$9,90) como alternativa/complemento ao ebook do funil de topo já existente (seção 7.9.5) — o badge tangível pode converter melhor que conteúdo lido e esquecido
+- [ ] **Posicionamento cuidadoso:** chamar de "Certificado CarreiraBeauty" (selo de engajamento/conhecimento na plataforma), não "certificação profissional formal" — evita expectativa de rigor técnico que um quiz interno não sustenta
+- [ ] A definir: banco de perguntas por tema/função (produção de conteúdo, possivelmente via IA/Gamma como os demais conteúdos da seção 7.9.4)
+- [ ] Métrica de validação: (a) taxa de conclusão diária/streak no plano grátis, (b) taxa de tentativa de desbloqueio de certificado (sinal de intenção de compra), (c) conversão certificado avulso vs. PRO unificado
+
+### b) Depoimentos/recomendações estilo LinkedIn
+
+**Hipótese:** recomendação escrita, nomeada, de cliente/parceiro/ex-empregador é prova social mais forte que uma nota numérica — reforça tanto a credibilidade real do perfil quanto o sinal de status.
+
+- [ ] Diferente da "captura de avaliação de cliente" já prevista na seção 7.9.1 (link enviado pós-atendimento, formato nota/review curto) — aqui é recomendação **nomeada e textual**, no estilo LinkedIn ("Fulano trabalhou comigo em X, recomendo por Y")
+- [ ] Fluxo: profissional envia link de pedido de recomendação pra cliente/parceiro/ex-empregador → pessoa escreve texto curto → aparece no perfil público, com nome e relação (cliente, colega, ex-empregador)
+- [ ] Baixo custo de construção (reaproveita padrão de link de convite já desenhado pra avaliação, seção 7.9.1) — mas é feature nova de exibição, não é o mesmo dado
+- [ ] Posicionamento: recurso do PRO (reforça vitrine), grátis pode ter limite de quantidade exibida (ex: 1 depoimento) vs. PRO ilimitado — mesma lógica de preview aberto + limite no grátis já usada em outras features
+
+### c) Fotos: portfólio + certificados de curso externo + prints de depoimento
+
+- [ ] Extensão natural do portfólio de fotos já previsto (seção 7.9 v2/7.9.1) — adicionar como tipos de mídia aceitos: certificado de curso feito fora da plataforma (foto/scan) e print de depoimento recebido por WhatsApp/Instagram
+- [ ] Reaproveita o campo de fotos ilimitadas já no PRO (tabela da seção 7.9.1) — não é feature nova de infraestrutura, é ampliar o que pode ser enviado pro álbum existente
+
+- [ ] **Registrado como hipóteses a testar, não ainda priorizadas em relação a templates (7.9.6) e vagas curadas (Fase 6.5)** — ordem de teste a definir
+
+---
+
+## 7.9.5. Oferta PRO unificada (decisão final — substitui venda separada)
+
+**Decisão (jul/2026):** unificar Perfil PRO (site/vitrine, seção 7.9.1) e Conteúdo PRO (micro-conteúdos recorrentes, evolução da seção 7.9.4) em **um único plano PRO**, em vez de vender cada um separadamente.
+
+**Estrutura do funil completo:**
+
+1. **Topo de funil — ebook avulso (R$9,90, compra única):** isca de baixo compromisso pra quem ainda não confia o suficiente pra assinar algo recorrente (mantido da seção 7.9.4, MVP de validação via Gamma)
+2. **Oferta principal — PRO unificado (assinatura mensal, preço a definir, ancorado em R$9,90-14,90):** inclui tudo da tabela da seção 7.9.1 (fotos ilimitadas, Instagram, avaliação de cliente, analytics, selo verificado) **+** micro-conteúdos recorrentes (seção 7.9.4) — um único "sim" de compra, não dois produtos concorrendo pela atenção/orçamento da mesma pessoa
+
+**Por que unificar (não vender separado):**
+- Reduz fricção de decisão — público de baixa sofisticação/baixo hábito de leitura se beneficia de uma escolha só, não de avaliar múltiplos produtos
+- Aumenta valor percebido pelo mesmo preço ("R$9,90 e ganho vitrine + conteúdo toda semana" soa como mais negócio que qualquer um dos dois isolado)
+- Transforma conteúdo de venda avulsa (baixo LTV, precisa vender de novo a cada peça) em parte de assinatura recorrente — reforça objetivo de receita recorrente desacoplada de volume de vaga (seção 4.2)
+- Micro-conteúdo recorrente dá motivo de abrir o app com frequência, mesmo pra quem já tem o perfil pronto — reduz risco de churn "single-feature" (cancelar por já ter usado a única coisa que queria)
+
+- [x] Decisão: PRO unificado (perfil + conteúdo), não produtos separados
+- [x] Ebook avulso mantido como isca de topo de funil, fora da assinatura
+- [x] **Preço final decidido e implementado (jul/2026): R$14,90/mês promocional** — o PRO deixou de ser só "candidaturas ilimitadas" (R$29) e passou a incluir conteúdos + visuais de perfil, então o valor agregado justificou a faixa de cima da âncora, e não os R$9,90. Plano do Mercado Pago atualizado no mesmo ID (`MP_PLAN_PROFISSIONAL_PRO`), sem assinante ativo afetado — não houve troca de variável de ambiente. Tela mostra "de R$ 29" riscado como ancoragem
+- [x] **Um único plano PRO no app, não dois SKUs** — na prática o "plano Pro de candidaturas" (R$29) e o "Perfil PRO" (R$9,90) da seção 7.9.2 nunca existiram separados no código: sempre houve um só `professionals.plano = 'pro'`. A decisão de unificar apenas alinhou preço e discurso ao que o código já fazia (supersede a separação prevista na seção 7.9.2)
+- [ ] Definir cadência de entrega dos micro-conteúdos dentro do PRO (semanal? conecta com a régua de email já definida na seção 7.7)
+- [ ] Medir taxa de conversão ebook avulso → PRO unificado, e churn do PRO unificado vs. churn que se esperava do Perfil PRO isolado (validar se a hipótese de retenção melhor se confirma)
+
+**Tela de planos do profissional — decisões de copy/UX (jul/2026):**
+
+- [x] **Copy virou orientada a resultado, não a feature** — H1 "Mais chances de conseguir a vaga certa" (era "Destaque seu perfil"); CTA "Quero ser PRO" (era "Assinar"). Bloco "Por que o PRO ajuda a conseguir vaga?" explica o **mecanismo** (topo da lista → mais visto; candidaturas ilimitadas → mais tentativas; perfil/conteúdos → se destaca melhor), em vez de só listar features
+- [x] **Sem prova social inventada** — decisão explícita de não usar "X profissionais já assinaram" ou "PRO é chamado 3x mais": com 0 assinantes, qualquer número seria fabricado. A persuasão se apoia no mecanismo, que é verificável
+- [x] **Ancoragem de preço:** "de R$ 29" riscado + selo "🔥 PROMO" no lugar de "Recomendado"
+- [x] **Objeção de fidelidade quebrada no ponto certo** — selo verde "Sem fidelidade. Cancele quando quiser, sem multa." logo abaixo do preço. A ressalva já existia, mas em 11px cinza no rodapé, invisível justamente pra quem tem a dúvida
+- [x] **Mobile sem scroll** — os 2 planos, o CTA e o selo de fidelidade cabem acima da dobra em 375x812 (validado). Cards ficaram lado a lado mesmo no celular, com as mesmas 5 linhas de benefício nos dois, virando comparação direta em vez de duas listas soltas
+- [ ] **⚠️ Pendência (vira problema no 1º assinante):** não existe cancelamento dentro do app. O cancelamento real acontece na conta do Mercado Pago (o webhook detecta e marca `plano_status: 'cancelado'`) — por isso o rodapé diz isso explicitamente, em vez de prometer "cancele pelo app". Pior: pra quem já é PRO, o card grátis mostra **"Fazer downgrade", que é um `<div>` decorativo sem `onClick`** — é exatamente onde o assinante clicaria pra cancelar, e não faz nada. Hoje é inofensivo (0 assinantes), mas vira ticket de suporte e quebra de confiança no momento mais sensível. Saídas: (a) o botão levar pro MP com instruções, ou (b) implementar cancelamento de verdade via API do MP
+
 ---
 
 ## 9. Especificação Técnica
@@ -358,6 +664,10 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 | **Pix Automático (nativo, via PSP)** | 0,22%–0,35% direto no Banco Central; 0,28%–0,99% via PSP como Asaas | Novo padrão do Banco Central (lançado início de 2026) para débito recorrente via Pix | Tecnologia mais nova — vale monitorar maturidade de suporte antes de depender dela no MVP |
 
 - [x] **Geocoding/CEP: BrasilAPI** (`brasilapi.com.br/api/cep/v2`) — usado para autopreencher endereço a partir do CEP no onboarding (mais simples que geocoding completo lat/long por enquanto; filtro por raio geográfico ainda não implementado — busca hoje é por cidade/estado, não por distância)
+
+> **⚠️ Achado importante (jul/2026): a BrasilAPI NÃO resolve o raio.** Ao tentar implementar o matching por raio de 30km, confirmou-se que o endpoint de CEP v2 retorna `location.coordinates` **vazio** (testado com 4 CEPs reais de SP/RJ) — ele dá cidade/estado/rua, não lat/long. E `companies.latitude/longitude` e `professionals.latitude/longitude` estão **100% nulos** hoje (0 de 3 empresas, 0 de 93 profissionais).
+>
+> Ou seja: **todo filtro por raio depende de escolher e integrar um geocoder de verdade + backfill dos registros existentes.** Opções levantadas: Nominatim/OpenStreetMap (grátis, sem chave, limite de 1 req/s — suficiente pro volume atual de ~96 endereços) ou Google Maps Geocoding API (mais preciso, exige chave e tem custo acima da cota grátis). **Decisão adiada** — o raio das vagas agregadas foi resolvido sem geocoding próprio (a Adzuna geocodifica), e o disparo de email por vaga seguiu por cidade exata por ora.
 
 ### Próximos passos técnicos
 1. [x] Especificar modelo de dados — alto nível (seção 10)
@@ -467,12 +777,20 @@ Objetivo: cada fase gera algo **testável e demonstrável** sozinho, antes de av
 - Email para profissional: novas vagas dentro do raio
 - **Critério de pronto:** recebo os dois emails de teste com dados reais da base
 
+> **Status (jul/2026): o digest semanal por cron continua NÃO implementado.** O que existe hoje é diferente e transacional: ao aprovar uma vaga no admin, um botão dispara o email de nova vaga pros candidatos compatíveis. Antes esse disparo era automático na aprovação; virou **manual e separado** (jul/2026) pra que o admin decida caso a caso — mostra a contagem de candidatos antes, pede confirmação, e só então envia. Matching por **função + cidade exata** da empresa (antes era função + estado, o que mandava vaga de outra cidade do mesmo estado).
+>
+> - [ ] **Pendência:** matching do disparo por raio de 30km em vez de cidade exata — depende de geocoding (ver pendência abaixo). Decisão de jul/2026 foi seguir por cidade agora e fazer o raio depois
+
 ### Fase 6 — Polimento
 - Portfólio de fotos (profissional, condicional à função)
 - Logo/Instagram da empresa
 - Ajustes de SEO da página pública, performance, revisão de UX do multi-step
 
 ### Fase 6.5 — Vagas Agregadas (MVP+, complementar)
+
+> **🧪 Antecipado para teste de hipótese no web app (jul/2026):** priorizado como 2ª hipótese a testar, logo após os Templates de Perfil (seção 7.9.6) — deixa de ser só "fase futura" e passa a ter build mínimo funcional real no app, não só validação barata. Hipótese: mostrar vagas curadas de outras fontes, próximas da região do profissional, aumenta engajamento/retenção mesmo com a base nativa de vagas ainda pequena.
+>
+> **✅ Status (jul/2026): as duas hipóteses estão no ar, aguardando dado.** Hipótese 1 (vagas agregadas, esta seção) e hipótese 2 (templates de perfil, seção 7.9.6) foram implementadas e instrumentadas. Nenhuma tem resultado ainda — falta tráfego real. As métricas de decisão estão em `vagas_externas_clicks` e `template_eventos`, com stats no admin.
 
 Objetivo: mostrar volume de vagas reais na região do profissional mesmo enquanto a base própria de empresas cadastradas ainda é pequena — resolve parte do problema de cold start do lado profissional.
 
@@ -489,6 +807,36 @@ Objetivo: mostrar volume de vagas reais na região do profissional mesmo enquant
 - [x] **Outras fontes avaliadas e descartadas:** Catho, InfoJobs e Vagas.com são concorrentes diretos no nicho, sem API pública de parceria para redistribuição de vagas. "API BR — Vagas Aggregator" existe mas é focada em vagas de tecnologia via GitHub, não aplicável ao nicho de beleza/estética
 - [ ] Definir se vaga agregada aparece misturada na busca com filtro de raio, ou em aba/seção totalmente separada
 - [ ] Adicionar ação de implementar JobPosting structured data (schema.org) nas vagas nativas — SEO gratuito, complementar à agregação via Adzuna
+
+**MVP de teste (build mínimo funcional, jul/2026): ✅ IMPLEMENTADO**
+- [x] Seção "Vagas de outros sites" no dashboard do profissional, abaixo das vagas nativas, com selo "Jobs by Adzuna" conforme obrigação contratual — **hoje é um badge de texto, não a imagem oficial (mín. 116x23px) que a Adzuna exige; pendência de conformidade**
+- [x] Busca por **raio de 30km** em torno da cidade do profissional, não match exato de cidade — usa o parâmetro `distance` nativo da Adzuna (que já geocodifica), resolvendo o caso de quem mora na periferia/região metropolitana sem precisar de geocoding próprio
+- [x] Cache em `vagas_externas` (migrações `030`/`031`), populado por script — não é chamada em tempo real por usuário. Coluna `cidade_busca` separa a cidade-âncora da busca (usada no filtro) da cidade real da vaga (usada na exibição), permitindo que a mesma vaga sirva a âncoras com raios sobrepostos
+- [x] Filtro restrito a beleza **no título** da vaga (mantém escopo 100% vertical). Termos genéricos (recepcionista/auxiliar/assistente) só entram combinados com termo de beleza no mesmo título — checar a descrição deixava passar ruído (ex: nome de agência de recrutamento com "cabeleireiro" vazando pra vaga de recepcionista de restaurante). Esses genéricos são ~9% do volume, quase todos "auxiliar/assistente de cabeleireiro"
+- [x] Candidatura externa redireciona pro site de origem (abre em nova aba, com ícone de link externo)
+- [x] Matching por função do profissional além da localização — antes qualquer profissional da cidade via as mesmas vagas
+- [x] Card mostra salário, "há X dias" e trecho da descrição. **Salário convertido de anual pra mensal** — a Adzuna sempre retorna anualizado (padrão deles pra comparação entre países), o que exibiria "R$ 24.000" pra uma vaga de R$ 2.000/mês
+- [x] Métrica de validação instrumentada: `vagas_externas_clicks` (clique em vaga agregada), com stats no admin — **aguardando dado real**
+- [x] **Cobertura atual:** ~970 vagas cacheadas em 29 cidades (as que têm profissional cadastrado). Total nacional disponível na Adzuna ≈ 2.650 vagas de beleza — dá pra ampliar pra capitais sem profissional ainda, sem estourar cota (250 chamadas/dia; hoje ~29 por execução)
+- [x] **Decisão (jul/2026): sem cron, atualização manual pelo admin** — botão "Atualizar cache da Adzuna agora" em `/admin/vagas-externas` mostra o resultado na hora (cidades processadas, chamadas feitas, vagas encontradas, erros) e registra em `vagas_externas_atualizacoes`. Usuário optou por rodar ~1x/semana e manter controle, em vez de agendar
+- [ ] **Pendência conhecida:** a Adzuna não reconhece "Embu das Artes" (nome oficial desde 2006) e retorna 0 pra qualquer busca lá — a base de localização deles ainda usa "Embu". Aceito por ora (1 de 29 cidades); se aparecerem mais casos, vale um mapa de nomes alternativos
+- [ ] **Pendência:** trocar o selo de texto pela imagem oficial "Jobs by Adzuna" (obrigação contratual de atribuição)
+
+### ⚠️ Decisão estratégica — NÃO expandir escopo para negócios locais fora de beleza (jul/2026)
+
+**Questionamento levantado:** dado que a oferta de vaga nativa em beleza ainda é baixa (problema real de liquidez, não hipotético), cogitou-se ampliar o CarreiraBeauty para aceitar qualquer negócio local (padaria, loja, mercado, farmácia) publicando vagas de auxiliar, vendedor, caixa, recepcionista — não só negócios de beleza.
+
+**Decisão: NÃO expandir.** Nem o cadastro nativo (pago, CNPJ, trial), nem a agregação de vagas de terceiros (Fase 6.5, Adzuna) — **tudo permanece 100% dentro do nicho de beleza/estética/bem-estar**, inclusive as vagas agregadas de fontes externas (busca no Adzuna continua filtrada só para funções/categorias de beleza, não geral).
+
+**Motivos:**
+- O diferencial competitivo (seção 3) é justamente ser vertical em beleza — permite competir com Catho/InfoJobs/Indeed (horizontais, muito maiores) sem entrar no jogo deles, onde a plataforma perderia
+- Toda a engenharia de aquisição já construída (segmentação Meta Ads por categoria de negócio de beleza, dado "44% dos salões não repõem equipe", conteúdo educativo de carreira em beleza, taxonomia de funções — seção 7.8) foi desenhada pro nicho e não é reaproveitável para negócios genéricos
+- Expandir escopo antes de validar product-market fit no nicho atual (campanha de empresa recém-ativada, monetização ainda em calibração) é risco de scaling prematuro
+
+**Alternativa considerada e também descartada:** ampliar o filtro de busca da Fase 6.5 (agregação via Adzuna) para incluir vagas locais gerais (vendedor, caixa, atendente) além de beleza, mantendo isso separado do cadastro nativo pago — resolveria o problema de liquidez percebida sem abrir cadastro pago pra qualquer negócio. **Também descartada** — usuário optou por manter 100% dentro do nicho de beleza em todas as camadas, inclusive na agregação.
+
+- [x] Escopo mantido 100% vertical em beleza/estética/bem-estar — cadastro nativo e agregação de terceiros
+- [x] Cargos de apoio (recepcionista, auxiliar/assistente) **dentro** de negócios de beleza continuam no escopo — já validado na taxonomia (seção 7.8), isso não é a mesma coisa que expandir para negócios fora do nicho
 
 - [x] Sequência de fases validada
 
@@ -612,6 +960,21 @@ Resultado observado: 50 cadastros totais — 29 profissionais, 1 empresa (cadast
 - [ ] Adicionar instrumentação de funil (em qual tela cada cadastro abandona) para visibilidade contínua — hoje não há essa visibilidade, dificultando diagnosticar drop-off por etapa
 
 **Confirmado ao vivo (beta.carreirabeauty.com/login):** a tela de login/signup unificado (Google + código por email, sem senha) está correta e alinhada com a seção 7.6 — não é o problema em si. O problema é a posição: é a primeira tela pra qualquer tráfego, incluindo anúncios, sem diferenciação de público. **Todos os anúncios hoje linkam para a mesma URL genérica `/login`**, sem parâmetro ou rota específica por campanha — confirma a causa raiz nº 2 acima. Próximo passo prático: criar rotas ou parâmetros dedicados (ex: `/login?perfil=empresa`, `/login?perfil=profissional`) e atualizar os links de cada campanha no Meta Ads Manager para apontar para a versão certa.
+
+### Canais de aquisição além de Meta Ads (jul/2026)
+
+**Contexto:** aquisição hoje depende 100% de Meta Ads, tanto empresa quanto profissional — risco de concentração num canal só. Avaliadas alternativas, incluindo automação em grupos de Facebook (onde a comunidade de beleza já troca vaga organicamente).
+
+**❌ Rejeitado: bot/agente automatizado pra identificar quem posta vaga em grupo de Facebook e convidar via mensagem.**
+- **Inviável tecnicamente:** Facebook descontinuou completamente o Groups API em abril/2024 — não existe forma oficial de ler posts de grupo ou mandar mensagem automatizada pra membro via API
+- **Viola os Termos de Serviço da Meta:** scraping/automação simulando navegador é proibido pelas "Automated Data Collection Terms" — enforcement vai de restrição de distribuição até banimento permanente da conta, incluindo a conta de anúncio vinculada (risco direto pro canal principal de aquisição, Meta Ads)
+- **Risco de marca:** mensagem fria não solicitada pra quem só postou num grupo (sem opt-in, sem relação prévia) tende a ser percebida como spam — risco de denúncia/bloqueio na própria comunidade que se quer conquistar
+
+**✅ Alternativas priorizadas para diversificar aquisição:**
+- [ ] **SEO de vagas via Google (JobPosting structured data)** — já mapeado como ação pendente na Fase 6.5 (seção 7); canal orgânico gratuito e sustentável, prioridade alta por já estar especificado tecnicamente
+- [ ] **Parceria direta com admins de grupos de Facebook do nicho** — abordagem manual e autorizada (não automatizada): propor fixar link/post semanal de "central de vagas" em troca de valor pro grupo (ex: divulgação cruzada), em vez de contornar a regra
+- [ ] **Presença orgânica manual em grupos** — alguém da equipe participa como membro normal e responde manualmente a quem posta vaga, sem automação — mais trabalhoso, mas dentro das regras e com conversão potencialmente melhor por ser contato humano real
+- [ ] Segmentação de Meta Ads por interesse/comportamento de quem interage com grupos de emprego/beleza, como forma indireta de alcançar esse público sem tocar no grupo diretamente
 
 ---
 
