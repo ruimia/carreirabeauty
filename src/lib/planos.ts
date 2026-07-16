@@ -6,8 +6,10 @@ export const PLANOS_EMPRESA = {
 } as const;
 
 export const PLANOS_PROFISSIONAL = {
-  gratis: { nome: "Grátis", candidaturas_mes: 10,    preco: 0 },
-  pro:    { nome: "Pro",    candidaturas_mes: null,  preco: 14.90 },
+  gratis: { nome: "Grátis", candidaturas_mes: 10,   preco: 0,     precoOriginal: null },
+  // precoOriginal é só ancoragem visual ("de R$29 por R$14,90") — o valor
+  // cobrado de verdade é o `preco`, que espelha o plano no Mercado Pago
+  pro:    { nome: "Pro",    candidaturas_mes: null, preco: 14.90, precoOriginal: 29 },
 } as const;
 
 export type PlanoEmpresa = keyof typeof PLANOS_EMPRESA;

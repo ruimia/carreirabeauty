@@ -23,19 +23,27 @@ export default async function PlanosProfissionalPage() {
   // Tracking interno — permite cruzar quem viu conteúdo PRO com quem chegou aqui
   await supabase.from("plano_views").insert({ professional_id: professional.id });
 
+  // Mesmas 5 linhas nos dois cards — comparação direta, linha a linha
+  const BENEFICIOS = [
+    { label: "10 candidaturas/mês", labelPro: "Candidaturas ilimitadas", gratis: true },
+    { label: "Página pública no Google", labelPro: "Página pública no Google", gratis: true },
+    { label: "Destaque nas buscas", labelPro: "Destaque nas buscas", gratis: false },
+    { label: "Conteúdos exclusivos", labelPro: "Conteúdos exclusivos", gratis: false },
+    { label: "Visuais de perfil PRO", labelPro: "Visuais de perfil PRO", gratis: false },
+  ];
+
   return (
     <div>
-      <main style={{ maxWidth: 780, margin: "0 auto", padding: "28px var(--space-page-x) 60px" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 26, color: "var(--text-primary)", marginBottom: 4 }}>
+      <main style={{ maxWidth: 720, margin: "0 auto", padding: "20px var(--space-page-x) 40px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 21, color: "var(--text-primary)", marginBottom: 3 }}>
           Destaque seu perfil
         </h1>
-        <p style={{ fontSize: 14, color: "var(--text-tertiary)", lineHeight: 1.5, marginBottom: 24 }}>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.4, marginBottom: 18 }}>
           Apareça primeiro nas buscas de empresas da sua região.
         </p>
 
-        <div style={{
-          display: "grid", gridTemplateColumns: "1fr", gap: 16,
-        }} className="plans-grid-profissional">
+        {/* 2 colunas mesmo no mobile — a pessoa compara os planos sem precisar rolar */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignItems: "start" }}>
           {PLANOS_ORDER.map((key) => {
             const plano = PLANOS_PROFISSIONAL[key];
             const ativo = key === planoAtual;
@@ -44,89 +52,83 @@ export default async function PlanosProfissionalPage() {
             return (
               <div key={key} style={{
                 background: "var(--surface-card)",
-                borderRadius: "var(--radius-xl)",
-                border: destaque ? "2px solid var(--color-brand-primary)" : "2px solid var(--border-default)",
+                borderRadius: "var(--radius-lg)",
+                border: destaque ? "2px solid var(--color-brand-primary)" : "1.5px solid var(--border-default)",
                 boxShadow: destaque ? "var(--shadow-md)" : "none",
-                padding: 22, position: "relative",
+                padding: "16px 12px 12px", position: "relative",
               }}>
                 {destaque && (
                   <span style={{
-                    position: "absolute", top: -12, left: 20,
-                    background: "var(--color-brand-primary)", color: "#fff",
-                    fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: "var(--radius-pill)",
+                    position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)",
+                    background: "var(--color-brand-primary)", color: "#fff", whiteSpace: "nowrap",
+                    fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: "var(--radius-pill)",
+                    letterSpacing: "0.04em",
                   }}>
-                    {ativo ? "Seu plano" : "Recomendado"}
+                    {ativo ? "SEU PLANO" : "🔥 PROMO"}
                   </span>
                 )}
 
-                <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: destaque ? "var(--color-brand-primary)" : "var(--text-tertiary)", marginBottom: 8 }}>
+                <p style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: destaque ? "var(--color-brand-primary)" : "var(--text-tertiary)", marginBottom: 4, textAlign: "center" }}>
                   {plano.nome}
                 </p>
-                <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 30, color: "var(--text-primary)", marginBottom: 16 }}>
-                  {plano.preco === 0 ? "R$ 0" : (
-                    <>R$ {formatPreco(plano.preco)}<span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span></>
-                  )}
-                </p>
 
-                {key === "gratis" ? (
-                  <>
-                    <Feature text="10 candidaturas por mês" ok />
-                    <Feature text="Página pública indexada no Google" ok />
-                    <Feature text="Destaque nas buscas" ok={false} />
-                    <Feature text="Acesso exclusivo a conteúdos PRO" ok={false} />
-                  </>
-                ) : (
-                  <>
-                    <Feature text="Tudo do plano grátis" ok />
-                    <Feature text="Candidaturas ilimitadas" ok />
-                    <Feature text="Perfil em destaque nas buscas" ok />
-                    <Feature text="Selo Pro no perfil" ok />
-                    <Feature text="Acesso exclusivo a conteúdos PRO" ok />
-                  </>
-                )}
+                {/* altura fixa mantém os dois preços alinhados, com ou sem o "de R$ 29" */}
+                <div style={{ height: 54, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                  {plano.precoOriginal && (
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-tertiary)", textDecoration: "line-through" }}>
+                      de R$ {formatPreco(plano.precoOriginal)}
+                    </span>
+                  )}
+                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--text-primary)", lineHeight: 1.2 }}>
+                    R$ {formatPreco(plano.preco)}
+                    {plano.preco > 0 && <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-tertiary)" }}>/mês</span>}
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  {BENEFICIOS.map((b) => (
+                    <Feature
+                      key={b.label}
+                      text={destaque ? b.labelPro : b.label}
+                      ok={destaque ? true : b.gratis}
+                    />
+                  ))}
+                </div>
 
                 {ativo ? (
-                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 14, fontWeight: 600, marginTop: 12 }}>
+                  <div style={{ height: 40, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", background: "var(--neutral-100)", color: "var(--text-tertiary)", fontSize: 12, fontWeight: 700 }}>
                     Plano atual
                   </div>
                 ) : plano.preco === 0 ? (
-                  <div style={{ height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 14, marginTop: 12 }}>
+                  <div style={{ height: 40, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", color: "var(--text-tertiary)", fontSize: 12 }}>
                     Fazer downgrade
                   </div>
                 ) : (
-                  <div style={{ marginTop: 12 }}>
-                    <AssinarButton
-                      planoKey="profissional_pro"
-                      label="Assinar destaque"
-                      destaque
-                    />
-                  </div>
+                  <AssinarButton planoKey="profissional_pro" label="Assinar" destaque />
                 )}
               </div>
             );
           })}
         </div>
 
-        <p style={{ fontSize: 12, color: "var(--text-tertiary)", textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          Pagamentos processados via Mercado Pago. Cancele a qualquer momento.
+        <p style={{ fontSize: 11, color: "var(--text-tertiary)", textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
+          Pagamentos via Mercado Pago. Cancele a qualquer momento.
         </p>
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
           <a
             href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+tenho+d%C3%BAvidas+sobre+os+planos+do+CarreiraBeauty"
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              color: "#1ea952", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, textDecoration: "none",
+              display: "inline-flex", alignItems: "center", gap: 6,
+              color: "#1ea952", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, textDecoration: "none",
             }}
           >
-            <i className="ph ph-whatsapp-logo" style={{ fontSize: 18 }}></i>
+            <i className="ph ph-whatsapp-logo" style={{ fontSize: 16 }}></i>
             Dúvidas? Chame no WhatsApp
           </a>
         </div>
-
-        <style>{`@media (min-width: 860px) { .plans-grid-profissional { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
       </main>
     </div>
   );
@@ -134,9 +136,9 @@ export default async function PlanosProfissionalPage() {
 
 function Feature({ text, ok }: { text: string; ok: boolean }) {
   return (
-    <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }}>
-      <i className={ok ? "ph-fill ph-check-circle" : "ph ph-x"} style={{ fontSize: 16, color: ok ? "var(--color-success-fg)" : "var(--text-tertiary)", flexShrink: 0, marginTop: 1 }}></i>
-      <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.4 }}>{text}</p>
+    <div style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 7 }}>
+      <i className={ok ? "ph-fill ph-check-circle" : "ph ph-x"} style={{ fontSize: 14, color: ok ? "var(--color-success-fg)" : "var(--neutral-300)", flexShrink: 0, marginTop: 1 }}></i>
+      <p style={{ fontSize: 12, color: ok ? "var(--text-secondary)" : "var(--text-tertiary)", lineHeight: 1.35 }}>{text}</p>
     </div>
   );
 }
