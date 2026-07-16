@@ -87,7 +87,8 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
   const templateData: PerfilTemplateData = {
     nome, funcao: funcaoLabel, cidade, estado, fotoUrl: avatarPreview, instagram,
-    tags: [disponibilidade].filter(Boolean),
+    whatsapp: telefone || null, email: email || null,
+    tags: experiencia ? [`${experiencia} de experiência`] : [],
     apresentacao: apresentacao || null, experiencia: experiencia || null,
     disponibilidade: disponibilidade || null, tipoVinculo: VINCULOS[tipoVinculo] || tipoVinculo || null,
     habilidades: selectedHabilidades, educacao, experienciaProf: experiencias, portfolioUrls,

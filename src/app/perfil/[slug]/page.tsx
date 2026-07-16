@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -51,10 +52,20 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
 
   const funcao = funcoesLabel(p.funcoes, p.funcao_outro);
 
+  // Templates PRO mostram contatos (WhatsApp/email) — o email vive em profiles,
+  // que o RLS não expõe pra visitante anônimo; service role só pra esse lookup
+  let email: string | null = null;
+  if (p.plano === "pro" && p.user_id) {
+    const supabaseService = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data: perfil } = await supabaseService.from("profiles").select("email").eq("id", p.user_id).maybeSingle();
+    email = perfil?.email ?? null;
+  }
+
   const tags = [
-    p.disponibilidade,
-    p.regime_trabalho,
-    p.anos_experiencia ? `${p.anos_experiencia} anos de experiência` : null,
+    p.experiencia ? `${p.experiencia} de experiência` : null,
   ].filter((t): t is string => !!t);
 
   const templateData: PerfilTemplateData = {
@@ -64,6 +75,8 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
     estado: p.estado,
     fotoUrl: p.foto_perfil_url,
     instagram: p.instagram,
+    whatsapp: p.telefone || null,
+    email,
     tags,
     apresentacao: p.educacao_basica || null,
     experiencia: p.experiencia || null,

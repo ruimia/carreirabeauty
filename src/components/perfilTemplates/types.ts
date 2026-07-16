@@ -5,6 +5,8 @@ export interface PerfilTemplateData {
   estado: string;
   fotoUrl: string | null;
   instagram: string | null;
+  whatsapp: string | null;
+  email: string | null;
   tags: string[];
   apresentacao: string | null;
   experiencia: string | null;
