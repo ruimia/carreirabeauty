@@ -31,6 +31,29 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [linkCopiado, setLinkCopiado] = useState(false);
+
+  const perfilUrl = p.slug && typeof window !== "undefined" ? `${window.location.origin}/perfil/${p.slug}` : "";
+
+  async function handleCopiarLink() {
+    if (!perfilUrl) return;
+    await navigator.clipboard.writeText(perfilUrl);
+    setLinkCopiado(true);
+    setTimeout(() => setLinkCopiado(false), 2000);
+  }
+
+  async function handleCompartilhar() {
+    if (!perfilUrl) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Meu perfil no CarreiraBeauty", url: perfilUrl });
+      } catch {
+        // usuário cancelou o share nativo — sem ação necessária
+      }
+    } else {
+      handleCopiarLink();
+    }
+  }
 
   // Basic fields
   const [nome, setNome] = useState(p.nome ?? "");
@@ -670,49 +693,99 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         </>
         )}
 
-        {/* Conta */}
-        <div style={card}>
-          <SectionTitle>Conta</SectionTitle>
-          <F label="E-mail de acesso" editing={false}><V>{email || "—"}</V></F>
-          {p.slug && (
-            <F label="Link do perfil público" editing={false}>
-              <Link href={`/perfil/${p.slug}`} style={{ fontSize: 14, color: "var(--text-link)", wordBreak: "break-all" }}>
-                /perfil/{p.slug}
+        {/* Perfil público — divulgação */}
+        {!editing && p.slug && (
+          <div style={{
+            background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+            borderRadius: "var(--radius-xl)", border: "1px solid var(--brand-magenta-100)",
+            boxShadow: "var(--shadow-xs)", padding: 20, marginBottom: 12,
+            display: "flex", flexDirection: "column", gap: 12,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <i className="ph-fill ph-globe" style={{ fontSize: 18, color: "var(--color-brand-primary)" }}></i>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>
+                Seu perfil público
+              </p>
+            </div>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 13.5, lineHeight: 1.5, color: "var(--text-secondary)" }}>
+              É isso que as empresas veem quando você se candidata. Use como seu cartão de visita:
+              coloque o link na bio do Instagram ou mande pra quem quiser te contratar. 💅
+            </p>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8, background: "var(--surface-card)",
+              border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", padding: "10px 12px",
+            }}>
+              <p style={{ flex: 1, minWidth: 0, fontSize: 13.5, color: "var(--text-link)", fontFamily: "var(--font-body)",
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                carreirabeauty.com/perfil/{p.slug}
+              </p>
+              <Link href={`/perfil/${p.slug}`} target="_blank" style={{
+                flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                width: 32, height: 32, borderRadius: "var(--radius-sm)", color: "var(--text-tertiary)",
+              }} title="Ver perfil">
+                <i className="ph ph-arrow-square-out" style={{ fontSize: 17 }}></i>
               </Link>
-            </F>
-          )}
-        </div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={handleCopiarLink} style={{
+                flex: 1, height: 42, borderRadius: "var(--radius-pill)", border: "1px solid var(--color-brand-primary)",
+                background: "transparent", color: "var(--color-brand-primary)", fontFamily: "var(--font-body)",
+                fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center",
+                justifyContent: "center", gap: 6,
+              }}>
+                <i className={linkCopiado ? "ph-fill ph-check" : "ph ph-copy"}></i>
+                {linkCopiado ? "Copiado!" : "Copiar link"}
+              </button>
+              <button onClick={handleCompartilhar} style={{
+                flex: 1, height: 42, borderRadius: "var(--radius-pill)", border: "none",
+                background: "var(--color-brand-primary)", color: "#fff", fontFamily: "var(--font-body)",
+                fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center",
+                justifyContent: "center", gap: 6,
+              }}>
+                <i className="ph ph-share-network"></i>
+                Compartilhar
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* Suporte e sair — só no mobile, desktop já tem na sidebar */}
+        {/* Conta — bloco separado com e-mail, suporte e sair */}
         {!editing && (
-          <div className="mobile-only" style={{
+          <div style={{
             background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
             border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
-            padding: "8px 20px", marginBottom: 12,
+            padding: "4px 20px", marginBottom: 12,
           }}>
-            <a
-              href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "flex", alignItems: "center", gap: 10, padding: "12px 4px",
-                color: "#1ea952", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15, textDecoration: "none",
-              }}
-            >
-              <i className="ph ph-whatsapp-logo" style={{ fontSize: 20 }}></i>
-              Suporte
-            </a>
-            <button
-              onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 10, padding: "12px 4px",
-                color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15,
-                background: "none", border: "none", cursor: "pointer", textAlign: "left",
-              }}
-            >
-              <i className="ph ph-sign-out" style={{ fontSize: 20 }}></i>
-              Sair
-            </button>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--border-default)" }}>
+              <span style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-tertiary)" }}>E-mail de acesso</span>
+              <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", fontWeight: 500 }}>{email || "—"}</span>
+            </div>
+            {/* Suporte e sair — só no mobile, desktop já tem na sidebar */}
+            <div className="mobile-only">
+              <a
+                href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+preciso+de+suporte+no+CarreiraBeauty"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "flex", alignItems: "center", gap: 10, padding: "14px 0", borderBottom: "1px solid var(--border-default)",
+                  color: "#1ea952", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15, textDecoration: "none",
+                }}
+              >
+                <i className="ph ph-whatsapp-logo" style={{ fontSize: 20 }}></i>
+                Suporte
+              </a>
+              <button
+                onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10, padding: "14px 0", width: "100%",
+                  color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 15,
+                  background: "none", border: "none", cursor: "pointer", textAlign: "left",
+                }}
+              >
+                <i className="ph ph-sign-out" style={{ fontSize: 20 }}></i>
+                Sair
+              </button>
+            </div>
           </div>
         )}
 
