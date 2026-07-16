@@ -286,6 +286,34 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x) 48px" }}>
 
+        {!editing && (
+          <Link href="/dashboard/profissional/planos" style={{ textDecoration: "none", display: "block", marginBottom: 16 }}>
+            <div style={{
+              background: p.plano === "pro" ? "var(--brand-magenta-50)" : "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+              border: p.plano === "pro" ? "1px solid var(--brand-magenta-100)" : "1px solid var(--brand-magenta-100)",
+              borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)",
+              padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
+            }}>
+              <i className={p.plano === "pro" ? "ph-fill ph-star" : "ph-fill ph-rocket-launch"} style={{
+                fontSize: 20, color: "var(--color-brand-primary)",
+              }}></i>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ font: "700 14px/1.3 var(--font-display)", color: "var(--color-brand-primary)" }}>
+                  {p.plano === "pro" ? "Você é PRO" : "Acelere sua carreira"}
+                </p>
+                <p style={{ font: "var(--text-caption)", color: p.plano === "pro" ? "var(--color-brand-primary)" : "var(--text-secondary)" }}>
+                  {p.plano === "pro"
+                    ? (p.plano_validade ? `Renova em ${new Date(p.plano_validade).toLocaleDateString("pt-BR")}` : "Assinatura ativa")
+                    : "Certificado, vitrine profissional e contato direto no WhatsApp"}
+                </p>
+              </div>
+              <span style={{ font: "600 13px/1 var(--font-body)", color: "var(--color-brand-primary)", flexShrink: 0 }}>
+                {p.plano === "pro" ? "Gerenciar" : "Ver PRO"} ›
+              </span>
+            </div>
+          </Link>
+        )}
+
         {success && (
           <div style={{ background: "var(--color-success-bg)", border: "1px solid var(--color-success-border)", color: "var(--color-success-fg)",
             borderRadius: "var(--radius-md)", padding: "12px 16px", fontSize: 14, marginBottom: 16 }}>

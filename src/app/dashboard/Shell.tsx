@@ -58,16 +58,10 @@ const PROFISSIONAL_TABS: Tab[] = [
     isActive: (p) => p === "/dashboard/profissional",
   },
   {
-    label: "Conteúdo",
-    icon: "ph ph-book-open-text",
+    label: "Crescer",
+    icon: "ph ph-sparkle",
     href: "/dashboard/profissional/conteudo",
-    isActive: (p) => p.startsWith("/dashboard/profissional/conteudo"),
-  },
-  {
-    label: "Planos",
-    icon: "ph ph-star",
-    href: "/dashboard/profissional/planos",
-    isActive: (p) => p.startsWith("/dashboard/profissional/planos"),
+    isActive: (p) => p.startsWith("/dashboard/profissional/conteudo") || p.startsWith("/dashboard/profissional/quiz"),
   },
   {
     label: "Perfil",
