@@ -425,6 +425,33 @@ export default async function DashboardProfissionalPage() {
             </Link>
           </div>
         )}
+
+        {/* Quiz-certificado — banner no fim da home, teste de incentivo ao PRO (seção 7.9.7) */}
+        <Link href="/dashboard/profissional/quiz" style={{ textDecoration: "none" }}>
+          <div style={{
+            background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+            borderRadius: "var(--radius-xl)", border: "1px solid var(--brand-magenta-100)",
+            boxShadow: "var(--shadow-xs)", padding: 16, marginTop: 20,
+            display: "flex", alignItems: "center", gap: 14,
+          }}>
+            <span style={{
+              width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
+              background: "var(--color-brand-primary)", color: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
+            }}>
+              <i className="ph-fill ph-seal-check"></i>
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                Autoestima e Postura Profissional
+              </p>
+              <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
+                Complete a trilha e ganhe um certificado pro seu perfil
+              </p>
+            </div>
+            <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+          </div>
+        </Link>
       </main>
     </div>
   );
