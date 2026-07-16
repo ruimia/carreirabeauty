@@ -111,6 +111,19 @@ export default async function PlanosProfissionalPage() {
           })}
         </div>
 
+        {/* Quebra a objeção do "vou ficar preso" logo depois do preço — é a
+            dúvida nº1 de assinatura, e some se ficar só no rodapé cinza */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+          background: "var(--color-success-bg)", border: "1px solid var(--color-success-border)",
+          borderRadius: "var(--radius-md)", padding: "10px 12px", marginTop: 12,
+        }}>
+          <i className="ph-fill ph-lock-simple-open" style={{ fontSize: 16, color: "var(--color-success-fg)", flexShrink: 0 }}></i>
+          <p style={{ fontSize: 12.5, fontWeight: 700, color: "var(--color-success-fg)", textAlign: "center", lineHeight: 1.35 }}>
+            Sem fidelidade. Cancele quando quiser, sem multa.
+          </p>
+        </div>
+
         {/* Mecanismo: explica POR QUE o PRO aumenta a chance de conseguir vaga */}
         <div style={{
           background: "var(--brand-magenta-50)", border: "1px solid var(--brand-magenta-100)",
@@ -125,7 +138,7 @@ export default async function PlanosProfissionalPage() {
         </div>
 
         <p style={{ fontSize: 11, color: "var(--text-tertiary)", textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
-          Pagamentos via Mercado Pago. Cancele a qualquer momento.
+          Pagamento seguro via Mercado Pago. O cancelamento é feito pela sua conta do Mercado Pago.
         </p>
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
