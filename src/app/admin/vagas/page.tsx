@@ -4,6 +4,7 @@ export const metadata = { title: "Moderação de vagas — Admin" };
 import { createClient } from "@/lib/supabase/server";
 import { updateJobStatus } from "../actions";
 import ModeracaoActions from "./ModeracaoActions";
+import DispararEmailButton from "./DispararEmailButton";
 
 export default async function AdminVagasPage() {
   const supabase = await createClient();
@@ -120,6 +121,7 @@ export default async function AdminVagasPage() {
         </details>
 
         {showMod && <ModeracaoActions id={v.id} />}
+        {v.status === "ativa" && <DispararEmailButton id={v.id} />}
       </div>
     );
   };
