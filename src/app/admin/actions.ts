@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { emailVagaAprovada, emailVagaRejeitada, emailNovaVagaProfissional, renderNovaVagaProfissionalHtml, MENSAGEM_PADRAO_NOVA_VAGA } from "@/lib/email";
+import { distanciaKm } from "@/lib/geocode";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -140,14 +141,17 @@ function normalizaCidade(s: string | null | undefined): string {
   return (s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
 }
 
-// Profissionais com a mesma função da vaga, na mesma cidade da empresa —
-// candidatos elegíveis pro disparo manual de email (matching por raio fica
-// pra depois, quando tivermos geocoding de verdade)
+const RAIO_KM_EMAIL = 30;
+
+// Profissionais com alguma função da vaga, dentro do raio de 30km da empresa —
+// candidatos elegíveis pro disparo manual de email. Cai pro comparativo de
+// cidade (mesmo critério de antes) quando algum dos lados ainda não tem
+// coordenada geocodificada.
 async function buscarCandidatosVaga(id: string) {
   const supabase = await assertAdmin();
   const { data: job } = await supabase
     .from("jobs")
-    .select("titulo, funcao, funcoes, slug, companies(nome_estabelecimento, cidade)")
+    .select("titulo, funcao, funcoes, slug, companies(nome_estabelecimento, cidade, latitude, longitude)")
     .eq("id", id).single();
   const funcoesVaga = job?.funcoes?.length ? job.funcoes : (job?.funcao ? [job.funcao] : []);
   if (!job || funcoesVaga.length === 0) return { job: null, candidatos: [] as { user_id: string; nome: string | null; cidade: string | null }[] };
@@ -157,13 +161,20 @@ async function buscarCandidatosVaga(id: string) {
   // OR: qualquer sobreposição entre as funções da vaga e as do profissional
   const { data: todosComFuncao } = await supabase
     .from("professionals")
-    .select("user_id, nome, cidade")
+    .select("user_id, nome, cidade, latitude, longitude")
     .overlaps("funcoes", funcoesVaga);
 
+  const empresaGeo = comp?.latitude && comp?.longitude
+    ? { latitude: comp.latitude, longitude: comp.longitude }
+    : null;
   const cidadeEmpresa = normalizaCidade(comp?.cidade);
-  const candidatos = cidadeEmpresa
-    ? (todosComFuncao ?? []).filter((p) => normalizaCidade(p.cidade) === cidadeEmpresa)
-    : (todosComFuncao ?? []);
+
+  const candidatos = (todosComFuncao ?? []).filter((p) => {
+    const profGeo = p.latitude && p.longitude ? { latitude: p.latitude, longitude: p.longitude } : null;
+    if (empresaGeo && profGeo) return distanciaKm(empresaGeo, profGeo) <= RAIO_KM_EMAIL;
+    if (!cidadeEmpresa) return true;
+    return normalizaCidade(p.cidade) === cidadeEmpresa;
+  });
 
   return { job: { ...job, companies: comp }, candidatos };
 }
