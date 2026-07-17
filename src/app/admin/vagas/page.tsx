@@ -12,7 +12,7 @@ export default async function AdminVagasPage() {
   const { data: vagas } = await supabase
     .from("jobs")
     .select(`
-      id, titulo, funcao, funcao_outro, status, motivo_rejeicao, criado_em,
+      id, titulo, funcao, funcoes, funcao_outro, status, motivo_rejeicao, criado_em,
       descricao, tipo_vinculo, modelo_remuneracao, faixa_salarial, comissao,
       endereco, bairro, cidade, estado, cep, foto_url,
       applications(count), companies(nome_estabelecimento, cidade)
@@ -126,7 +126,7 @@ export default async function AdminVagasPage() {
             id={v.id}
             inicial={{
               titulo: v.titulo ?? "",
-              funcao: v.funcao ?? "",
+              funcoes: v.funcoes?.length ? v.funcoes : (v.funcao ? [v.funcao] : []),
               funcao_outro: v.funcao_outro ?? "",
               descricao: v.descricao ?? "",
               tipo_vinculo: v.tipo_vinculo ?? "",

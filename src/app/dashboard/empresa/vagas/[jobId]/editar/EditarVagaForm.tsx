@@ -25,8 +25,11 @@ const MODELOS = [
   { value: "a_combinar", label: "A combinar" },
 ];
 
+const OUTRA_FUNCAO = "Outro";
+
 interface Props {
-  job: Record<string, string | null>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  job: Record<string, any>;
   company: { id: string; endereco: string; bairro: string; cidade: string; estado: string; cep: string; logo_url: string | null };
   profissoes: string[];
 }
@@ -36,8 +39,17 @@ export default function EditarVagaForm({ job, company, profissoes }: Props) {
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [funcao, setFuncao] = useState(job.funcao ?? "");
+  const [funcoes, setFuncoes] = useState<string[]>(
+    job.funcoes?.length ? job.funcoes : (job.funcao ? [job.funcao] : [])
+  );
   const [funcaoOutro, setFuncaoOutro] = useState(job.funcao_outro ?? "");
+  function toggleFuncao(nome: string) {
+    setFuncoes((prev) => {
+      const next = prev.includes(nome) ? prev.filter((x) => x !== nome) : [...prev, nome];
+      if (!titulo.trim() && nome !== OUTRA_FUNCAO && !prev.includes(nome)) setTitulo(nome);
+      return next;
+    });
+  }
   const [titulo, setTitulo] = useState(job.titulo ?? "");
   const [descricao, setDescricao] = useState(job.descricao ?? "");
   const [tipoVinculo, setTipoVinculo] = useState(job.tipo_vinculo ?? "");
@@ -75,6 +87,8 @@ export default function EditarVagaForm({ job, company, profissoes }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (funcoes.length === 0) { setError("Selecione ao menos uma função."); return; }
+    if (funcoes.includes(OUTRA_FUNCAO) && !funcaoOutro.trim()) { setError("Preencha qual é a outra função."); return; }
     setLoading(true); setError("");
     try {
       let fotoUrl = job.foto_url ?? company.logo_url ?? null;
@@ -90,8 +104,9 @@ export default function EditarVagaForm({ job, company, profissoes }: Props) {
 
       const { error: jErr } = await supabase.from("jobs").update({
         titulo,
-        funcao: funcao === "Outro" ? "outro" : funcao,
-        funcao_outro: funcao === "Outro" ? funcaoOutro : null,
+        funcao: funcoes[0] === "Outro" ? "outro" : (funcoes[0] ?? ""),
+        funcoes,
+        funcao_outro: funcoes.includes(OUTRA_FUNCAO) ? funcaoOutro : null,
         descricao,
         tipo_vinculo: tipoVinculo || null,
         modelo_remuneracao: modeloRemuneracao,
@@ -181,18 +196,29 @@ export default function EditarVagaForm({ job, company, profissoes }: Props) {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) setFotoPreview(URL.createObjectURL(f)); }} />
             </F>
 
-            <F label="Função *">
-              <select required value={funcao} onChange={(e) => {
-                const val = e.target.value;
-                setFuncao(val);
-                if (!titulo.trim() && val && val !== "Outro") setTitulo(val);
-              }} style={sel}>
-                <option value="">Selecione uma função</option>
-                {[...profissoes, "Outro"].map((f) => <option key={f} value={f}>{f}</option>)}
-              </select>
+            <F label="Funções * (pode escolher mais de uma)">
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[...profissoes, OUTRA_FUNCAO].map((f) => {
+                  const active = funcoes.includes(f);
+                  return (
+                    <button key={f} type="button" onClick={() => toggleFuncao(f)} style={{
+                      width: "100%", textAlign: "left", padding: "12px 14px",
+                      borderRadius: "var(--radius-md)",
+                      border: `2px solid ${active ? "var(--color-brand-primary)" : "var(--border-default)"}`,
+                      background: active ? "var(--brand-magenta-50)" : "var(--surface-card)",
+                      color: active ? "var(--brand-magenta-700)" : "var(--text-primary)",
+                      fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400, fontSize: 14,
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    }}>
+                      {f}
+                      {active && <span style={{ fontSize: 16, color: "var(--color-brand-primary)" }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
             </F>
 
-            {funcao === "Outro" && (
+            {funcoes.includes(OUTRA_FUNCAO) && (
               <F label="Qual função? *">
                 <input required value={funcaoOutro} onChange={(e) => setFuncaoOutro(e.target.value)} style={inp} />
               </F>

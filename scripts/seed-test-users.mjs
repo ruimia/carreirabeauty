@@ -161,6 +161,7 @@ async function seedProfissional(userId, companyId) {
       nome: "Ana Carolina Teste",
       telefone: "11988880002",
       funcao: "Cabeleireiro(a)",
+      funcoes: ["Cabeleireiro(a)"],
       localizacao: "Pinheiros, São Paulo",
       cidade: "São Paulo",
       estado: "SP",

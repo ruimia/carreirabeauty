@@ -52,8 +52,9 @@ export default function VagaEditForm({ id, inicial }: { id: string; inicial: Vag
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={label}>Função</label>
-          <input className={input} value={dados.funcao} onChange={(e) => campo("funcao", e.target.value)} />
+          <label className={label}>Funções (separadas por vírgula)</label>
+          <input className={input} value={dados.funcoes.join(", ")}
+            onChange={(e) => campo("funcoes", e.target.value.split(",").map((f) => f.trim()).filter(Boolean))} />
         </div>
         <div>
           <label className={label}>Função (outro)</label>

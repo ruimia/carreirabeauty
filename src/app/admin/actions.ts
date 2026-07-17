@@ -71,7 +71,7 @@ export async function atualizarEmpresaAdmin(id: string, dados: EmpresaEditData) 
 
 export interface VagaEditData {
   titulo: string;
-  funcao: string;
+  funcoes: string[];
   funcao_outro: string;
   descricao: string;
   tipo_vinculo: string;
@@ -88,7 +88,8 @@ export async function atualizarVagaAdmin(id: string, dados: VagaEditData) {
   const supabase = await assertAdmin();
   const { error } = await supabase.from("jobs").update({
     titulo: dados.titulo,
-    funcao: dados.funcao,
+    funcao: dados.funcoes[0] ?? "",
+    funcoes: dados.funcoes,
     funcao_outro: dados.funcao_outro || null,
     descricao: dados.descricao,
     tipo_vinculo: dados.tipo_vinculo || null,
@@ -146,16 +147,18 @@ async function buscarCandidatosVaga(id: string) {
   const supabase = await assertAdmin();
   const { data: job } = await supabase
     .from("jobs")
-    .select("titulo, funcao, slug, companies(nome_estabelecimento, cidade)")
+    .select("titulo, funcao, funcoes, slug, companies(nome_estabelecimento, cidade)")
     .eq("id", id).single();
-  if (!job || !job.funcao) return { job: null, candidatos: [] as { user_id: string; nome: string | null; cidade: string | null }[] };
+  const funcoesVaga = job?.funcoes?.length ? job.funcoes : (job?.funcao ? [job.funcao] : []);
+  if (!job || funcoesVaga.length === 0) return { job: null, candidatos: [] as { user_id: string; nome: string | null; cidade: string | null }[] };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const comp = job.companies as any;
+  // OR: qualquer sobreposição entre as funções da vaga e as do profissional
   const { data: todosComFuncao } = await supabase
     .from("professionals")
     .select("user_id, nome, cidade")
-    .contains("funcoes", [job.funcao]);
+    .overlaps("funcoes", funcoesVaga);
 
   const cidadeEmpresa = normalizaCidade(comp?.cidade);
   const candidatos = cidadeEmpresa
@@ -176,13 +179,14 @@ export async function previewEmailCandidatos(id: string, mensagemCustom?: string
   const cidade = job.companies?.cidade ?? null;
   const empresaNome = job.companies?.nome_estabelecimento ?? "";
   const tituloVaga = job.titulo || job.funcao || "Vaga";
+  const funcoesVaga = job.funcoes?.length ? job.funcoes : (job.funcao ? [job.funcao] : []);
   const assuntoPadrao = `Nova vaga: ${tituloVaga} em ${empresaNome}`;
   const nomeExemplo = candidatos[0]?.nome || "Profissional";
 
   const htmlPreview = renderNovaVagaProfissionalHtml({
     profissionalNome: nomeExemplo,
     tituloVaga,
-    funcaoVaga: job.funcao ?? "",
+    funcaoVaga: funcoesVaga.join(", "),
     empresaNome,
     cidade,
     vagaSlug: job.slug ?? id,
@@ -191,7 +195,7 @@ export async function previewEmailCandidatos(id: string, mensagemCustom?: string
 
   return {
     total: candidatos.length,
-    funcao: job.funcao ?? "",
+    funcao: funcoesVaga.join(", "),
     cidade,
     assuntoPadrao,
     mensagemPadrao: MENSAGEM_PADRAO_NOVA_VAGA,

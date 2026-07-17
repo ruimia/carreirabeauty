@@ -26,7 +26,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
   const { data: jobs } = await supabase
     .from("jobs")
     .select(`
-      id, titulo, funcao, funcao_outro, status, criado_em, descricao,
+      id, titulo, funcao, funcoes, funcao_outro, status, criado_em, descricao,
       tipo_vinculo, faixa_salarial, comissao, endereco, bairro, cidade, estado, cep,
       applications(count)
     `)
@@ -150,7 +150,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
                     id={job.id}
                     inicial={{
                       titulo: job.titulo ?? "",
-                      funcao: job.funcao ?? "",
+                      funcoes: job.funcoes?.length ? job.funcoes : (job.funcao ? [job.funcao] : []),
                       funcao_outro: job.funcao_outro ?? "",
                       descricao: job.descricao ?? "",
                       tipo_vinculo: job.tipo_vinculo ?? "",

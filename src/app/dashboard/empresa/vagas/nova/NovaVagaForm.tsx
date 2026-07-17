@@ -55,9 +55,17 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const OUTRA_FUNCAO = "Outro";
   const [titulo, setTitulo] = useState("");
-  const [funcao, setFuncao] = useState("");
+  const [funcoes, setFuncoes] = useState<string[]>([]);
   const [funcaoOutro, setFuncaoOutro] = useState("");
+  function toggleFuncao(nome: string) {
+    setFuncoes((prev) => {
+      const next = prev.includes(nome) ? prev.filter((x) => x !== nome) : [...prev, nome];
+      if (!titulo.trim() && nome !== OUTRA_FUNCAO && !prev.includes(nome)) setTitulo(nome);
+      return next;
+    });
+  }
   const [descricao, setDescricao] = useState("");
   const [tipoVinculo, setTipoVinculo] = useState("");
   const [modeloRemuneracao, setModeloRemuneracao] = useState("fixo");
@@ -94,6 +102,8 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (funcoes.length === 0) { setError("Selecione ao menos uma função."); return; }
+    if (funcoes.includes(OUTRA_FUNCAO) && !funcaoOutro.trim()) { setError("Preencha qual é a outra função."); return; }
     setLoading(true); setError("");
 
     try {
@@ -110,8 +120,8 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
 
       const result = await criarVaga({
         titulo,
-        funcao,
-        funcaoOutro: funcao === "Outro" ? funcaoOutro : null,
+        funcoes,
+        funcaoOutro: funcoes.includes(OUTRA_FUNCAO) ? funcaoOutro : null,
         descricao,
         tipoVinculo: tipoVinculo || null,
         modeloRemuneracao,
@@ -207,18 +217,29 @@ export default function NovaVagaForm({ company, profissoes }: Props) {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) setFotoPreview(URL.createObjectURL(f)); }} />
             </F>
 
-            <F label="Função *">
-              <select required value={funcao} onChange={(e) => {
-                const val = e.target.value;
-                setFuncao(val);
-                if (!titulo.trim() && val && val !== "Outro") setTitulo(val);
-              }} style={sel}>
-                <option value="">Selecione uma função</option>
-                {[...profissoes, "Outro"].map((f) => <option key={f} value={f}>{f}</option>)}
-              </select>
+            <F label="Funções * (pode escolher mais de uma)">
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[...profissoes, OUTRA_FUNCAO].map((f) => {
+                  const active = funcoes.includes(f);
+                  return (
+                    <button key={f} type="button" onClick={() => toggleFuncao(f)} style={{
+                      width: "100%", textAlign: "left", padding: "12px 14px",
+                      borderRadius: "var(--radius-md)",
+                      border: `2px solid ${active ? "var(--color-brand-primary)" : "var(--border-default)"}`,
+                      background: active ? "var(--brand-magenta-50)" : "var(--surface-card)",
+                      color: active ? "var(--brand-magenta-700)" : "var(--text-primary)",
+                      fontFamily: "var(--font-body)", fontWeight: active ? 700 : 400, fontSize: 14,
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    }}>
+                      {f}
+                      {active && <span style={{ fontSize: 16, color: "var(--color-brand-primary)" }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
             </F>
 
-            {funcao === "Outro" && (
+            {funcoes.includes(OUTRA_FUNCAO) && (
               <F label="Qual função? *">
                 <input required value={funcaoOutro} onChange={(e) => setFuncaoOutro(e.target.value)}
                   placeholder="Ex: Podólogo especializado" style={inp} />

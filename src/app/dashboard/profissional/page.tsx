@@ -82,7 +82,7 @@ export default async function DashboardProfissionalPage() {
   const [{ data: allJobs }, { data: applications }, { data: conteudos }, { data: vagasExternas }] = await Promise.all([
     supabase
       .from("jobs")
-      .select("id, titulo, funcao, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
+      .select("id, titulo, funcao, funcoes, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
       .eq("status", "ativa")
       .order("criado_em", { ascending: false }),
     supabase
@@ -151,8 +151,13 @@ export default async function DashboardProfissionalPage() {
     }
 
     if (funcoes.length === 0) return true;
-    return funcoes.some((f) => f.toLowerCase() === j.funcao?.toLowerCase() ||
-      (j.funcao === "outro" && funcoes.includes("outro")));
+    // OR: casa se qualquer função da vaga bater com qualquer função do
+    // profissional — vaga pode servir pra vários perfis ao mesmo tempo
+    const funcoesVaga: string[] = j.funcoes?.length ? j.funcoes : (j.funcao ? [j.funcao] : []);
+    return funcoesVaga.some((fv) =>
+      funcoes.some((f) => f.toLowerCase() === fv.toLowerCase()) ||
+      (fv.toLowerCase() === "outro" && funcoes.includes("outro"))
+    );
   });
 
   // Força do perfil — quanto mais completo, mais fácil empresas encontrarem

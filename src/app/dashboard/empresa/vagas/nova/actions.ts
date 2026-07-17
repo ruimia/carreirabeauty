@@ -6,7 +6,7 @@ import { buildSlug, randomSuffix } from "@/lib/slug";
 
 interface CriarVagaInput {
   titulo: string;
-  funcao: string;
+  funcoes: string[];
   funcaoOutro: string | null;
   descricao: string;
   tipoVinculo: string | null;
@@ -50,15 +50,17 @@ export async function criarVaga(input: CriarVagaInput): Promise<CriarVagaResult>
     return { ok: false, error: "LIMITE_PLANO", plano };
   }
 
-  const slugBase = buildSlug(input.titulo || input.funcao, input.cidade);
+  const slugBase = buildSlug(input.titulo || input.funcoes[0] || "", input.cidade);
   const { data: existing } = await supabase.from("jobs").select("id").eq("slug", slugBase).maybeSingle();
   const slug = existing ? `${slugBase}-${randomSuffix()}` : slugBase;
 
+  const primeiraFuncao = input.funcoes[0] ?? "";
   const { error } = await supabase.from("jobs").insert({
     company_id: company.id,
     titulo: input.titulo,
-    funcao: input.funcao === "Outro" ? "outro" : input.funcao,
-    funcao_outro: input.funcao === "Outro" ? input.funcaoOutro : null,
+    funcao: primeiraFuncao === "Outro" ? "outro" : primeiraFuncao,
+    funcoes: input.funcoes,
+    funcao_outro: input.funcoes.includes("Outro") ? input.funcaoOutro : null,
     descricao: input.descricao,
     tipo_vinculo: input.tipoVinculo || null,
     modelo_remuneracao: input.modeloRemuneracao,
