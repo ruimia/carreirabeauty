@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { geocodeEndereco } from "@/lib/geocode";
 import { compressImage } from "@/lib/compressImage";
 import TemplateSelector from "./visual/TemplateSelector";
 import { PerfilTemplateData } from "@/components/perfilTemplates/types";
@@ -68,6 +69,8 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   const [bairro, setBairro] = useState(p.bairro ?? "");
   const [cidade, setCidade] = useState(p.cidade ?? "");
   const [estado, setEstado] = useState(p.estado ?? "");
+  const [latitude, setLatitude] = useState<number | null>(p.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(p.longitude ?? null);
   const [cepLoading, setCepLoading] = useState(false);
   const [dataNascimento, setDataNascimento] = useState(p.data_nascimento ?? "");
   const [genero, setGenero] = useState(p.genero ?? "");
@@ -127,6 +130,13 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
       setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
+    }
+    const coords = data?.city && data?.state
+      ? await geocodeEndereco({ endereco: data.street, cidade: data.city, estado: data.state })
+      : null;
+    if (coords) {
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
     }
     setCepLoading(false);
   }
@@ -191,6 +201,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         nome, telefone, funcoes, funcao_outro: funcoes.includes(OUTRA) ? funcaoOutro : null,
         cep: cep.replace(/\D/g, ""), endereco, bairro,
         cidade: cidade.trim(), estado, localizacao: `${cidade.trim()} - ${estado}`,
+        latitude, longitude,
         educacao_basica: apresentacao,
         experiencia, disponibilidade,
         tipo_vinculo: tipoVinculo || null,
@@ -217,6 +228,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
     setNome(p.nome ?? ""); setTelefone(p.telefone ?? "");
     setFuncoes(p.funcoes?.length ? p.funcoes : []); setFuncaoOutro(p.funcao_outro ?? "");
     setCep(p.cep ?? ""); setEndereco(p.endereco ?? ""); setBairro(p.bairro ?? ""); setCidade(p.cidade ?? ""); setEstado(p.estado ?? "");
+    setLatitude(p.latitude ?? null); setLongitude(p.longitude ?? null);
     setApresentacao(p.educacao_basica ?? "");
     setExperiencia(p.experiencia ?? ""); setDisponibilidade(p.disponibilidade ?? "");
     setTipoVinculo(p.tipo_vinculo ?? "");

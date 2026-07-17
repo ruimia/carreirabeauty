@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import StepShell from "@/components/ui/StepShell";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { geocodeEndereco } from "@/lib/geocode";
 import { compressImage } from "@/lib/compressImage";
 import { trackLead } from "@/lib/trackLead";
 
@@ -49,6 +50,8 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
   const [bairro, setBairro] = useState(initialData.bairro ?? "");
   const [cidade, setCidade] = useState(initialData.cidade ?? "");
   const [estado, setEstado] = useState(initialData.estado ?? "");
+  const [latitude, setLatitude] = useState<number | null>(initialData.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(initialData.longitude ?? null);
   const [cepLoading, setCepLoading] = useState(false);
 
   async function handleCepBlur() {
@@ -61,6 +64,13 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
       setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
+    }
+    const coords = data?.city && data?.state
+      ? await geocodeEndereco({ endereco: data.street, cidade: data.city, estado: data.state })
+      : null;
+    if (coords) {
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
     }
     setCepLoading(false);
   }
@@ -245,7 +255,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
         </div>
         {errBox}
         <PrimaryBtn label="Continuar"
-          onClick={() => go({ cep: cep.replace(/\D/g, ""), endereco, bairro, localizacao: `${cidade.trim()} - ${estado}`, cidade: cidade.trim(), estado }, 4)}
+          onClick={() => go({ cep: cep.replace(/\D/g, ""), endereco, bairro, localizacao: `${cidade.trim()} - ${estado}`, cidade: cidade.trim(), estado, latitude, longitude }, 4)}
           disabled={!cep.replace(/\D/g, "") || !endereco.trim() || !cidade.trim() || !estado.trim()} />
       </div>
     </StepShell>

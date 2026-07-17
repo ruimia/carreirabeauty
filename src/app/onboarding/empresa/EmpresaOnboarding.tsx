@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import StepShell from "@/components/ui/StepShell";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { geocodeEndereco } from "@/lib/geocode";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { compressImage } from "@/lib/compressImage";
 import { trackCompleteRegistration } from "@/lib/trackLead";
@@ -52,6 +53,8 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
   const [cidade, setCidade] = useState(initialData.cidade ?? "");
   const [estado, setEstado] = useState(initialData.estado ?? "");
   const [cep, setCep] = useState(initialData.cep ?? "");
+  const [latitude, setLatitude] = useState<number | null>(initialData.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(initialData.longitude ?? null);
   const [cepLoading, setCepLoading] = useState(false);
 
   async function handleCepBlur() {
@@ -64,6 +67,13 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
       setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
+    }
+    const coords = data?.city && data?.state
+      ? await geocodeEndereco({ endereco: data.street, cidade: data.city, estado: data.state })
+      : null;
+    if (coords) {
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
     }
     setCepLoading(false);
   }
@@ -100,7 +110,12 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
       const end = [data.logradouro, data.numero, data.complemento].filter(Boolean).join(", ");
       setNomeEstabelecimento(nome); setEndereco(end); setBairro(data.bairro || "");
       setCidade(data.municipio || ""); setEstado(data.uf || "");
-      setCep((data.cep || "").replace(/\D/g, ""));
+      const cepLimpo = (data.cep || "").replace(/\D/g, "");
+      setCep(cepLimpo);
+      if (data.municipio && data.uf) {
+        const coords = await geocodeEndereco({ endereco: data.logradouro, cidade: data.municipio, estado: data.uf });
+        if (coords) { setLatitude(coords.latitude); setLongitude(coords.longitude); }
+      }
       await upsertCompany({ cnpj: raw, nome_estabelecimento: nome });
       setStep(2);
     } catch (e) {
@@ -239,7 +254,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
           </label>
         </div>
         {errBox}
-        {btn("Continuar", () => save({ nome_estabelecimento: nomeEstabelecimento, endereco, bairro, cidade, estado, cep: cep.replace(/\D/g, "") }, 3),
+        {btn("Continuar", () => save({ nome_estabelecimento: nomeEstabelecimento, endereco, bairro, cidade, estado, cep: cep.replace(/\D/g, ""), latitude, longitude }, 3),
           !nomeEstabelecimento || !endereco || !cidade || !estado)}
       </div>
     </StepShell>

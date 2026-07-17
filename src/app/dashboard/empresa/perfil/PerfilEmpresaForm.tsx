@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
+import { geocodeEndereco } from "@/lib/geocode";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { compressImage } from "@/lib/compressImage";
 
@@ -35,6 +36,8 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
   const [cidade, setCidade] = useState(company.cidade ?? "");
   const [estado, setEstado] = useState(company.estado ?? "");
   const [cep, setCep] = useState(company.cep ?? "");
+  const [latitude, setLatitude] = useState<number | null>(company.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(company.longitude ?? null);
   const [cepLoading, setCepLoading] = useState(false);
 
   async function handleCepBlur() {
@@ -47,6 +50,13 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
       setBairro(data.neighborhood ?? "");
       setCidade(data.city ?? "");
       setEstado(data.state ?? "");
+    }
+    const coords = data?.city && data?.state
+      ? await geocodeEndereco({ endereco: data.street, cidade: data.city, estado: data.state })
+      : null;
+    if (coords) {
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
     }
     setCepLoading(false);
   }
@@ -77,6 +87,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
       }
       const { error: upErr } = await supabase.from("companies").update({
         nome_estabelecimento: nome, responsavel, telefone, endereco, bairro, cidade, estado, cep: cep.replace(/\D/g, ""), slug,
+        latitude, longitude,
         categoria_negocio: categoria || null,
         categoria_outro: categoria === OUTRA_CATEGORIA ? categoriaOutro || null : null,
         faixa_funcionarios: faixa || null,

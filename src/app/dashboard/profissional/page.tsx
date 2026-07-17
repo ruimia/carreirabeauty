@@ -8,6 +8,7 @@ import Link from "next/link";
 import VagaExternaCard from "@/components/VagaExternaCard";
 import AtividadeRecente from "@/components/AtividadeRecente";
 import { getAtividadeRecente } from "@/lib/atividadeRecente";
+import { distanciaKm } from "@/lib/geocode";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -81,7 +82,7 @@ export default async function DashboardProfissionalPage() {
   const [{ data: allJobs }, { data: applications }, { data: conteudos }, { data: vagasExternas }] = await Promise.all([
     supabase
       .from("jobs")
-      .select("id, titulo, funcao, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url)")
+      .select("id, titulo, funcao, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
       .eq("status", "ativa")
       .order("criado_em", { ascending: false }),
     supabase
@@ -126,12 +127,29 @@ export default async function DashboardProfissionalPage() {
   // pausada/em moderação vem com jobs=null e não tem o que renderizar no card
   const candidaturas = (applications ?? []).filter((a) => a.jobs);
 
-  // Vagas compatíveis ainda não candidatadas — mesma função e mesmo estado
+  // Vagas compatíveis ainda não candidatadas — mesma função e localização
+  // compatível. Localização prioriza raio de 30km quando ambos os lados têm
+  // coordenadas (geocoding via CEP); sem coordenadas ainda (backfill em
+  // andamento), cai pro comparativo por estado como antes.
+  const profissionalGeo = professional.latitude && professional.longitude
+    ? { latitude: professional.latitude, longitude: professional.longitude }
+    : null;
+  const RAIO_KM = 30;
+
   const jobs = (allJobs ?? []).filter((j) => {
     if (appliedJobIds.has(j.id)) return false;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const jobEstado = (j.companies as any)?.estado;
-    if (professional.estado && jobEstado && jobEstado !== professional.estado) return false;
+    const empresa = (j.companies as any);
+    const empresaGeo = empresa?.latitude && empresa?.longitude
+      ? { latitude: empresa.latitude, longitude: empresa.longitude }
+      : null;
+
+    if (profissionalGeo && empresaGeo) {
+      if (distanciaKm(profissionalGeo, empresaGeo) > RAIO_KM) return false;
+    } else if (professional.estado && empresa?.estado && empresa.estado !== professional.estado) {
+      return false;
+    }
+
     if (funcoes.length === 0) return true;
     return funcoes.some((f) => f.toLowerCase() === j.funcao?.toLowerCase() ||
       (j.funcao === "outro" && funcoes.includes("outro")));
