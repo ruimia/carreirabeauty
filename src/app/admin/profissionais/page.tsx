@@ -25,7 +25,7 @@ export default async function AdminProfissionaisPage() {
               <tr>
                 <th className="text-left px-4 py-3">Nome</th>
                 <th className="text-left px-4 py-3 hidden sm:table-cell">Função</th>
-                <th className="text-left px-4 py-3 hidden sm:table-cell">Cidade</th>
+                <th className="text-left px-4 py-3 hidden sm:table-cell">Localização</th>
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-left px-4 py-3"></th>
               </tr>

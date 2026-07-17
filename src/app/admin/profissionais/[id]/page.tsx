@@ -61,7 +61,7 @@ export default async function AdminProfissionalDetailPage({ params }: { params: 
         <div className="grid grid-cols-2 gap-3 text-sm">
           {[
             ["Funções", funcoesLabel(p.funcoes, p.funcao_outro)],
-            ["Cidade", `${[p.bairro, p.cidade].filter(Boolean).join(", ")} · ${p.estado}`],
+            ["Localização", `${[p.bairro, p.cidade].filter(Boolean).join(", ")} · ${p.estado}`],
             ["Experiência", p.experiencia],
             ["Disponibilidade", p.disponibilidade],
             ["Tipo de vínculo", p.tipo_vinculo],

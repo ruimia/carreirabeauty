@@ -9,9 +9,11 @@ interface Props {
   professionalId: string | null; // null = não logado ou é empresa
   jaAplicou: boolean;
   nomeProfissional: string | null;
+  empresaNome: string | null;
+  empresaWhatsapp: string | null;
 }
 
-export default function CandidaturaSection({ jobId, professionalId, jaAplicou, nomeProfissional }: Props) {
+export default function CandidaturaSection({ jobId, professionalId, jaAplicou, nomeProfissional, empresaNome, empresaWhatsapp }: Props) {
   const [enviado, setEnviado] = useState(jaAplicou);
   const [mensagem, setMensagem] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,6 +65,31 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
         <p style={{ fontSize: 14, color: "var(--color-success-fg)", marginTop: 4, opacity: 0.8 }}>
           A empresa receberá seu perfil e entrará em contato se tiver interesse.
         </p>
+
+        {empresaWhatsapp && (
+          <div style={{
+            marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-success-border, #BBF7D0)",
+          }}>
+            <p style={{ fontSize: 13, color: "var(--color-success-fg)", opacity: 0.85, marginBottom: 10 }}>
+              Quer acelerar? Manda uma mensagem direto pro WhatsApp{empresaNome ? ` da ${empresaNome}` : ""}.
+            </p>
+            <a
+              href={`https://wa.me/55${empresaWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
+                `Olá! Vi a vaga no CarreiraBeauty e acabei de me candidatar${nomeProfissional ? ` (${nomeProfissional})` : ""}. Gostaria de conversar sobre a oportunidade.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none",
+                background: "#25d366", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700,
+                fontSize: 14, padding: "12px 22px", borderRadius: "var(--radius-pill)",
+              }}
+            >
+              <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 18 }}></i>
+              Chamar no WhatsApp
+            </a>
+          </div>
+        )}
       </div>
     );
   }

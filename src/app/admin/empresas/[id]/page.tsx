@@ -63,7 +63,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
           {[
             ["CNPJ", empresa.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")],
             ["Responsável", empresa.responsavel],
-            ["Cidade", `${[empresa.bairro, empresa.cidade].filter(Boolean).join(", ")} · ${empresa.estado}`],
+            ["Localização", `${[empresa.bairro, empresa.cidade].filter(Boolean).join(", ")} · ${empresa.estado}`],
             ["Categoria", empresa.categoria_negocio],
             ["Funcionários", empresa.faixa_funcionarios],
             ["Assinatura", empresa.status_assinatura],

@@ -186,6 +186,8 @@ export default async function VagaPage({ params }: Props) {
           professionalId={professionalId}
           jaAplicou={jaAplicou}
           nomeProfissional={nomeProfissional}
+          empresaNome={company.nome_estabelecimento ?? null}
+          empresaWhatsapp={company.telefone ?? null}
         />
       </main>
     </div>

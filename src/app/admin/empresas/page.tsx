@@ -31,7 +31,7 @@ export default async function AdminEmpresasPage() {
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
               <tr>
                 <th className="text-left px-4 py-3">Empresa</th>
-                <th className="text-left px-4 py-3 hidden sm:table-cell">Cidade</th>
+                <th className="text-left px-4 py-3 hidden sm:table-cell">Localização</th>
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-left px-4 py-3 hidden sm:table-cell">Cadastro</th>
                 <th className="text-left px-4 py-3"></th>
