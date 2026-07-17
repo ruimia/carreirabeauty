@@ -118,6 +118,10 @@ export default async function DashboardProfissionalPage() {
 
   const appliedJobIds = new Set((applications ?? []).map((a) => a.job_id));
 
+  // RLS só expõe a vaga do join quando ela está ativa — candidatura pra vaga
+  // pausada/em moderação vem com jobs=null e não tem o que renderizar no card
+  const candidaturas = (applications ?? []).filter((a) => a.jobs);
+
   // Vagas compatíveis ainda não candidatadas — mesma função e mesmo estado
   const jobs = (allJobs ?? []).filter((j) => {
     if (appliedJobIds.has(j.id)) return false;
@@ -157,55 +161,88 @@ export default async function DashboardProfissionalPage() {
     <div>
       <main className="page-x">
 
-        {/* Força do perfil */}
+        {/* Saudação — o app fala com a pessoa antes de cobrar qualquer coisa */}
+        <p style={{ font: "800 22px/1.2 var(--font-display)", color: "var(--text-primary)", marginBottom: 4 }}>
+          Oi, {(professional.nome ?? "").split(" ")[0] || "você"}! 👋
+        </p>
+        <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 16 }}>
+          {jobs.length > 0
+            ? `Tem ${jobs.length} vaga${jobs.length > 1 ? "s" : ""} esperando você hoje.`
+            : "A gente tá de olho em vagas pra você."}
+        </p>
+
+        {/* Perfil incompleto — uma linha discreta com anel de progresso, não um cartaz */}
         {perfilPct < 100 && (
           <Link href="/dashboard/profissional/perfil" style={{
-            display: "block", textDecoration: "none", marginBottom: 20,
-            background: "linear-gradient(135deg, var(--color-brand-primary), var(--brand-magenta-600, #a600a6))",
-            borderRadius: "var(--radius-xl)", padding: 20, boxShadow: "var(--shadow-md)",
+            display: "flex", alignItems: "center", gap: 12, textDecoration: "none", marginBottom: 20,
+            background: "var(--surface-card)", border: "1px solid var(--border-default)",
+            borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "12px 16px",
           }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <p style={{ font: "700 16px/1.3 var(--font-display)", color: "#fff" }}>
-                Seu perfil está {perfilPct}% completo
+            <svg width="40" height="40" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+              <circle cx="20" cy="20" r="16" fill="none" stroke="var(--brand-magenta-50)" strokeWidth="4" />
+              <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-brand-primary)" strokeWidth="4"
+                strokeLinecap="round" strokeDasharray={`${(perfilPct / 100) * 100.5} 100.5`}
+                transform="rotate(-90 20 20)" />
+              <text x="20" y="24" textAnchor="middle" fontSize="10" fontWeight="700" fill="var(--color-brand-primary)">
+                {perfilPct}%
+              </text>
+            </svg>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ font: "600 14px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
+                Complete seu perfil
               </p>
-              <span style={{
-                fontSize: 13, fontWeight: 800, color: "var(--color-brand-primary)",
-                background: "#fff", padding: "8px 16px", borderRadius: "var(--radius-pill)",
-                whiteSpace: "nowrap", flexShrink: 0, marginLeft: 12,
-              }}>
-                Completar →
-              </span>
+              <p style={{ font: "var(--text-caption)", color: "var(--text-secondary)" }}>
+                Perfil caprichado é chamado primeiro
+              </p>
             </div>
-            <div style={{ height: 8, borderRadius: 4, background: "rgba(255,255,255,0.3)", overflow: "hidden", marginBottom: 10 }}>
-              <div style={{ height: "100%", width: `${perfilPct}%`, background: "#fff", borderRadius: 4 }} />
-            </div>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", lineHeight: 1.5 }}>
-              Capricha no perfil e aumenta suas chances de ser chamada primeiro! 🚀
-              Falta: {faltando.join(", ")}.
-            </p>
+            <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
           </Link>
         )}
 
-        {/* Stats — só aparece quando há algo pra mostrar (placar zerado desanima) */}
-        {(jobs.length > 0 || (applications?.length ?? 0) > 0) && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-            <div className="stat-card">
-              <div className="stat-icon" style={{ background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)" }}>
-                <i className="ph-fill ph-briefcase"></i>
-              </div>
-              <div>
-                <p style={{ font: "800 28px/1 var(--font-display)", color: "var(--text-primary)" }}>{jobs.length}</p>
-                <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 3 }}>Vagas para você</p>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon" style={{ background: "var(--brand-cyan-50)", color: "var(--brand-cyan-600)" }}>
-                <i className="ph-fill ph-paper-plane-tilt"></i>
-              </div>
-              <div>
-                <p style={{ font: "800 28px/1 var(--font-display)", color: "var(--text-primary)" }}>{applications?.length ?? 0}</p>
-                <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 3 }}>Candidaturas</p>
-              </div>
+        {/* Minhas candidaturas — o "e aí, me chamaram?" vem antes de tudo */}
+        {candidaturas.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <p className="section-label">Suas candidaturas</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {candidaturas.map((app) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const job = app.jobs as any;
+                if (!job) return null;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const company = job.companies as any;
+                const title = job.funcao === "outro" ? (job.funcao_outro || "Outro") : (FUNCAO_LABEL[job.funcao] ?? job.funcao);
+
+                return (
+                  <Link key={app.job_id} href={`/vaga/${job.slug}`} style={{ textDecoration: "none" }}>
+                    <div className="job-feed-card" style={{ borderLeft: "3px solid var(--color-success-fg)" }}>
+                      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                        {company?.logo_url
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={company.logo_url} alt={company.nome_estabelecimento}
+                              style={{ width: 40, height: 40, borderRadius: "var(--radius-md)", objectFit: "cover", flexShrink: 0 }} />
+                          : <Avatar name={company?.nome_estabelecimento ?? "?"} size={40} />
+                        }
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ font: "600 15px/1.2 var(--font-display)", color: "var(--text-primary)" }}>
+                            {job.titulo || title}
+                          </p>
+                          <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 2 }}>
+                            {company?.nome_estabelecimento}
+                          </p>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <span className="status-pill" style={{ background: "var(--color-success-bg)", color: "var(--color-success-fg)" }}>
+                            <i className="ph-fill ph-check-circle"></i> Enviada
+                          </span>
+                          <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 4 }}>
+                            {new Date(app.criado_em).toLocaleDateString("pt-BR")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
@@ -225,7 +262,7 @@ export default async function DashboardProfissionalPage() {
           )}
         </div>
 
-        {jobs.length === 0 ? (
+        {jobs.length === 0 && vagasExternasFiltradas.length === 0 ? (
           <div className="card card-xl" style={{ padding: "28px 24px", textAlign: "center", marginBottom: 28 }}>
             <div style={{
               width: 72, height: 72, borderRadius: "50%", margin: "0 auto 16px",
@@ -265,7 +302,7 @@ export default async function DashboardProfissionalPage() {
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 12 }}>
             {jobs.map((job) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const company = job.companies as any;
@@ -321,19 +358,19 @@ export default async function DashboardProfissionalPage() {
           </div>
         )}
 
-        {/* Vagas de outros sites — agregadas via Adzuna, separadas das vagas nativas
-            (candidatura externa redireciona pro site de origem, não é 1-clique) */}
+        {/* Vagas agregadas (Adzuna) — continuam na mesma lista, só com um divisor
+            sutil de origem em vez de uma segunda seção com título próprio */}
         {vagasExternasFiltradas.length > 0 && (
           <div style={{ marginBottom: 28 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <p className="section-label" style={{ margin: 0 }}>Vagas de outros sites</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 0 12px" }}>
+              <span style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
               <a href="https://www.adzuna.com.br" target="_blank" rel="noopener noreferrer" style={{
-                display: "inline-flex", alignItems: "center", height: 23, padding: "0 8px",
-                borderRadius: "var(--radius-sm)", background: "var(--surface-sunken)",
-                color: "var(--text-tertiary)", fontSize: 10, fontWeight: 700, textDecoration: "none",
+                fontSize: 10, fontWeight: 700, color: "var(--text-tertiary)", textDecoration: "none",
+                textTransform: "uppercase", letterSpacing: "0.06em",
               }}>
-                Jobs by Adzuna
+                de outros sites · Jobs by Adzuna
               </a>
+              <span style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {vagasExternasFiltradas.map((v) => (
@@ -343,115 +380,58 @@ export default async function DashboardProfissionalPage() {
           </div>
         )}
 
-        {/* Dicas de perfil — mesmo com vaga(s) na lista, reforça o que fazer pra se destacar */}
-        {jobs.length > 0 && dicas.length > 0 && (
-          <div className="card card-xl" style={{ padding: "20px 24px", marginBottom: 28 }}>
-            <DicasPerfil dicas={dicas} />
-          </div>
-        )}
-
-        {/* Minhas candidaturas */}
-        {(applications?.length ?? 0) > 0 && (
-          <>
-            <p className="section-label" style={{ marginTop: 4 }}>Minhas candidaturas</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {applications!.map((app) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const job = app.jobs as any;
-                if (!job) return null;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const company = job.companies as any;
-                const title = job.funcao === "outro" ? (job.funcao_outro || "Outro") : (FUNCAO_LABEL[job.funcao] ?? job.funcao);
-
-                return (
-                  <Link key={app.job_id} href={`/vaga/${job.slug}`} style={{ textDecoration: "none" }}>
-                    <div className="job-feed-card" style={{ borderLeft: "3px solid var(--color-success-fg)" }}>
-                      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                        {company?.logo_url
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={company.logo_url} alt={company.nome_estabelecimento}
-                              style={{ width: 40, height: 40, borderRadius: "var(--radius-md)", objectFit: "cover", flexShrink: 0 }} />
-                          : <Avatar name={company?.nome_estabelecimento ?? "?"} size={40} />
-                        }
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ font: "600 15px/1.2 var(--font-display)", color: "var(--text-primary)" }}>
-                            {job.titulo || title}
-                          </p>
-                          <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 2 }}>
-                            {company?.nome_estabelecimento}
-                          </p>
-                        </div>
-                        <div style={{ textAlign: "right", flexShrink: 0 }}>
-                          <span className="status-pill" style={{ background: "var(--color-success-bg)", color: "var(--color-success-fg)" }}>
-                            <i className="ph-fill ph-check-circle"></i> Enviada
-                          </span>
-                          <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 4 }}>
-                            {new Date(app.criado_em).toLocaleDateString("pt-BR")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        {/* Conteúdo — chamada pra aba de conteúdo, com as headlines mais recentes */}
-        {(conteudos?.length ?? 0) > 0 && (
-          <div className="card card-xl" style={{ padding: 18, marginTop: 20 }}>
-            <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", marginBottom: 12 }}>
-              📚 Conteúdo pra você crescer
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {conteudos!.map((c) => (
-                <Link key={c.slug} href={`/dashboard/profissional/conteudo/${c.slug}`} style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
-                  textDecoration: "none", background: "var(--surface-sunken)",
-                  borderRadius: "var(--radius-md)", padding: "10px 14px",
-                }}>
-                  <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
-                    {c.titulo}
-                  </span>
-                  <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
-                </Link>
-              ))}
-            </div>
-            <Link href="/dashboard/profissional/conteudo" style={{
-              display: "block", textAlign: "center", marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", textDecoration: "none",
+        {/* Crescer — quiz + conteúdos numa faixa só, fechando a home */}
+        <div style={{ marginTop: 4 }}>
+          <p className="section-label">Pra crescer na carreira</p>
+          <div className="card card-xl" style={{ padding: 18 }}>
+            <Link href="/dashboard/profissional/quiz" style={{
+              display: "flex", alignItems: "center", gap: 14, textDecoration: "none",
+              background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+              border: "1px solid var(--brand-magenta-100)", borderRadius: "var(--radius-md)", padding: 14,
             }}>
-              Ver todos os conteúdos →
+              <span style={{
+                width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
+                background: "var(--color-brand-primary)", color: "#fff",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
+              }}>
+                <i className="ph-fill ph-seal-check"></i>
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                  Autoestima e Postura Profissional
+                </p>
+                <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
+                  Complete a trilha e ganhe um certificado
+                </p>
+              </div>
+              <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
             </Link>
-          </div>
-        )}
 
-        {/* Quiz-certificado — banner no fim da home, teste de incentivo ao PRO (seção 7.9.7) */}
-        <Link href="/dashboard/profissional/quiz" style={{ textDecoration: "none" }}>
-          <div style={{
-            background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
-            borderRadius: "var(--radius-xl)", border: "1px solid var(--brand-magenta-100)",
-            boxShadow: "var(--shadow-xs)", padding: 16, marginTop: 20,
-            display: "flex", alignItems: "center", gap: 14,
-          }}>
-            <span style={{
-              width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
-              background: "var(--color-brand-primary)", color: "#fff",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
-            }}>
-              <i className="ph-fill ph-seal-check"></i>
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
-                Autoestima e Postura Profissional
-              </p>
-              <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
-                Complete a trilha e ganhe um certificado pro seu perfil
-              </p>
-            </div>
-            <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+            {(conteudos?.length ?? 0) > 0 && (
+              <>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
+                  {conteudos!.map((c) => (
+                    <Link key={c.slug} href={`/dashboard/profissional/conteudo/${c.slug}`} style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+                      textDecoration: "none", background: "var(--surface-sunken)",
+                      borderRadius: "var(--radius-md)", padding: "10px 14px",
+                    }}>
+                      <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
+                        {c.titulo}
+                      </span>
+                      <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+                    </Link>
+                  ))}
+                </div>
+                <Link href="/dashboard/profissional/conteudo" style={{
+                  display: "block", textAlign: "center", marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", textDecoration: "none",
+                }}>
+                  Ver tudo →
+                </Link>
+              </>
+            )}
           </div>
-        </Link>
+        </div>
       </main>
     </div>
   );
