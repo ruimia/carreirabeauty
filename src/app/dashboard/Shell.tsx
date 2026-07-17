@@ -37,6 +37,12 @@ const EMPRESA_TABS: Tab[] = [
     isActive: (p) => p.startsWith("/dashboard/empresa/vagas/nova"),
   },
   {
+    label: "Candidatos",
+    icon: "ph ph-users-three",
+    href: "/dashboard/empresa/candidatos",
+    isActive: (p) => p.startsWith("/dashboard/empresa/candidatos"),
+  },
+  {
     label: "Planos",
     icon: "ph ph-star",
     href: "/dashboard/empresa/planos",
