@@ -123,7 +123,11 @@ export default function CandidatoPotencialCard({ professional: p, vagas }: Props
         ))}
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 14, marginBottom: 6 }}>
+        Convide para conhecer suas vagas
+      </p>
+
+      <div style={{ display: "flex", gap: 8 }}>
         {p.slug && (
           <Link href={`/perfil/${p.slug}`} target="_blank" rel="noopener noreferrer" style={{
             flex: 1, height: 40, borderRadius: "var(--radius-pill)",
