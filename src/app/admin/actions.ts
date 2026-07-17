@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { emailVagaAprovada, emailVagaRejeitada, emailNovaVagaProfissional } from "@/lib/email";
+import { emailVagaAprovada, emailVagaRejeitada, emailNovaVagaProfissional, renderNovaVagaProfissionalHtml, MENSAGEM_PADRAO_NOVA_VAGA } from "@/lib/email";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -57,7 +57,7 @@ export async function aprovarVaga(id: string) {
     }
   }
   // Notificar candidatos por email agora é uma ação manual e separada —
-  // ver contarCandidatosVaga/dispararEmailCandidatos abaixo
+  // ver previewEmailCandidatos/dispararEmailCandidatos abaixo
 }
 
 // Profissionais com a mesma função da vaga, na mesma cidade da empresa —
@@ -83,13 +83,42 @@ async function buscarCandidatosVaga(id: string) {
   return { job: { ...job, companies: comp }, candidatos: candidatos ?? [] };
 }
 
-export async function contarCandidatosVaga(id: string) {
+// Monta os dados pro admin revisar antes de disparar: quantidade, regra de
+// filtro usada, e um preview real do HTML do email (com o primeiro candidato
+// como exemplo de nome) — pra evitar disparo às cegas.
+export async function previewEmailCandidatos(id: string, mensagemCustom?: string) {
   await assertAdmin();
-  const { candidatos } = await buscarCandidatosVaga(id);
-  return { total: candidatos.length };
+  const { job, candidatos } = await buscarCandidatosVaga(id);
+  if (!job) return null;
+
+  const cidade = job.companies?.cidade ?? null;
+  const empresaNome = job.companies?.nome_estabelecimento ?? "";
+  const tituloVaga = job.titulo || job.funcao || "Vaga";
+  const assuntoPadrao = `Nova vaga: ${tituloVaga} em ${empresaNome}`;
+  const nomeExemplo = candidatos[0]?.nome || "Profissional";
+
+  const htmlPreview = renderNovaVagaProfissionalHtml({
+    profissionalNome: nomeExemplo,
+    tituloVaga,
+    funcaoVaga: job.funcao ?? "",
+    empresaNome,
+    cidade,
+    vagaSlug: job.slug ?? id,
+    mensagem: mensagemCustom || MENSAGEM_PADRAO_NOVA_VAGA,
+  });
+
+  return {
+    total: candidatos.length,
+    funcao: job.funcao ?? "",
+    cidade,
+    assuntoPadrao,
+    mensagemPadrao: MENSAGEM_PADRAO_NOVA_VAGA,
+    nomeExemplo,
+    htmlPreview,
+  };
 }
 
-export async function dispararEmailCandidatos(id: string) {
+export async function dispararEmailCandidatos(id: string, assunto?: string, mensagem?: string) {
   const supabase = await assertAdmin();
   const { job, candidatos } = await buscarCandidatosVaga(id);
   if (!job || candidatos.length === 0) return { enviados: 0, semEmail: 0, total: 0 };
@@ -113,6 +142,8 @@ export async function dispararEmailCandidatos(id: string) {
         empresaNome: job.companies?.nome_estabelecimento ?? "",
         cidade: prof.cidade ?? null,
         vagaSlug: job.slug ?? id,
+        assunto,
+        mensagem,
       });
     })
   );
