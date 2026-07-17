@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PLANOS_EMPRESA, PlanoEmpresa, formatPreco } from "@/lib/planos";
 import AssinarButton from "./AssinarButton";
+import VoltarButton from "@/components/VoltarButton";
 
 const PLANOS_ORDER: PlanoEmpresa[] = ["gratis", "premium"];
 
@@ -31,6 +32,9 @@ export default async function PlanosEmpresaPage() {
   return (
     <div>
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "20px var(--space-page-x) 40px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <VoltarButton fallbackHref="/dashboard/empresa" />
+        </div>
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 21, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.25 }}>
           Planos
         </h1>

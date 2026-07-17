@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PLANOS_PROFISSIONAL, PlanoProfissional, formatPreco } from "@/lib/planos";
 import AssinarButton from "../../empresa/planos/AssinarButton";
+import VoltarButton from "@/components/VoltarButton";
 
 const PLANOS_ORDER: PlanoProfissional[] = ["gratis", "pro"];
 
@@ -35,6 +36,9 @@ export default async function PlanosProfissionalPage() {
   return (
     <div>
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "20px var(--space-page-x) 40px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <VoltarButton fallbackHref="/dashboard/profissional" />
+        </div>
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 21, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.25 }}>
           Mais chances de conseguir a vaga certa
         </h1>
