@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import CandidaturaSection from "./CandidaturaSection";
+import CandidatarFloatingButton from "./CandidatarFloatingButton";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -181,15 +182,19 @@ export default async function VagaPage({ params }: Props) {
         )}
 
         {/* CTA / Candidatura */}
-        <CandidaturaSection
-          jobId={vaga.id}
-          professionalId={professionalId}
-          jaAplicou={jaAplicou}
-          nomeProfissional={nomeProfissional}
-          empresaNome={company.nome_estabelecimento ?? null}
-          empresaWhatsapp={company.telefone ?? null}
-        />
+        <div id="candidatura-section">
+          <CandidaturaSection
+            jobId={vaga.id}
+            professionalId={professionalId}
+            jaAplicou={jaAplicou}
+            nomeProfissional={nomeProfissional}
+            empresaNome={company.nome_estabelecimento ?? null}
+            empresaWhatsapp={company.telefone ?? null}
+          />
+        </div>
       </main>
+
+      <CandidatarFloatingButton jaAplicou={jaAplicou} />
     </div>
   );
 }
