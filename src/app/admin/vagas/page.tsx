@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { updateJobStatus } from "../actions";
 import ModeracaoActions from "./ModeracaoActions";
 import DispararEmailButton from "./DispararEmailButton";
+import VagaEditForm from "./VagaEditForm";
 
 export default async function AdminVagasPage() {
   const supabase = await createClient();
@@ -119,6 +120,26 @@ export default async function AdminVagasPage() {
             </div>
           </div>
         </details>
+
+        <div className="mt-2">
+          <VagaEditForm
+            id={v.id}
+            inicial={{
+              titulo: v.titulo ?? "",
+              funcao: v.funcao ?? "",
+              funcao_outro: v.funcao_outro ?? "",
+              descricao: v.descricao ?? "",
+              tipo_vinculo: v.tipo_vinculo ?? "",
+              faixa_salarial: v.faixa_salarial ?? "",
+              comissao: v.comissao ?? "",
+              endereco: v.endereco ?? "",
+              bairro: v.bairro ?? "",
+              cidade: v.cidade ?? "",
+              estado: v.estado ?? "",
+              cep: v.cep ?? "",
+            }}
+          />
+        </div>
 
         {showMod && <ModeracaoActions id={v.id} />}
         {v.status === "ativa" && <DispararEmailButton id={v.id} />}

@@ -245,7 +245,7 @@ export default function ProfissionalOnboarding({ professionalId: initialId, init
         </div>
         {errBox}
         <PrimaryBtn label="Continuar"
-          onClick={() => go({ cep: cep.replace(/\D/g, ""), endereco, bairro, localizacao: `${cidade} - ${estado}`, cidade, estado }, 4)}
+          onClick={() => go({ cep: cep.replace(/\D/g, ""), endereco, bairro, localizacao: `${cidade.trim()} - ${estado}`, cidade: cidade.trim(), estado }, 4)}
           disabled={!cep.replace(/\D/g, "") || !endereco.trim() || !cidade.trim() || !estado.trim()} />
       </div>
     </StepShell>

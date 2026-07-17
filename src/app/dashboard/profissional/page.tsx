@@ -100,7 +100,7 @@ export default async function DashboardProfissionalPage() {
       ? supabase
           .from("vagas_externas")
           .select("id, titulo, empresa, cidade, estado, url, salario_min, salario_max, descricao, publicado_em")
-          .eq("cidade_busca", professional.cidade)
+          .eq("cidade_busca", professional.cidade.trim())
           .order("publicado_em", { ascending: false })
           .limit(30)
       : Promise.resolve({ data: [] }),

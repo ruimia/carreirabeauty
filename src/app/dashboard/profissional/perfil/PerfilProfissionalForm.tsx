@@ -190,7 +190,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
       const { error: upErr } = await supabase.from("professionals").update({
         nome, telefone, funcoes, funcao_outro: funcoes.includes(OUTRA) ? funcaoOutro : null,
         cep: cep.replace(/\D/g, ""), endereco, bairro,
-        cidade, estado, localizacao: `${cidade} - ${estado}`,
+        cidade: cidade.trim(), estado, localizacao: `${cidade.trim()} - ${estado}`,
         educacao_basica: apresentacao,
         experiencia, disponibilidade,
         tipo_vinculo: tipoVinculo || null,

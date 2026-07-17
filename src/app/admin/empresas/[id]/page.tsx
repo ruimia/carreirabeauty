@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { toggleBloqueioEmpresa, updateJobStatus } from "../../actions";
+import EmpresaEditForm from "./EmpresaEditForm";
+import VagaEditForm from "../../vagas/VagaEditForm";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -23,7 +25,11 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
 
   const { data: jobs } = await supabase
     .from("jobs")
-    .select("id, funcao, funcao_outro, status, criado_em, applications(count)")
+    .select(`
+      id, titulo, funcao, funcao_outro, status, criado_em, descricao,
+      tipo_vinculo, faixa_salarial, comissao, endereco, bairro, cidade, estado, cep,
+      applications(count)
+    `)
     .eq("company_id", id)
     .order("criado_em", { ascending: false });
 
@@ -72,7 +78,7 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
           ))}
         </div>
 
-        <div className="pt-2 border-t border-gray-100 flex gap-2">
+        <div className="pt-2 border-t border-gray-100 flex flex-wrap gap-2">
           <form action={toggleBloqueioEmpresa.bind(null, empresa.id, !empresa.bloqueado)}>
             <button className={`text-sm font-medium px-4 py-2 rounded-xl transition ${
               empresa.bloqueado
@@ -82,6 +88,26 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
               {empresa.bloqueado ? "Desbloquear empresa" : "Bloquear empresa"}
             </button>
           </form>
+        </div>
+
+        <div>
+          <EmpresaEditForm
+            id={empresa.id}
+            inicial={{
+              nome_estabelecimento: empresa.nome_estabelecimento ?? "",
+              responsavel: empresa.responsavel ?? "",
+              telefone: empresa.telefone ?? "",
+              cnpj: empresa.cnpj ?? "",
+              endereco: empresa.endereco ?? "",
+              bairro: empresa.bairro ?? "",
+              cidade: empresa.cidade ?? "",
+              estado: empresa.estado ?? "",
+              cep: empresa.cep ?? "",
+              categoria_negocio: empresa.categoria_negocio ?? "",
+              faixa_funcionarios: empresa.faixa_funcionarios ?? "",
+              instagram: empresa.instagram ?? "",
+            }}
+          />
         </div>
       </div>
 
@@ -95,27 +121,48 @@ export default async function AdminEmpresaDetailPage({ params }: { params: Promi
         ) : (
           <div className="divide-y divide-gray-50">
             {jobs.map((job) => (
-              <div key={job.id} className="px-4 py-3 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    {job.funcao === "outro" ? job.funcao_outro : FUNCAO_LABEL[job.funcao] ?? job.funcao}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(job.applications as any)?.[0]?.count ?? 0} candidatura(s) · {new Date(job.criado_em).toLocaleDateString("pt-BR")}
-                  </p>
+              <div key={job.id} className="px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {job.titulo || (job.funcao === "outro" ? job.funcao_outro : FUNCAO_LABEL[job.funcao] ?? job.funcao)}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      {(job.applications as any)?.[0]?.count ?? 0} candidatura(s) · {new Date(job.criado_em).toLocaleDateString("pt-BR")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      job.status === "ativa" ? "bg-green-100 text-green-700" :
+                      job.status === "pausada" ? "bg-yellow-100 text-yellow-700" :
+                      "bg-gray-100 text-gray-500"
+                    }`}>{job.status}</span>
+                    <form action={updateJobStatus.bind(null, job.id, job.status === "ativa" ? "fechada" : "ativa")}>
+                      <button className="text-xs text-rose-500 hover:text-rose-600 font-medium">
+                        {job.status === "ativa" ? "Fechar" : "Reativar"}
+                      </button>
+                    </form>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    job.status === "ativa" ? "bg-green-100 text-green-700" :
-                    job.status === "pausada" ? "bg-yellow-100 text-yellow-700" :
-                    "bg-gray-100 text-gray-500"
-                  }`}>{job.status}</span>
-                  <form action={updateJobStatus.bind(null, job.id, job.status === "ativa" ? "fechada" : "ativa")}>
-                    <button className="text-xs text-rose-500 hover:text-rose-600 font-medium">
-                      {job.status === "ativa" ? "Fechar" : "Reativar"}
-                    </button>
-                  </form>
+                <div className="mt-2">
+                  <VagaEditForm
+                    id={job.id}
+                    inicial={{
+                      titulo: job.titulo ?? "",
+                      funcao: job.funcao ?? "",
+                      funcao_outro: job.funcao_outro ?? "",
+                      descricao: job.descricao ?? "",
+                      tipo_vinculo: job.tipo_vinculo ?? "",
+                      faixa_salarial: job.faixa_salarial ?? "",
+                      comissao: job.comissao ?? "",
+                      endereco: job.endereco ?? "",
+                      bairro: job.bairro ?? "",
+                      cidade: job.cidade ?? "",
+                      estado: job.estado ?? "",
+                      cep: job.cep ?? "",
+                    }}
+                  />
                 </div>
               </div>
             ))}

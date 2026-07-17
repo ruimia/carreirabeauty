@@ -33,6 +33,78 @@ export async function updateJobStatus(id: string, status: string) {
   revalidatePath("/admin/vagas");
 }
 
+export interface EmpresaEditData {
+  nome_estabelecimento: string;
+  responsavel: string;
+  telefone: string;
+  cnpj: string;
+  endereco: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  categoria_negocio: string;
+  faixa_funcionarios: string;
+  instagram: string;
+}
+
+export async function atualizarEmpresaAdmin(id: string, dados: EmpresaEditData) {
+  const supabase = await assertAdmin();
+  const { error } = await supabase.from("companies").update({
+    nome_estabelecimento: dados.nome_estabelecimento,
+    responsavel: dados.responsavel,
+    telefone: dados.telefone,
+    cnpj: dados.cnpj || null,
+    endereco: dados.endereco,
+    bairro: dados.bairro,
+    cidade: dados.cidade.trim(),
+    estado: dados.estado,
+    cep: dados.cep,
+    categoria_negocio: dados.categoria_negocio || null,
+    faixa_funcionarios: dados.faixa_funcionarios || null,
+    instagram: dados.instagram || null,
+  }).eq("id", id);
+  revalidatePath(`/admin/empresas/${id}`);
+  revalidatePath("/admin/empresas");
+  if (error) throw new Error(error.message);
+}
+
+export interface VagaEditData {
+  titulo: string;
+  funcao: string;
+  funcao_outro: string;
+  descricao: string;
+  tipo_vinculo: string;
+  faixa_salarial: string;
+  comissao: string;
+  endereco: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+}
+
+export async function atualizarVagaAdmin(id: string, dados: VagaEditData) {
+  const supabase = await assertAdmin();
+  const { error } = await supabase.from("jobs").update({
+    titulo: dados.titulo,
+    funcao: dados.funcao,
+    funcao_outro: dados.funcao_outro || null,
+    descricao: dados.descricao,
+    tipo_vinculo: dados.tipo_vinculo || null,
+    faixa_salarial: dados.faixa_salarial,
+    comissao: dados.comissao,
+    endereco: dados.endereco,
+    bairro: dados.bairro,
+    cidade: dados.cidade.trim(),
+    estado: dados.estado,
+    cep: dados.cep,
+  }).eq("id", id);
+  revalidatePath("/admin/vagas");
+  revalidatePath("/admin/empresas");
+  if (error) throw new Error(error.message);
+}
+
 export async function aprovarVaga(id: string) {
   const supabase = await assertAdmin();
   await supabase.from("jobs").update({ status: "ativa", motivo_rejeicao: null }).eq("id", id);
@@ -60,6 +132,13 @@ export async function aprovarVaga(id: string) {
   // ver previewEmailCandidatos/dispararEmailCandidatos abaixo
 }
 
+// Ignora acento/maiúscula na comparação — cidade vem digitada à mão em
+// alguns cadastros (ex: "SAO PAULO" vs "São Paulo") e uma comparação exata
+// deixava candidatos de fora silenciosamente
+function normalizaCidade(s: string | null | undefined): string {
+  return (s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+}
+
 // Profissionais com a mesma função da vaga, na mesma cidade da empresa —
 // candidatos elegíveis pro disparo manual de email (matching por raio fica
 // pra depois, quando tivermos geocoding de verdade)
@@ -73,14 +152,17 @@ async function buscarCandidatosVaga(id: string) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const comp = job.companies as any;
-  let query = supabase
+  const { data: todosComFuncao } = await supabase
     .from("professionals")
     .select("user_id, nome, cidade")
     .contains("funcoes", [job.funcao]);
-  if (comp?.cidade) query = query.eq("cidade", comp.cidade);
-  const { data: candidatos } = await query;
 
-  return { job: { ...job, companies: comp }, candidatos: candidatos ?? [] };
+  const cidadeEmpresa = normalizaCidade(comp?.cidade);
+  const candidatos = cidadeEmpresa
+    ? (todosComFuncao ?? []).filter((p) => normalizaCidade(p.cidade) === cidadeEmpresa)
+    : (todosComFuncao ?? []);
+
+  return { job: { ...job, companies: comp }, candidatos };
 }
 
 // Monta os dados pro admin revisar antes de disparar: quantidade, regra de
