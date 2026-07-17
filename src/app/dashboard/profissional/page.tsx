@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import VagaExternaCard from "@/components/VagaExternaCard";
+import AtividadeRecente from "@/components/AtividadeRecente";
+import { getAtividadeRecente } from "@/lib/atividadeRecente";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -103,6 +105,8 @@ export default async function DashboardProfissionalPage() {
           .limit(30)
       : Promise.resolve({ data: [] }),
   ]);
+
+  const atividades = await getAtividadeRecente(supabase, 4);
 
   // Casa vaga agregada com a(s) função(ões) do profissional — mesma lógica das
   // vagas nativas (se não tem função marcada ou marcou "outro", não filtra)
@@ -377,6 +381,12 @@ export default async function DashboardProfissionalPage() {
                 <VagaExternaCard key={v.id} vaga={v} professionalId={professional.id} publicadoRelativo={formatoDataRelativa(v.publicado_em)} />
               ))}
             </div>
+          </div>
+        )}
+
+        {atividades.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <AtividadeRecente eventos={atividades} />
           </div>
         )}
 

@@ -570,15 +570,37 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 
 **Hipótese:** quiz curto e gamificado sobre temas da profissão (atendimento, técnica, precificação, etc.), com certificado/badge ao final — o valor percebido está no certificado (objeto de status, compartilhável), não necessariamente no conteúdo do quiz em si.
 
-**Modelo proposto:**
-- [ ] **Quiz em si: sempre grátis**, com limite de **1 quiz/dia no plano grátis** (mecânica de rate-limit estilo Duolingo — cria hábito de abertura diária e urgência de "quero fazer mais um agora")
-- [ ] **PRO: quizzes ilimitados**, sem limite diário
-- [ ] **Certificado/badge: paywall separado do acesso ao quiz** — ela pode responder de graça, mas "destravar" o certificado pra postar/adicionar ao perfil é o que é pago. Separa "aprender" (grátis, gera engajamento e hábito) de "provar que aprendeu" (pago, é o objeto de status)
+**Modelo proposto (versão evoluída, com limite diário):**
+- [ ] Quiz em si: sempre grátis, com limite de 1 quiz/dia no plano grátis (mecânica de rate-limit estilo Duolingo — cria hábito de abertura diária e urgência de "quero fazer mais um agora")
+- [ ] PRO: quizzes ilimitados, sem limite diário
+- [ ] Certificado/badge: paywall separado do acesso ao quiz — ela pode responder de graça, mas "destravar" o certificado pra postar/adicionar ao perfil é o que é pago. Separa "aprender" (grátis, gera engajamento e hábito) de "provar que aprendeu" (pago, é o objeto de status)
+
+> **⚠️ Simplificado para o teste inicial (jul/2026):** no primeiro teste, **sem limite diário** — todos os módulos da trilha ficam liberados de uma vez pra qualquer pessoa fazer quando quiser. O único ponto de paywall nessa fase é o **resgate do certificado ao final da trilha**. Objetivo do teste é isolar e validar duas coisas específicas: (a) taxa de conclusão da trilha inteira quando não há fricção nenhuma de acesso, e (b) taxa de conversão pra PRO no momento de resgatar o certificado. O rate-limit de 1/dia (mecânica de streak/hábito) fica registrado como evolução futura, a reintroduzir depois de validar esse sinal mais simples primeiro — não é necessário pro teste inicial e adicionaria uma variável a mais dificultando a leitura do resultado.
 - [ ] Certificado desbloqueado fica **liberado dentro do PRO unificado** (seção 7.9.5, R$14,90) — não cria SKU extra, mantém a lógica de "um sim só" de compra
 - [ ] **Testar variante de baixo compromisso:** certificado avulso (compra única, ex: R$9,90) como alternativa/complemento ao ebook do funil de topo já existente (seção 7.9.5) — o badge tangível pode converter melhor que conteúdo lido e esquecido
 - [ ] **Posicionamento cuidadoso:** chamar de "Certificado CarreiraBeauty" (selo de engajamento/conhecimento na plataforma), não "certificação profissional formal" — evita expectativa de rigor técnico que um quiz interno não sustenta
 - [ ] A definir: banco de perguntas por tema/função (produção de conteúdo, possivelmente via IA/Gamma como os demais conteúdos da seção 7.9.4)
 - [ ] Métrica de validação: (a) taxa de conclusão diária/streak no plano grátis, (b) taxa de tentativa de desbloqueio de certificado (sinal de intenção de compra), (c) conversão certificado avulso vs. PRO unificado
+
+#### Trilha piloto escolhida (jul/2026): "Autoestima e Postura Profissional"
+
+**Motivo da priorização:** em vez de começar pela trilha técnica ("Domínio da Profissão"), o piloto começa por postura/atendimento porque esse é um ponto de dor explícito do lado **empregador** (dificuldade de avaliar postura profissional numa candidatura rápida), mesmo quando o profissional não reconhece essa lacuna em si mesmo. Isso dá ao certificado um valor duplo: reforça a autoestima do profissional (objetivo original) **e** vira um sinal de confiança pro empregador — reconecta com a ideia de busca/filtro no banco de currículos (seção 7.9, hoje fora do MVP), abrindo caminho futuro pra empresa filtrar candidato por certificado obtido, não só por palavra-chave de função.
+
+**6 módulos da trilha (1 quiz = 1 módulo, conclusão dos 6 desbloqueia o certificado da trilha):**
+1. **A primeira impressão** — pontualidade, comunicação inicial, apresentação pessoal
+2. **Comunicação com o cliente** — escuta ativa, tom de voz, condução da conversa durante o atendimento
+3. **Lidando com reclamação sem se abalar** — separar crítica do trabalho de crítica pessoal
+4. **Postura em mensagens (WhatsApp/redes)** — tom escrito, tempo de resposta, profissionalismo em texto
+5. **Impondo limites com respeito** — dizer não, cobrar atraso, recusar pedido fora do combinado sem soar rude
+6. **Autoconfiança e superando a insegurança** — lidar com a sensação de "não ser boa o suficiente", reconhecer o próprio valor
+
+**Nome do certificado:** "Atendimento e Postura Profissional Certificado" — nome pensado pra também fazer sentido numa futura tela de recrutamento pro lado empresa, não só como badge de autoestima.
+
+- [x] Trilha piloto definida e priorizada: Autoestima e Postura Profissional (substitui "Domínio da Profissão" como primeira a construir)
+- [x] **Modelo do teste inicial:** os 6 módulos ficam **todos liberados sem limite** para qualquer pessoa fazer — sem rate-limit diário nessa fase. O paywall acontece **só no resgate do certificado** ao concluir a trilha inteira (PRO ou avulso, a definir no teste)
+- [ ] **Pronto para implementação pelo Claude Code:** construir o módulo de quiz com esses 6 módulos liberados, com paywall apenas no resgate do certificado final (dentro do PRO unificado ou avulso R$9,90), reaproveitando a entidade `Subscription` já existente (seção 4/10) pra verificação de acesso no momento do resgate
+- [ ] Banco de perguntas dos 6 módulos ainda por escrever (conteúdo a produzir antes ou durante a implementação técnica)
+- [ ] Estrutura de dados a detalhar: `Quiz`, `QuizModule`, `QuizAttempt`, `Certificate` (extensão do modelo, seção 10)
 
 ### b) Depoimentos/recomendações estilo LinkedIn
 
@@ -595,6 +617,26 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 - [ ] Reaproveita o campo de fotos ilimitadas já no PRO (tabela da seção 7.9.1) — não é feature nova de infraestrutura, é ampliar o que pode ser enviado pro álbum existente
 
 - [ ] **Registrado como hipóteses a testar, não ainda priorizadas em relação a templates (7.9.6) e vagas curadas (Fase 6.5)** — ordem de teste a definir
+
+---
+
+## 7.9.8. PWA (Progressive Web App) — instalável no celular (ideia registrada, jul/2026)
+
+**Ideia:** transformar o web app em PWA instalável — mesmo código/URL, sem virar "dois produtos" (web vs app). A diferença é só o navegador oferecer instalação:
+- **Desktop:** ícone de instalar na barra de endereço, baixa prioridade (raro alguém instalar app de vagas no computador).
+- **Mobile:** o que importa de verdade pra esse público. Não forçar instalação na primeira visita — melhor deixar usar normal primeiro e, depois de algum uso (ex: 2º login), mostrar convite discreto tipo "Instalar app".
+
+**Benefícios esperados:**
+- Ícone na tela inicial — reabre direto, sem caçar aba/favorito (público usa pouco além de WhatsApp/Instagram)
+- Sensação de "app de verdade" — abre em tela cheia, sem barra de navegador
+- Reengajamento maior — padrão documentado em apps de vaga/marketplace em público de baixa renda
+- **Notificação push** (fora do escopo básico de "instalável", exige service worker + permissão) — avisar "nova vaga compatível" ou "candidatura visualizada" direto no celular. Provavelmente o maior gerador de retorno do produto, mas é um passo técnico a mais
+
+**Custo estimado:**
+- Fase 1 (instalável, ~1h): `manifest.json` + ícones dimensionados (192/512px) + meta tags — sem service worker
+- Fase 2 (offline/service worker): maior custo e teste, **baixa prioridade** pra esse produto — vagas/candidaturas/planos precisam estar sempre atualizados, cache offline arrisca mostrar dado velho (ex: vaga já fechada)
+
+**Status:** ideia registrada, aguardando resultado do teste do quiz-certificado (seção 7.9.7) antes de priorizar implementação.
 
 ---
 
@@ -628,6 +670,29 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 - [x] **Objeção de fidelidade quebrada no ponto certo** — selo verde "Sem fidelidade. Cancele quando quiser, sem multa." logo abaixo do preço. A ressalva já existia, mas em 11px cinza no rodapé, invisível justamente pra quem tem a dúvida
 - [x] **Mobile sem scroll** — os 2 planos, o CTA e o selo de fidelidade cabem acima da dobra em 375x812 (validado). Cards ficaram lado a lado mesmo no celular, com as mesmas 5 linhas de benefício nos dois, virando comparação direta em vez de duas listas soltas
 - [ ] **⚠️ Pendência (vira problema no 1º assinante):** não existe cancelamento dentro do app. O cancelamento real acontece na conta do Mercado Pago (o webhook detecta e marca `plano_status: 'cancelado'`) — por isso o rodapé diz isso explicitamente, em vez de prometer "cancele pelo app". Pior: pra quem já é PRO, o card grátis mostra **"Fazer downgrade", que é um `<div>` decorativo sem `onClick`** — é exatamente onde o assinante clicaria pra cancelar, e não faz nada. Hoje é inofensivo (0 assinantes), mas vira ticket de suporte e quebra de confiança no momento mais sensível. Saídas: (a) o botão levar pro MP com instruções, ou (b) implementar cancelamento de verdade via API do MP
+
+---
+
+## 7.10. Feed de atividade — prova social real (hipótese, jul/2026)
+
+**Hipótese:** a percepção de "pouco movimento" no app pode ser atenuada mostrando atividade real acontecendo (cadastros, candidaturas), gerando senso de comunidade viva e "inquietude" (FOMO) em quem ainda não agiu. Diferente da prova social fabricada que foi **explicitamente rejeitada** na tela de planos (seção 7.9.5, "sem prova social inventada, com 0 assinantes qualquer número seria fabricado") — aqui o dado é **real**, então não tem esse problema de credibilidade.
+
+**Riscos identificados antes de construir:**
+- **LGPD:** nome completo publicamente exposto sem consentimento específico é problema — precisa ser parcialmente anonimizado
+- **Volume baixo pode expor fraqueza em vez de escondê-la:** com pouca vaga/candidatura ainda (diagnóstico da seção 13: 1 empresa só, a maioria são cadastros de profissional), um feed evento-a-evento de candidatura ficaria visivelmente vazio — o oposto do efeito desejado. Recomendação original era começar só com contador agregado de cadastros e evoluir pro feed nome-a-nome depois, quando candidatura/vaga tiver volume suficiente
+
+**Decisão do usuário (jul/2026) — formato definido para implementação direta:**
+- [x] **Formato de exibição:** "Nome e iniciais — bairro — cidade (estado)" (ex: "Ana S. — Vila Mariana — São Paulo (SP)") — resolve a preocupação de LGPD sem precisar de anonimização mais pesada, mantendo o efeito humano/real
+- [x] **Gatilho do evento:** exibido **após a pessoa finalizar o onboarding** (cadastro completo, não cadastro parcial/incompleto) — evita mostrar os ~40% de cadastros incompletos identificados no diagnóstico da seção 13
+- [x] **Onde aparece:** tanto na **landing page pública** (pré-cadastro, reforça pra quem está decidindo se cadastrar que "tem gente de verdade aqui") quanto na **área logada** (reforça pra quem já é usuário que a comunidade está ativa)
+- [x] **Janela de tempo:** mostra atividade das **últimas 24 horas**
+
+- [x] **Implementado (jul/2026):** sem nova tabela — `getAtividadeRecente()` (`src/lib/atividadeRecente.ts`) é uma view derivada em código, consultando `professionals` (slug preenchido = onboarding completo) e `companies` (`status_cadastro = 'completo'`) direto, filtrando `criado_em` nas últimas 24h. Mais simples que criar `ActivityFeedEvent` e suficiente pro volume atual
+- [x] Copy implementado: profissional → "{Nome} {Inicial}. de {bairro}, {cidade} (UF) acabou de se cadastrar"; empresa → "{Nome do estabelecimento} se cadastrou em {bairro}, {cidade} (UF)" (nome de empresa é dado público, não precisa iniciais)
+- [x] **Decisão tomada:** bloco inteiro some quando não há eventos nas últimas 24h (componente `AtividadeRecente` retorna `null`) — evita expor dia de pouco movimento
+- [x] Bairro confirmado sendo salvo (seção 7.8.1/bairro) — usado no texto do evento, com fallback gracioso pra só cidade/UF quando bairro estiver vazio
+- [ ] Opt-out no cadastro — não implementado nesta rodada, avaliar se é necessário dado que o nome já aparece parcialmente anonimizado (primeiro nome + inicial)
+- [x] **Implementado pelo Claude Code:** componente `AtividadeRecente` (`src/components/AtividadeRecente.tsx`) plugado na landing pública (`src/app/page.tsx`), na home do profissional e na home da empresa
 
 ---
 

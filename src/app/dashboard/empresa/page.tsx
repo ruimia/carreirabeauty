@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import EncerrarVagaButton from "./EncerrarVagaButton";
+import AtividadeRecente from "@/components/AtividadeRecente";
+import { getAtividadeRecente } from "@/lib/atividadeRecente";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -43,6 +45,7 @@ export default async function DashboardEmpresaPage() {
   }, 0);
 
   const todasPendentes = (jobs ?? []).length > 0 && (jobs ?? []).every((j) => j.status === "pendente_moderacao");
+  const atividades = await getAtividadeRecente(supabase, 4);
 
   return (
     <div>
@@ -197,6 +200,12 @@ export default async function DashboardEmpresaPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {atividades.length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <AtividadeRecente eventos={atividades} />
           </div>
         )}
       </main>

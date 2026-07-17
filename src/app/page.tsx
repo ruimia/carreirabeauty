@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
 import StickyCTABar from "./StickyCTABar";
+import AtividadeRecente from "@/components/AtividadeRecente";
+import { getAtividadeRecente } from "@/lib/atividadeRecente";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,8 @@ export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (user) redirect("/dashboard");
+
+  const atividades = await getAtividadeRecente(supabase);
 
   return (
     <div style={{ minHeight: "100vh", fontFamily: "var(--font-body)" }}>
@@ -97,6 +101,12 @@ export default async function Home() {
                 📍 De capitais a cidades do interior do Brasil — sua região está aqui
               </span>
             </div>
+
+            {atividades.length > 0 && (
+              <div style={{ width: "100%", maxWidth: 480, marginTop: 8, textAlign: "left" }}>
+                <AtividadeRecente eventos={atividades} />
+              </div>
+            )}
           </div>
         </section>
 
