@@ -338,6 +338,13 @@ export default async function DashboardProfissionalPage() {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const company = job.companies as any;
               const title = job.funcao === "outro" ? (job.funcao_outro || "Outro") : (FUNCAO_LABEL[job.funcao] ?? job.funcao);
+              const empresaGeo = company?.latitude && company?.longitude
+                ? { latitude: company.latitude, longitude: company.longitude }
+                : null;
+              const distancia = profissionalGeo && empresaGeo
+                ? Math.round(distanciaKm(profissionalGeo, empresaGeo))
+                : null;
+              const publicadoRelativo = formatoDataRelativa(job.criado_em);
 
               return (
                 <Link key={job.id} href={`/vaga/${job.slug}`} style={{ textDecoration: "none" }}>
@@ -380,6 +387,12 @@ export default async function DashboardProfissionalPage() {
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
                       {job.tipo_vinculo && (
                         <span className="tag"><i className="ph ph-briefcase"></i> {VINCULO_LABEL[job.tipo_vinculo] ?? job.tipo_vinculo}</span>
+                      )}
+                      {distancia !== null && (
+                        <span className="tag"><i className="ph ph-map-pin"></i> {distancia === 0 ? "menos de 1 km" : `${distancia} km`}</span>
+                      )}
+                      {publicadoRelativo && (
+                        <span className="tag"><i className="ph ph-clock"></i> {publicadoRelativo}</span>
                       )}
                     </div>
                   </div>
