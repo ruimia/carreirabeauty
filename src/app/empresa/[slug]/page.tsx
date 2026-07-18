@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { APP_URL, buildOrganizationLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -23,8 +24,22 @@ interface Props { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data } = await supabase.from("companies").select("nome_estabelecimento").eq("slug", slug).single();
-  return { title: data?.nome_estabelecimento ?? "Empresa" };
+  const { data } = await supabase
+    .from("companies").select("nome_estabelecimento, cidade, estado, logo_url").eq("slug", slug).single();
+  if (!data) return { title: "Empresa não encontrada" };
+
+  const local = [data.cidade, data.estado].filter(Boolean).join(" - ");
+  const title = `${data.nome_estabelecimento}${local ? ` — ${local}` : ""}`;
+  const description = `Vagas de emprego em beleza${local ? ` em ${local}` : ""} na ${data.nome_estabelecimento}. Candidate-se grátis no CarreiraBeauty.`;
+  const url = `${APP_URL}/empresa/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: "website", images: data.logo_url ? [data.logo_url] : [] },
+    twitter: { card: "summary", title, description, images: data.logo_url ? [data.logo_url] : [] },
+  };
 }
 
 export default async function EmpresaPage({ params }: Props) {
@@ -44,8 +59,19 @@ export default async function EmpresaPage({ params }: Props) {
   const inp: React.CSSProperties = { display: "none" };
   void inp;
 
+  const organizationLd = buildOrganizationLd({
+    nome: company.nome_estabelecimento,
+    logoUrl: company.logo_url,
+    endereco: company.endereco,
+    bairro: company.bairro,
+    cidade: company.cidade,
+    estado: company.estado,
+    slug: company.slug,
+  });
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--surface-page)" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
       <header style={{
         background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
         padding: "0 var(--space-page-x)", height: 56,

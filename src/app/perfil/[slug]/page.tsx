@@ -7,6 +7,7 @@ import TemplateClassico from "@/components/perfilTemplates/TemplateClassico";
 import TemplateVitrine from "@/components/perfilTemplates/TemplateVitrine";
 import TemplateElegante from "@/components/perfilTemplates/TemplateElegante";
 import { PerfilTemplateData } from "@/components/perfilTemplates/types";
+import { APP_URL, buildPersonLd } from "@/lib/seo";
 
 function funcoesLabel(funcoes: string[] | null, funcaoOutro: string | null): string {
   if (!funcoes?.length) return "Profissional de beleza";
@@ -21,13 +22,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .select("nome, funcoes, funcao_outro, cidade, estado, foto_perfil_url")
     .eq("slug", slug).single();
 
-  if (!p) return { title: "Perfil não encontrado — CarreiraBeauty" };
+  if (!p) return { title: "Perfil não encontrado" };
 
   const funcao = funcoesLabel(p.funcoes, p.funcao_outro);
+  const title = `${p.nome} — ${funcao} em ${p.cidade}`;
+  const description = `Perfil profissional de ${p.nome}, ${funcao} em ${p.cidade} - ${p.estado}. Encontre profissionais de beleza no CarreiraBeauty.`;
+  const url = `${APP_URL}/perfil/${slug}`;
+
   return {
-    title: `${p.nome} — ${funcao} em ${p.cidade} | CarreiraBeauty`,
-    description: `Perfil profissional de ${p.nome}, ${funcao} em ${p.cidade} - ${p.estado}. Encontre profissionais de beleza no CarreiraBeauty.`,
-    openGraph: { images: p.foto_perfil_url ? [p.foto_perfil_url] : [] },
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title, description, url, type: "profile",
+      images: p.foto_perfil_url ? [p.foto_perfil_url] : [],
+    },
+    twitter: { card: "summary", title, description, images: p.foto_perfil_url ? [p.foto_perfil_url] : [] },
   };
 }
 
@@ -93,8 +103,18 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
   // volta pro Clássico automaticamente em vez de manter o visual travado
   const templateId = p.plano === "pro" ? (p.template_id ?? "classico") : "classico";
 
+  const personLd = buildPersonLd({
+    nome: p.nome,
+    funcao,
+    cidade: p.cidade,
+    estado: p.estado,
+    fotoUrl: p.foto_perfil_url,
+    slug: p.slug,
+  });
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--surface-page)" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }} />
 
       {/* Header bar */}
       <header style={{

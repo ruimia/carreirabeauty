@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { APP_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
   title: {
     template: "%s | CarreiraBeauty",
     default: "CarreiraBeauty — Empregos em beleza",
   },
   description: "Conectando profissionais e estabelecimentos de beleza",
   icons: { icon: "/logo-square.jpg" },
+  openGraph: {
+    siteName: "CarreiraBeauty",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: { card: "summary" },
 };
 
 const GTM_ID = "GTM-KTDFWTMG";

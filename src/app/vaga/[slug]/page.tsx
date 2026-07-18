@@ -4,6 +4,7 @@ import Link from "next/link";
 import CandidaturaSection from "./CandidaturaSection";
 import CandidatarFloatingButton from "./CandidatarFloatingButton";
 import type { Metadata } from "next";
+import { APP_URL, buildJobPostingLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -13,11 +14,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: vaga } = await supabase
-    .from("jobs").select("titulo, funcao, companies(nome_estabelecimento)").eq("slug", slug).single();
+    .from("jobs").select("titulo, funcao, descricao, cidade, estado, companies(nome_estabelecimento, logo_url)").eq("slug", slug).single();
+  if (!vaga) return { title: "Vaga não encontrada" };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const empresa = (vaga?.companies as any)?.nome_estabelecimento ?? "";
-  const titulo = vaga?.titulo || vaga?.funcao || "Vaga";
-  return { title: empresa ? `${titulo} — ${empresa}` : titulo };
+  const company = vaga.companies as any;
+  const empresa = company?.nome_estabelecimento ?? "";
+  const titulo = vaga.titulo || vaga.funcao || "Vaga";
+  const local = [vaga.cidade, vaga.estado].filter(Boolean).join(" - ");
+  const title = empresa ? `${titulo} — ${empresa}${local ? ` (${local})` : ""}` : titulo;
+  const description = vaga.descricao
+    ? vaga.descricao.slice(0, 155)
+    : `Vaga de ${titulo} em ${empresa}${local ? `, ${local}` : ""}. Candidate-se grátis no CarreiraBeauty.`;
+  const url = `${APP_URL}/vaga/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title, description, url, type: "website",
+      images: company?.logo_url ? [company.logo_url] : [],
+    },
+    twitter: { card: "summary", title, description, images: company?.logo_url ? [company.logo_url] : [] },
+  };
 }
 
 export default async function VagaPage({ params }: Props) {
@@ -64,8 +83,26 @@ export default async function VagaPage({ params }: Props) {
 
   const VINCULOS: Record<string, string> = { clt: "CLT", pj: "PJ", freela: "Freela / autônomo" };
 
+  const jobPostingLd = buildJobPostingLd({
+    id: vaga.id,
+    titulo: vaga.titulo || (vaga.funcao === "outro" ? (vaga.funcao_outro || "Outro") : vaga.funcao),
+    descricao: vaga.descricao ?? "",
+    criadoEm: vaga.criado_em,
+    slug: vaga.slug,
+    tipoVinculo: vaga.tipo_vinculo,
+    faixaSalarial: vaga.faixa_salarial,
+    endereco: vaga.endereco,
+    bairro: vaga.bairro,
+    cidade: vaga.cidade,
+    estado: vaga.estado,
+    empresaNome: company?.nome_estabelecimento ?? "",
+    empresaLogoUrl: company?.logo_url ?? null,
+    empresaSlug: company?.slug ?? null,
+  });
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--surface-page)" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd) }} />
       <header style={{
         background: "var(--surface-card)", borderBottom: "1px solid var(--border-default)",
         padding: "0 var(--space-page-x)", height: 56,

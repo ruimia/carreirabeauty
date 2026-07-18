@@ -1,10 +1,22 @@
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Vagas em beleza" };
-
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
+import { APP_URL } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "Vagas em beleza",
+  description: "Vagas para cabeleireiro(a), manicure, esteticista, maquiador(a) e mais profissões de beleza. Candidate-se grátis no CarreiraBeauty.",
+  alternates: { canonical: `${APP_URL}/vagas` },
+  openGraph: {
+    title: "Vagas em beleza — CarreiraBeauty",
+    description: "Vagas para cabeleireiro(a), manicure, esteticista, maquiador(a) e mais profissões de beleza.",
+    url: `${APP_URL}/vagas`,
+    type: "website",
+  },
+};
 
 const VINCULO_LABEL: Record<string, string> = {
   clt: "CLT", pj: "PJ", freela: "Freela", estagio: "Estágio", menor_aprendiz: "Menor aprendiz",
