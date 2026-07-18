@@ -21,14 +21,25 @@ interface Professional {
   foto_perfil_url: string | null;
   slug: string | null;
   plano: string | null;
+  criado_em: string;
 }
 
 interface Props {
   professional: Professional;
   vagas: { id: string; titulo: string }[];
+  distanciaKm: number | null;
 }
 
-export default function CandidatoPotencialCard({ professional: p, vagas }: Props) {
+function formatoDataRelativa(iso: string) {
+  const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (dias <= 0) return "cadastrado hoje";
+  if (dias === 1) return "cadastrado há 1 dia";
+  if (dias < 30) return `cadastrado há ${dias} dias`;
+  const meses = Math.floor(dias / 30);
+  return `cadastrado há ${meses} ${meses === 1 ? "mês" : "meses"}`;
+}
+
+export default function CandidatoPotencialCard({ professional: p, vagas, distanciaKm }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState("");
@@ -108,6 +119,7 @@ export default function CandidatoPotencialCard({ professional: p, vagas }: Props
           {p.cidade && (
             <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
               <i className="ph ph-map-pin"></i> {[p.bairro, p.cidade].filter(Boolean).join(", ")}{p.estado ? ` · ${p.estado}` : ""}
+              {distanciaKm !== null && ` · ${distanciaKm === 0 ? "menos de 1 km" : `${distanciaKm} km`}`}
             </p>
           )}
         </div>
@@ -116,6 +128,7 @@ export default function CandidatoPotencialCard({ professional: p, vagas }: Props
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
         {p.experiencia && <span style={tag}><i className="ph ph-clock"></i> {p.experiencia}</span>}
         {p.disponibilidade && <span style={tag}><i className="ph ph-calendar-check"></i> {p.disponibilidade}</span>}
+        <span style={tag}><i className="ph ph-user-plus"></i> {formatoDataRelativa(p.criado_em)}</span>
         {vagas.map((v) => (
           <span key={v.id} style={{ ...tag, background: "var(--brand-cyan-50)", color: "var(--brand-cyan-700)" }}>
             <i className="ph ph-briefcase"></i> {v.titulo}

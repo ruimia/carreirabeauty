@@ -50,7 +50,7 @@ export default async function CandidatosPotenciaisPage() {
     .select(`
       id, user_id, nome, telefone, funcoes, funcao, funcao_outro,
       bairro, cidade, estado, latitude, longitude, experiencia,
-      disponibilidade, tipo_vinculo, foto_perfil_url, slug, plano, bloqueado
+      disponibilidade, tipo_vinculo, foto_perfil_url, slug, plano, bloqueado, criado_em
     `)
     .overlaps("funcoes", todasFuncoes);
 
@@ -78,7 +78,9 @@ export default async function CandidatosPotenciaisPage() {
         j.funcoes.some((fv: string) => (p.funcoes ?? []).some((f: string) => f.toLowerCase() === fv.toLowerCase()))
       );
 
-      return { p, dentroDoRaio, vagasCompatveis };
+      const distanciaKmValor = empresaGeo && profGeo ? Math.round(distanciaKm(empresaGeo, profGeo)) : null;
+
+      return { p, dentroDoRaio, vagasCompatveis, distanciaKmValor };
     })
     .filter((x) => x.dentroDoRaio && x.vagasCompatveis.length > 0);
 
@@ -101,11 +103,12 @@ export default async function CandidatosPotenciaisPage() {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {potenciais.map(({ p, vagasCompatveis }) => (
+          {potenciais.map(({ p, vagasCompatveis, distanciaKmValor }) => (
             <CandidatoPotencialCard
               key={p.id}
               professional={p}
               vagas={vagasCompatveis.map((j) => ({ id: j.id, titulo: j.titulo || j.funcoes[0] || "Vaga" }))}
+              distanciaKm={distanciaKmValor}
             />
           ))}
         </div>
