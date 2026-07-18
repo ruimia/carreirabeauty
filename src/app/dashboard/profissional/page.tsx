@@ -111,7 +111,7 @@ export default async function DashboardProfissionalPage() {
       : Promise.resolve({ data: [] }),
   ]);
 
-  const atividades = await getAtividadeRecente(supabase, 4);
+  const atividades = await getAtividadeRecente(supabase, 10);
 
   // Casa vaga agregada com a(s) função(ões) do profissional — mesma lógica das
   // vagas nativas (se não tem função marcada ou marcou "outro", não filtra)
@@ -402,6 +402,12 @@ export default async function DashboardProfissionalPage() {
           </div>
         )}
 
+        {atividades.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <AtividadeRecente eventos={atividades} />
+          </div>
+        )}
+
         {/* Vagas agregadas (Adzuna) — continuam na mesma lista, só com um divisor
             sutil de origem em vez de uma segunda seção com título próprio */}
         {vagasExternasFiltradas.length > 0 && (
@@ -421,12 +427,6 @@ export default async function DashboardProfissionalPage() {
                 <VagaExternaCard key={v.id} vaga={v} professionalId={professional.id} publicadoRelativo={formatoDataRelativa(v.publicado_em)} />
               ))}
             </div>
-          </div>
-        )}
-
-        {atividades.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
-            <AtividadeRecente eventos={atividades} />
           </div>
         )}
 
