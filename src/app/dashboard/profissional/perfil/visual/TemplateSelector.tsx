@@ -98,7 +98,7 @@ export default function TemplateSelector({ data, templateAtual, isPro }: {
         borderRadius: "var(--radius-xl)", overflow: "hidden", border: "1px solid var(--border-default)",
         marginBottom: 16, background: "var(--surface-page)",
       }}>
-        <Componente p={data} preview />
+        <Componente p={data} preview contatosBloqueados={!isPro} />
       </div>
 
       {sucesso && (

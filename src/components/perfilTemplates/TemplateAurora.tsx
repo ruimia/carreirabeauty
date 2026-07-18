@@ -4,7 +4,7 @@ import { PerfilTemplateProps, iniciais } from "./types";
 // tags em formato de sticker, portfólio em cartões levemente inclinados.
 // Pensado pra quem quer um perfil alegre e chamativo (manicure, maquiagem,
 // designer de sobrancelha) — o oposto do Elegante, que é mais sóbrio.
-export default function TemplateAurora({ p, preview }: PerfilTemplateProps) {
+export default function TemplateAurora({ p, preview, contatosBloqueados }: PerfilTemplateProps) {
   return (
     <main style={{
       maxWidth: 480, margin: "0 auto", padding: "0 0 48px",
@@ -47,10 +47,14 @@ export default function TemplateAurora({ p, preview }: PerfilTemplateProps) {
         </p>
       </div>
 
-      {/* Contatos — flutuam sobre a curva do header, mesmo padrão de destaque das outras PRO */}
-      {(p.whatsapp || p.instagram || p.email) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", padding: "0 20px", marginTop: -28, marginBottom: 24 }}>
-          {p.whatsapp && (
+      {/* Contatos — flutuam sobre a curva do header, mesmo padrão de destaque das outras PRO.
+          position: relative é necessário aqui: o header logo acima é position:relative (por
+          causa dos círculos decorativos absolutos), o que já basta pra ele pintar numa camada
+          acima de irmãos estáticos seguintes — sem isso, o texto destes botões ficava coberto
+          pela cauda do gradiente do header. */}
+      {(p.whatsapp || p.instagram || p.email || contatosBloqueados) && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", padding: "0 20px", marginTop: -28, marginBottom: 24, position: "relative", zIndex: 1 }}>
+          {p.whatsapp ? (
             <a href={`https://wa.me/55${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
               display: "inline-flex", alignItems: "center", gap: 7, height: 44, padding: "0 20px", borderRadius: 999,
               background: "#25d366", color: "#fff", fontSize: 13, fontWeight: 800, textDecoration: "none",
@@ -58,6 +62,8 @@ export default function TemplateAurora({ p, preview }: PerfilTemplateProps) {
             }}>
               <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 18 }}></i> WhatsApp
             </a>
+          ) : contatosBloqueados && (
+            <ContatoBloqueadoAurora label="WhatsApp" icone="ph-fill ph-whatsapp-logo" />
           )}
           {p.instagram && (
             <a href={`https://instagram.com/${p.instagram}`} target="_blank" rel="noreferrer" style={{
@@ -68,13 +74,15 @@ export default function TemplateAurora({ p, preview }: PerfilTemplateProps) {
               <i className="ph-fill ph-instagram-logo" style={{ fontSize: 18 }}></i> @{p.instagram}
             </a>
           )}
-          {p.email && (
+          {p.email ? (
             <a href={`mailto:${p.email}`} style={{
               display: "inline-flex", alignItems: "center", gap: 7, height: 44, padding: "0 20px", borderRadius: 999,
               background: "#fff", border: "1.5px solid #ffd9b0", color: "#c96a2e", fontSize: 13, fontWeight: 800, textDecoration: "none",
             }}>
               <i className="ph-fill ph-envelope-simple" style={{ fontSize: 18 }}></i> Email
             </a>
+          ) : contatosBloqueados && (
+            <ContatoBloqueadoAurora label="Email" icone="ph-fill ph-envelope-simple" />
           )}
         </div>
       )}
@@ -207,5 +215,19 @@ function CardAurora({ cor, children }: { cor: string; children: React.ReactNode 
 function TituloAurora({ cor, children }: { cor: string; children: React.ReactNode }) {
   return (
     <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 15, color: cor, marginBottom: 12 }}>{children}</p>
+  );
+}
+
+// Teaser do que o plano PRO desbloqueia — aparece só no preview de quem
+// ainda não é PRO, no lugar do botão de contato real
+function ContatoBloqueadoAurora({ label, icone }: { label: string; icone: string }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 7, height: 44, padding: "0 20px", borderRadius: 999,
+      background: "#fff", color: "#c2637e", fontSize: 13, fontWeight: 800, boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+    }}>
+      <i className="ph ph-lock-simple" style={{ fontSize: 16 }}></i>
+      <i className={icone} style={{ fontSize: 18, opacity: 0.6 }}></i> {label}
+    </span>
   );
 }

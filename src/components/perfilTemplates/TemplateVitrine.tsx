@@ -2,7 +2,7 @@ import { PerfilTemplateProps, iniciais } from "./types";
 
 // Tema PRO — "página de marca própria": header curvo com foto sobreposta,
 // nome tratado como logomarca, portfólio em mosaico estilo feed do Instagram.
-export default function TemplateVitrine({ p, preview }: PerfilTemplateProps) {
+export default function TemplateVitrine({ p, preview, contatosBloqueados }: PerfilTemplateProps) {
   const primeiroNome = p.nome.split(" ")[0] || p.nome;
 
   return (
@@ -57,9 +57,9 @@ export default function TemplateVitrine({ p, preview }: PerfilTemplateProps) {
         <p style={{ fontSize: 13, color: "#9b7f96", fontWeight: 600 }}>📍 {[p.bairro, p.cidade].filter(Boolean).join(", ")} · {p.estado}</p>
 
         {/* Contatos — o "cartão de visitas" da vitrine */}
-        {(p.whatsapp || p.instagram || p.email) && (
+        {(p.whatsapp || p.instagram || p.email || contatosBloqueados) && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginTop: 18 }}>
-            {p.whatsapp && (
+            {p.whatsapp ? (
               <a href={`https://wa.me/55${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 height: 46, padding: "0 22px", borderRadius: 999,
@@ -69,6 +69,8 @@ export default function TemplateVitrine({ p, preview }: PerfilTemplateProps) {
               }}>
                 <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 19 }}></i> WhatsApp
               </a>
+            ) : contatosBloqueados && (
+              <ContatoBloqueado label="WhatsApp" icone="ph-fill ph-whatsapp-logo" />
             )}
             {p.instagram && (
               <a href={`https://instagram.com/${p.instagram}`} target="_blank" rel="noreferrer" style={{
@@ -81,7 +83,7 @@ export default function TemplateVitrine({ p, preview }: PerfilTemplateProps) {
                 <i className="ph-fill ph-instagram-logo" style={{ fontSize: 19 }}></i> @{p.instagram}
               </a>
             )}
-            {p.email && (
+            {p.email ? (
               <a href={`mailto:${p.email}`} style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 height: 46, padding: "0 22px", borderRadius: 999,
@@ -91,6 +93,8 @@ export default function TemplateVitrine({ p, preview }: PerfilTemplateProps) {
               }}>
                 <i className="ph-fill ph-envelope-simple" style={{ fontSize: 19 }}></i> Email
               </a>
+            ) : contatosBloqueados && (
+              <ContatoBloqueado label="Email" icone="ph-fill ph-envelope-simple" />
             )}
           </div>
         )}
@@ -241,5 +245,20 @@ function CardVitrine({ children }: { children: React.ReactNode }) {
 function TituloCard({ children }: { children: React.ReactNode }) {
   return (
     <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 15, color: "#8b008b", marginBottom: 12 }}>{children}</p>
+  );
+}
+
+// Teaser do que o plano PRO desbloqueia — aparece só no preview de quem
+// ainda não é PRO, no lugar do botão de contato real
+export function ContatoBloqueado({ label, icone }: { label: string; icone: string }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 8,
+      height: 46, padding: "0 22px", borderRadius: 999,
+      background: "#f3e6f1", color: "#b98cb2", fontSize: 14, fontWeight: 800,
+    }}>
+      <i className="ph ph-lock-simple" style={{ fontSize: 17 }}></i>
+      <i className={icone} style={{ fontSize: 19, opacity: 0.6 }}></i> {label}
+    </span>
   );
 }

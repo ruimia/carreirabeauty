@@ -8,7 +8,7 @@ const LINHA = "#e3dbcf";
 // topo, tipografia bold sem serifa, paleta neutra areia/tinta. Pensado pra
 // quem quer que o trabalho (fotos) fale antes de qualquer texto — esteticista,
 // designer de sobrancelha/cílios, maquiador(a).
-export default function TemplateEstudio({ p, preview }: PerfilTemplateProps) {
+export default function TemplateEstudio({ p, preview, contatosBloqueados }: PerfilTemplateProps) {
   const capa = p.portfolioUrls[0];
   const resto = p.portfolioUrls.slice(1);
 
@@ -54,15 +54,17 @@ export default function TemplateEstudio({ p, preview }: PerfilTemplateProps) {
         </p>
       </div>
 
-      {(p.whatsapp || p.instagram || p.email) && (
+      {(p.whatsapp || p.instagram || p.email || contatosBloqueados) && (
         <div style={{ display: "flex", gap: 8, padding: "16px 24px 0", flexWrap: "wrap" }}>
-          {p.whatsapp && (
+          {p.whatsapp ? (
             <a href={`https://wa.me/55${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
               display: "inline-flex", alignItems: "center", gap: 7, height: 42, padding: "0 18px",
               background: TINTA, color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none",
             }}>
               <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 16 }}></i> WhatsApp
             </a>
+          ) : contatosBloqueados && (
+            <ContatoBloqueadoEstudio label="WhatsApp" icone="ph-fill ph-whatsapp-logo" />
           )}
           {p.instagram && (
             <a href={`https://instagram.com/${p.instagram}`} target="_blank" rel="noreferrer" style={{
@@ -72,13 +74,15 @@ export default function TemplateEstudio({ p, preview }: PerfilTemplateProps) {
               <i className="ph-fill ph-instagram-logo" style={{ fontSize: 16 }}></i> @{p.instagram}
             </a>
           )}
-          {p.email && (
+          {p.email ? (
             <a href={`mailto:${p.email}`} style={{
               display: "inline-flex", alignItems: "center", gap: 7, height: 42, padding: "0 18px",
               border: `1px solid ${LINHA}`, color: "#6b6259", fontSize: 13, fontWeight: 700, textDecoration: "none",
             }}>
               <i className="ph-fill ph-envelope-simple" style={{ fontSize: 16 }}></i> Email
             </a>
+          ) : contatosBloqueados && (
+            <ContatoBloqueadoEstudio label="Email" icone="ph-fill ph-envelope-simple" />
           )}
         </div>
       )}
@@ -180,5 +184,19 @@ function Secao({ numero, titulo, children }: { numero: string; titulo: string; c
       </div>
       {children}
     </div>
+  );
+}
+
+// Teaser do que o plano PRO desbloqueia — aparece só no preview de quem
+// ainda não é PRO, no lugar do botão de contato real
+function ContatoBloqueadoEstudio({ label, icone }: { label: string; icone: string }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 7, height: 42, padding: "0 18px",
+      border: `1px dashed ${LINHA}`, color: "#a99f92", fontSize: 13, fontWeight: 700,
+    }}>
+      <i className="ph ph-lock-simple" style={{ fontSize: 15 }}></i>
+      <i className={icone} style={{ fontSize: 16, opacity: 0.6 }}></i> {label}
+    </span>
   );
 }

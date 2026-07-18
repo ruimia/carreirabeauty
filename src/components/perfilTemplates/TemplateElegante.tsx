@@ -7,7 +7,7 @@ const CARTAO = "#1b191e";
 
 // Tema PRO — "estúdio de luxo": monograma dourado, tipografia serifada,
 // divisores ornamentais, portfólio em moldura. Sofisticação de marca própria.
-export default function TemplateElegante({ p, preview }: PerfilTemplateProps) {
+export default function TemplateElegante({ p, preview, contatosBloqueados }: PerfilTemplateProps) {
   const monograma = iniciais(p.nome);
 
   return (
@@ -59,9 +59,9 @@ export default function TemplateElegante({ p, preview }: PerfilTemplateProps) {
         <p style={{ fontSize: 13, color: "#8d8694", letterSpacing: "0.06em", fontStyle: "italic" }}>{[p.bairro, p.cidade].filter(Boolean).join(", ")} — {p.estado}</p>
 
         {/* Contatos */}
-        {(p.whatsapp || p.instagram || p.email) && (
+        {(p.whatsapp || p.instagram || p.email || contatosBloqueados) && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginTop: 22 }}>
-            {p.whatsapp && (
+            {p.whatsapp ? (
               <a href={`https://wa.me/55${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 height: 44, padding: "0 24px", borderRadius: 2,
@@ -71,6 +71,8 @@ export default function TemplateElegante({ p, preview }: PerfilTemplateProps) {
               }}>
                 <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 17 }}></i> WhatsApp
               </a>
+            ) : contatosBloqueados && (
+              <ContatoBloqueadoElegante label="WhatsApp" icone="ph-fill ph-whatsapp-logo" />
             )}
             {p.instagram && (
               <a href={`https://instagram.com/${p.instagram}`} target="_blank" rel="noreferrer" style={{
@@ -83,7 +85,7 @@ export default function TemplateElegante({ p, preview }: PerfilTemplateProps) {
                 <i className="ph-fill ph-instagram-logo" style={{ fontSize: 17 }}></i> @{p.instagram}
               </a>
             )}
-            {p.email && (
+            {p.email ? (
               <a href={`mailto:${p.email}`} style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 height: 44, padding: "0 24px", borderRadius: 2,
@@ -93,6 +95,8 @@ export default function TemplateElegante({ p, preview }: PerfilTemplateProps) {
               }}>
                 <i className="ph-fill ph-envelope-simple" style={{ fontSize: 17 }}></i> Email
               </a>
+            ) : contatosBloqueados && (
+              <ContatoBloqueadoElegante label="Email" icone="ph-fill ph-envelope-simple" />
             )}
           </div>
         )}
@@ -215,5 +219,22 @@ function SecaoElegante({ titulo, children }: { titulo: string; children: React.R
       </div>
       {children}
     </div>
+  );
+}
+
+// Teaser do que o plano PRO desbloqueia — aparece só no preview de quem
+// ainda não é PRO, no lugar do botão de contato real
+function ContatoBloqueadoElegante({ label, icone }: { label: string; icone: string }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 8,
+      height: 44, padding: "0 24px", borderRadius: 2,
+      border: `1px dashed ${OURO}55`, color: "#6f6878",
+      fontSize: 12, fontWeight: 600, letterSpacing: "0.12em",
+      textTransform: "uppercase", fontFamily: "var(--font-body)",
+    }}>
+      <i className="ph ph-lock-simple" style={{ fontSize: 15 }}></i>
+      <i className={icone} style={{ fontSize: 17, opacity: 0.5 }}></i> {label}
+    </span>
   );
 }

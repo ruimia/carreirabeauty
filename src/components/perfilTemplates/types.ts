@@ -25,6 +25,12 @@ export interface PerfilTemplateProps {
   // em vez de sumir — empurrão pra completar o cadastro. Na página pública
   // real, seções vazias continuam ocultas (preview=false).
   preview?: boolean;
+  // WhatsApp/email só aparecem pra quem já é PRO (p.whatsapp/p.email vêm
+  // null do caller quando plano != "pro", mesmo que o dado exista). No
+  // preview de um tema PRO pra quem ainda é grátis, em vez de simplesmente
+  // sumir com os contatos, mostramos um botão bloqueado — é o próprio
+  // benefício que o PRO desbloqueia, então esconder undersell a venda.
+  contatosBloqueados?: boolean;
 }
 
 export function iniciais(nome: string) {
