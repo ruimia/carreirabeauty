@@ -8,11 +8,11 @@ import { APP_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Vagas em beleza",
-  description: "Vagas para cabeleireiro(a), manicure, esteticista, maquiador(a) e mais profissões de beleza. Candidate-se grátis no CarreiraBeauty.",
+  description: "Vagas CLT, PJ e freelas para cabeleireiro(a), manicure, esteticista, maquiador(a) e mais profissões de beleza. Candidate-se grátis no CarreiraBeauty.",
   alternates: { canonical: `${APP_URL}/vagas` },
   openGraph: {
     title: "Vagas em beleza — CarreiraBeauty",
-    description: "Vagas para cabeleireiro(a), manicure, esteticista, maquiador(a) e mais profissões de beleza.",
+    description: "Vagas CLT, PJ e freelas para cabeleireiro(a), manicure, esteticista, maquiador(a) e mais profissões de beleza.",
     url: `${APP_URL}/vagas`,
     type: "website",
   },
@@ -82,6 +82,10 @@ export default async function VagasPage({ searchParams }: Props) {
           <p style={{ fontSize: 14, color: "var(--text-tertiary)", margin: 0 }}>
             {total} vaga{total !== 1 ? "s" : ""} ativa{total !== 1 ? "s" : ""}
             {funcao ? ` · ${funcao}` : ""}
+            {" · "}
+            <Link href="/freelas" style={{ color: "var(--color-brand-primary)", fontWeight: 600, textDecoration: "none" }}>
+              Ver só freelas →
+            </Link>
           </p>
         </div>
 

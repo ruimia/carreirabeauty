@@ -2,11 +2,42 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import StickyCTABar from "./StickyCTABar";
 import AtividadeRecente from "@/components/AtividadeRecente";
 import { getAtividadeRecente } from "@/lib/atividadeRecente";
+import { APP_URL } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+const DESCRIPTION = "Empregos, freelas e diárias em beleza, estética e bem-estar. Cabeleireiro(a), manicure, esteticista, maquiador(a) e mais — cadastro grátis, matching por região.";
+
+export const metadata: Metadata = {
+  description: DESCRIPTION,
+  alternates: { canonical: APP_URL },
+  openGraph: { title: "CarreiraBeauty — Empregos e freelas em beleza", description: DESCRIPTION, url: APP_URL, type: "website" },
+};
+
+const organizationLd = {
+  "@context": "https://schema.org/",
+  "@type": "Organization",
+  name: "CarreiraBeauty",
+  url: APP_URL,
+  logo: `${APP_URL}/logo-square.jpg`,
+  description: DESCRIPTION,
+};
+
+const websiteLd = {
+  "@context": "https://schema.org/",
+  "@type": "WebSite",
+  name: "CarreiraBeauty",
+  url: APP_URL,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${APP_URL}/vagas?funcao={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
+};
 
 export default async function Home() {
   const supabase = await createClient();
@@ -17,6 +48,8 @@ export default async function Home() {
 
   return (
     <div style={{ minHeight: "100vh", fontFamily: "var(--font-body)" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }} />
       {/* ── Header ── */}
       <header style={{
         position: "sticky", top: 0, zIndex: 10,
@@ -253,7 +286,8 @@ export default async function Home() {
           </div>
           <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
             <FooterCol title="Produto" links={[{ label: "Para profissionais", href: "#profissionais" }, { label: "Para empresas", href: "#empresas" }]} />
-            <FooterCol title="Legal" links={[{ label: "Termos de uso", href: "/termos" }, { label: "Privacidade", href: "/privacidade" }]} />
+            <FooterCol title="Vagas" links={[{ label: "Todas as vagas", href: "/vagas" }, { label: "Freelas e diárias", href: "/freelas" }]} />
+            <FooterCol title="Ajuda" links={[{ label: "Perguntas frequentes", href: "/perguntas-frequentes" }, { label: "Termos de uso", href: "/termos" }, { label: "Privacidade", href: "/privacidade" }]} />
           </div>
           <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 20, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
             © {new Date().getFullYear()} CarreiraBeauty. Todos os direitos reservados.
