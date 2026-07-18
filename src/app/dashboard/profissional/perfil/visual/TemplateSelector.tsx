@@ -87,6 +87,17 @@ export default function TemplateSelector({ data, templateAtual, isPro }: {
         ))}
       </div>
 
+      {/* Tagline aspiracional — o "porquê" de escolher esse tema, antes do
+          preview e do botão de aplicar. Só existe pros temas PRO. */}
+      {templateInfo.pro && "tagline" in templateInfo && (
+        <p style={{
+          fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", textAlign: "center",
+          lineHeight: 1.5, marginBottom: 14, fontStyle: "italic",
+        }}>
+          ✦ {templateInfo.tagline}
+        </p>
+      )}
+
       {aplicado === selecionado && (
         <p style={{ fontSize: 13, color: "var(--color-success-fg)", fontWeight: 600, marginBottom: 12, textAlign: "center" }}>
           ✓ Este é o visual ativo do seu perfil

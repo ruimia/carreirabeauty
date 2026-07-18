@@ -39,10 +39,22 @@ export function iniciais(nome: string) {
 
 export const TEMPLATES = [
   { id: "classico", nome: "Clássico", pro: false },
-  { id: "vitrine", nome: "Vitrine", pro: true },
-  { id: "elegante", nome: "Elegante", pro: true },
-  { id: "aurora", nome: "Aurora", pro: true },
-  { id: "estudio", nome: "Estúdio", pro: true },
+  {
+    id: "vitrine", nome: "Vitrine", pro: true,
+    tagline: "Pra quem quer ser lembrado como uma marca, não só um nome na lista.",
+  },
+  {
+    id: "elegante", nome: "Elegante", pro: true,
+    tagline: "O visual que passa confiança pra fechar clientes de ticket mais alto.",
+  },
+  {
+    id: "aurora", nome: "Aurora", pro: true,
+    tagline: "Chama atenção logo de cara — combina com quem trabalha na régua da criatividade.",
+  },
+  {
+    id: "estudio", nome: "Estúdio", pro: true,
+    tagline: "Seu trabalho na frente, antes de qualquer palavra — ideal pra quem vive de portfólio.",
+  },
 ] as const;
 
 export type TemplateId = typeof TEMPLATES[number]["id"];
