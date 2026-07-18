@@ -6,12 +6,16 @@ import { PerfilTemplateData, TEMPLATES, TemplateId } from "@/components/perfilTe
 import TemplateClassico from "@/components/perfilTemplates/TemplateClassico";
 import TemplateVitrine from "@/components/perfilTemplates/TemplateVitrine";
 import TemplateElegante from "@/components/perfilTemplates/TemplateElegante";
+import TemplateAurora from "@/components/perfilTemplates/TemplateAurora";
+import TemplateEstudio from "@/components/perfilTemplates/TemplateEstudio";
 import { registrarPreview, aplicarTemplate } from "./actions";
 
 const COMPONENTES = {
   classico: TemplateClassico,
   vitrine: TemplateVitrine,
   elegante: TemplateElegante,
+  aurora: TemplateAurora,
+  estudio: TemplateEstudio,
 };
 
 export default function TemplateSelector({ data, templateAtual, isPro }: {
@@ -51,14 +55,19 @@ export default function TemplateSelector({ data, templateAtual, isPro }: {
 
   return (
     <div>
-      {/* Seletor de abas */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto" }}>
+      {/* Carrossel de opções — largura fixa por card, com scroll-snap horizontal
+          (5 templates não cabem espremidos numa faixa só, como fazia sentido
+          quando eram 3) */}
+      <div style={{
+        display: "flex", gap: 10, marginBottom: 16, overflowX: "auto",
+        scrollSnapType: "x mandatory", paddingBottom: 4, WebkitOverflowScrolling: "touch",
+      }}>
         {TEMPLATES.map((t) => (
           <button
             key={t.id}
             onClick={() => selecionar(t.id)}
             style={{
-              flex: "1 1 0", minWidth: 100, height: 44, padding: "0 14px",
+              flex: "0 0 auto", scrollSnapAlign: "start", minWidth: 108, height: 44, padding: "0 16px",
               borderRadius: "var(--radius-md)", whiteSpace: "nowrap",
               border: `2px solid ${selecionado === t.id ? "var(--color-brand-primary)" : "var(--border-default)"}`,
               background: selecionado === t.id ? "var(--brand-magenta-50)" : "var(--surface-card)",

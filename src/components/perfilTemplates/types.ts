@@ -35,6 +35,8 @@ export const TEMPLATES = [
   { id: "classico", nome: "Clássico", pro: false },
   { id: "vitrine", nome: "Vitrine", pro: true },
   { id: "elegante", nome: "Elegante", pro: true },
+  { id: "aurora", nome: "Aurora", pro: true },
+  { id: "estudio", nome: "Estúdio", pro: true },
 ] as const;
 
 export type TemplateId = typeof TEMPLATES[number]["id"];

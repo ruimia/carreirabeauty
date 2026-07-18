@@ -6,6 +6,8 @@ import Link from "next/link";
 import TemplateClassico from "@/components/perfilTemplates/TemplateClassico";
 import TemplateVitrine from "@/components/perfilTemplates/TemplateVitrine";
 import TemplateElegante from "@/components/perfilTemplates/TemplateElegante";
+import TemplateAurora from "@/components/perfilTemplates/TemplateAurora";
+import TemplateEstudio from "@/components/perfilTemplates/TemplateEstudio";
 import { PerfilTemplateData } from "@/components/perfilTemplates/types";
 import { APP_URL, buildPersonLd } from "@/lib/seo";
 
@@ -130,6 +132,8 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
 
       {templateId === "vitrine" && <TemplateVitrine p={templateData} />}
       {templateId === "elegante" && <TemplateElegante p={templateData} />}
+      {templateId === "aurora" && <TemplateAurora p={templateData} />}
+      {templateId === "estudio" && <TemplateEstudio p={templateData} />}
       {templateId === "classico" && <TemplateClassico p={templateData} />}
 
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 var(--space-page-x) 48px" }}>
