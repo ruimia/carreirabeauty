@@ -1,10 +1,5 @@
 "use server";
 
-// Processa ~30 cidades chamando a API da Adzuna uma a uma — leva bem mais
-// que o timeout padrão de função serverless (10s no plano atual), por isso
-// precisa desse teto maior.
-export const maxDuration = 60;
-
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { atualizarVagasExternas, StatsAtualizacaoAdzuna } from "@/lib/adzuna";

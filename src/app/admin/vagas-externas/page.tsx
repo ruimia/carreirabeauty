@@ -1,5 +1,11 @@
 export const dynamic = "force-dynamic";
 
+// Processa ~30 cidades chamando a API da Adzuna uma a uma — leva bem mais
+// que o timeout padrão de função serverless (10s no plano atual), por isso
+// precisa desse teto maior. Server Actions herdam o maxDuration da página
+// que os usa (AtualizarCacheButton chama rodarAtualizacaoAdzuna daqui).
+export const maxDuration = 60;
+
 export const metadata = { title: "Vagas externas — Admin" };
 import { createClient } from "@/lib/supabase/server";
 import AtualizarCacheButton from "./AtualizarCacheButton";
