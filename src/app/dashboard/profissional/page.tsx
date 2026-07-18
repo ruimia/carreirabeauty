@@ -103,7 +103,11 @@ export default async function DashboardProfissionalPage() {
           .select("id, titulo, empresa, cidade, estado, url, salario_min, salario_max, descricao, publicado_em")
           .eq("cidade_busca", professional.cidade.trim())
           .order("publicado_em", { ascending: false })
-          .limit(30)
+          // Filtro por função roda em JS depois desse fetch — limite baixo
+          // cortava vagas de funções menos frequentes (ex: manicure) antes
+          // mesmo do filtro rodar, porque profissões mais postadas (ex:
+          // cabeleireiro) ocupavam as posições mais recentes
+          .limit(200)
       : Promise.resolve({ data: [] }),
   ]);
 

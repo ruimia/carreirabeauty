@@ -61,8 +61,15 @@ function localizacaoReal(v: any, cidadeBusca: string, estadoBusca: string) {
   return { cidade: cidade || cidadeBusca, estado: estado || estadoBusca };
 }
 
-async function buscarVagasAdzuna(cidade: string, appId: string, appKey: string) {
-  const url = new URL("https://api.adzuna.com/v1/api/jobs/br/search/1");
+// Uma única página de 50 mistura todas as profissões de beleza no mesmo
+// resultado (busca é "cabeleireiro OU manicure OU esteticista OU..."), então
+// profissões com menos vagas publicadas (ex: manicure) ficavam de fora quando
+// profissões mais publicadas (ex: cabeleireiro) preenchiam as 50 posições.
+// Busca 2 páginas por cidade (até 100 resultados) pra dar mais espaço.
+const PAGINAS_POR_CIDADE = 2;
+
+async function buscarPaginaAdzuna(cidade: string, pagina: number, appId: string, appKey: string) {
+  const url = new URL(`https://api.adzuna.com/v1/api/jobs/br/search/${pagina}`);
   url.searchParams.set("app_id", appId);
   url.searchParams.set("app_key", appKey);
   url.searchParams.set("what_or", TERMOS_BELEZA);
@@ -80,6 +87,23 @@ async function buscarVagasAdzuna(cidade: string, appId: string, appKey: string) 
   }
   const json = await res.json();
   return { results: json.results ?? [] };
+}
+
+async function buscarVagasAdzuna(cidade: string, appId: string, appKey: string) {
+  // Páginas sequenciais dentro da mesma cidade — testado: paralelizar
+  // página+cidade ao mesmo tempo (muitas requisições simultâneas) disparou
+  // 429 (Too Many Requests) da Adzuna. Concorrência controlada acontece só
+  // entre cidades (ver TAMANHO_LOTE), não dentro de uma cidade.
+  const todas: unknown[] = [];
+  let chamadas = 0;
+  for (let pagina = 1; pagina <= PAGINAS_POR_CIDADE; pagina++) {
+    const { results, erro } = await buscarPaginaAdzuna(cidade, pagina, appId, appKey);
+    chamadas++;
+    if (erro) return { results: todas, erro, chamadas };
+    if (results.length === 0) break;
+    todas.push(...results);
+  }
+  return { results: todas, erro: undefined as string | undefined, chamadas };
 }
 
 export interface StatsAtualizacaoAdzuna {
@@ -115,16 +139,12 @@ export async function atualizarVagasExternas(supabase: SupabaseClient): Promise<
     cidades.push({ cidade, estado });
   }
 
-  let vagasEncontradas = 0;
-  const erros: string[] = [];
-
-  for (const { cidade, estado } of cidades) {
-    const { results: brutas, erro } = await buscarVagasAdzuna(cidade, appId, appKey);
-    if (erro) { erros.push(`${cidade}: ${erro}`); continue; }
+  async function processarCidade({ cidade, estado }: { cidade: string; estado: string }) {
+    const { results: brutas, erro, chamadas } = await buscarVagasAdzuna(cidade, appId!, appKey!);
+    if (erro) return { vagasEncontradas: 0, chamadas, erro: `${cidade}: ${erro}` };
 
     const vagas = brutas.filter(ehVagaDeBeleza);
-    vagasEncontradas += vagas.length;
-    if (vagas.length === 0) continue;
+    if (vagas.length === 0) return { vagasEncontradas: 0, chamadas, erro: null };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const linhas = vagas.map((v: any) => {
@@ -148,12 +168,34 @@ export async function atualizarVagasExternas(supabase: SupabaseClient): Promise<
     });
 
     const { error } = await supabase.from("vagas_externas").upsert(linhas, { onConflict: "fonte,external_id,cidade_busca" });
-    if (error) erros.push(`${cidade}: erro ao salvar — ${error.message}`);
+    return {
+      vagasEncontradas: vagas.length,
+      chamadas,
+      erro: error ? `${cidade}: erro ao salvar — ${error.message}` : null,
+    };
+  }
+
+  // Processa várias cidades ao mesmo tempo (não uma por uma) — com 31+
+  // cidades e 2 páginas cada, sequencial estourava o timeout da função
+  // serverless que roda o botão manual do admin
+  const TAMANHO_LOTE = 4;
+  let vagasEncontradas = 0;
+  let chamadasApi = 0;
+  const erros: string[] = [];
+
+  for (let i = 0; i < cidades.length; i += TAMANHO_LOTE) {
+    const lote = cidades.slice(i, i + TAMANHO_LOTE);
+    const resultados = await Promise.all(lote.map(processarCidade));
+    for (const r of resultados) {
+      vagasEncontradas += r.vagasEncontradas;
+      chamadasApi += r.chamadas;
+      if (r.erro) erros.push(r.erro);
+    }
   }
 
   return {
     cidadesProcessadas: cidades.length,
-    chamadasApi: cidades.length,
+    chamadasApi,
     vagasEncontradas,
     erros,
   };

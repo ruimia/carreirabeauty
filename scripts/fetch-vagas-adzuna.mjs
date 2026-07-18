@@ -109,15 +109,20 @@ async function buscarCidades() {
 // vizinhas. A Adzuna já geocodifica o "where" e filtra por distância real.
 const RAIO_KM = 30;
 
-async function buscarVagasAdzuna(cidade) {
-  const url = new URL("https://api.adzuna.com/v1/api/jobs/br/search/1");
+// Uma única página de 50 mistura todas as profissões de beleza no mesmo
+// resultado (busca é "cabeleireiro OU manicure OU esteticista OU..."), então
+// profissões com menos vagas publicadas (ex: manicure) ficavam de fora quando
+// profissões mais publicadas (ex: cabeleireiro) preenchiam as 50 posições.
+// Busca 2 páginas por cidade (até 100 resultados) pra dar mais espaço.
+const PAGINAS_POR_CIDADE = 2;
+
+async function buscarPaginaAdzuna(cidade, pagina) {
+  const url = new URL(`https://api.adzuna.com/v1/api/jobs/br/search/${pagina}`);
   url.searchParams.set("app_id", APP_ID);
   url.searchParams.set("app_key", APP_KEY);
   url.searchParams.set("what_or", TERMOS_BELEZA);
   url.searchParams.set("where", cidade);
   url.searchParams.set("distance", String(RAIO_KM));
-  // Máximo permitido pela Adzuna por página — não custa chamada extra de cota,
-  // só traz mais resultados na mesma requisição
   url.searchParams.set("results_per_page", "50");
   url.searchParams.set("content-type", "application/json");
 
@@ -128,6 +133,18 @@ async function buscarVagasAdzuna(cidade) {
   }
   const json = await res.json();
   return { results: json.results ?? [], count: json.count ?? 0 };
+}
+
+async function buscarVagasAdzuna(cidade) {
+  const todas = [];
+  let totalDisponivel = 0;
+  for (let pagina = 1; pagina <= PAGINAS_POR_CIDADE; pagina++) {
+    const { results, count } = await buscarPaginaAdzuna(cidade, pagina);
+    totalDisponivel = count;
+    if (results.length === 0) break;
+    todas.push(...results);
+  }
+  return { results: todas, count: totalDisponivel };
 }
 
 const UF_POR_NOME = {
@@ -159,23 +176,18 @@ function localizacaoReal(v, cidadeBusca, estadoBusca) {
   };
 }
 
-async function main() {
-  const cidades = await buscarCidades();
-  console.log(`${cidades.length} cidade(s) com profissionais ativos:\n`);
+async function processarCidade(cidade, estado) {
+  console.log(`📍 ${cidade}/${estado}`);
+  const { results: brutas, count: totalDisponivel } = await buscarVagasAdzuna(cidade);
+  const vagas = brutas.filter(ehVagaDeBeleza);
+  console.log(`  ${brutas.length} vaga(s) na página (${totalDisponivel} no total pra essa busca), ${vagas.length} dentro do escopo de beleza`);
 
-  let totalVagas = 0;
-  for (const { cidade, estado } of cidades) {
-    console.log(`📍 ${cidade}/${estado}`);
-    const { results: brutas, count: totalDisponivel } = await buscarVagasAdzuna(cidade);
-    const vagas = brutas.filter(ehVagaDeBeleza);
-    console.log(`  ${brutas.length} vaga(s) na página (${totalDisponivel} no total pra essa busca), ${vagas.length} dentro do escopo de beleza`);
-    totalVagas += vagas.length;
+  if (DRY_RUN) {
+    vagas.slice(0, 3).forEach((v) => console.log(`    - ${v.title} @ ${v.company?.display_name ?? "?"}`));
+    return vagas.length;
+  }
 
-    if (DRY_RUN) {
-      vagas.slice(0, 3).forEach((v) => console.log(`    - ${v.title} @ ${v.company?.display_name ?? "?"}`));
-      continue;
-    }
-
+  if (vagas.length > 0) {
     const linhas = vagas.map((v) => {
       const { cidade: cidadeReal, estado: estadoReal } = localizacaoReal(v, cidade, estado);
       return {
@@ -196,11 +208,27 @@ async function main() {
       };
     });
 
-    if (linhas.length > 0) {
-      const { error } = await supabase.from("vagas_externas").upsert(linhas, { onConflict: "fonte,external_id,cidade_busca" });
-      if (error) console.error(`  ✗ erro ao salvar: ${error.message}`);
-      else console.log(`  ✓ salvo/atualizado`);
-    }
+    const { error } = await supabase.from("vagas_externas").upsert(linhas, { onConflict: "fonte,external_id,cidade_busca" });
+    if (error) console.error(`  ✗ erro ao salvar: ${error.message}`);
+    else console.log(`  ✓ salvo/atualizado`);
+  }
+
+  return vagas.length;
+}
+
+// Processa cidades em lotes concorrentes — sequencial estourava o tempo
+// que a função serverless do botão manual do admin tem disponível
+const TAMANHO_LOTE = 4;
+
+async function main() {
+  const cidades = await buscarCidades();
+  console.log(`${cidades.length} cidade(s) com profissionais ativos:\n`);
+
+  let totalVagas = 0;
+  for (let i = 0; i < cidades.length; i += TAMANHO_LOTE) {
+    const lote = cidades.slice(i, i + TAMANHO_LOTE);
+    const resultados = await Promise.all(lote.map(({ cidade, estado }) => processarCidade(cidade, estado)));
+    totalVagas += resultados.reduce((a, b) => a + b, 0);
   }
 
   console.log(`\n${DRY_RUN ? "DRY-RUN — nada foi salvo. " : ""}Total: ${totalVagas} vaga(s) em ${cidades.length} cidade(s).`);
