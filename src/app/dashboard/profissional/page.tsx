@@ -9,6 +9,7 @@ import VagaExternaCard from "@/components/VagaExternaCard";
 import AtividadeRecente from "@/components/AtividadeRecente";
 import { getAtividadeRecente } from "@/lib/atividadeRecente";
 import { distanciaKm } from "@/lib/geocode";
+import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -79,7 +80,7 @@ export default async function DashboardProfissionalPage() {
 
   const funcoes: string[] = professional.funcoes ?? [];
 
-  const [{ data: allJobs }, { data: applications }, { data: conteudos }, { data: vagasExternas }] = await Promise.all([
+  const [{ data: allJobs }, { data: applications }, { data: conteudos }, { data: vagasExternas }, { data: quizProgresso }] = await Promise.all([
     supabase
       .from("jobs")
       .select("id, titulo, funcao, funcoes, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
@@ -109,6 +110,11 @@ export default async function DashboardProfissionalPage() {
           // cabeleireiro) ocupavam as posições mais recentes
           .limit(200)
       : Promise.resolve({ data: [] }),
+    supabase
+      .from("quiz_progresso")
+      .select("modulo_slug")
+      .eq("professional_id", professional.id)
+      .eq("trilha_slug", TRILHA_AUTOESTIMA.slug),
   ]);
 
   const atividades = await getAtividadeRecente(supabase, 10);
@@ -188,6 +194,23 @@ export default async function DashboardProfissionalPage() {
   };
   const dicas = faltando.slice(0, 3).map((label) => DICA[label]).filter(Boolean);
 
+  // Conquistas de ativação (fase 1) — todas calculadas na hora a partir do que já
+  // existe, sem tabela nova. São privadas e motivacionais: engajamento nunca vira
+  // selo público. Ver badges-conquistas-selos-carreirabeauty.md.
+  const totalCandidaturas = (applications ?? []).length;
+  const modulosQuizFeitos = new Set((quizProgresso ?? []).map((p) => p.modulo_slug)).size;
+  const conquistas = [
+    { slug: "perfil-no-ar", nome: "Perfil no ar", icon: "ph-fill ph-rocket-launch", done: true },
+    { slug: "primeira-foto", nome: "Primeira foto", icon: "ph-fill ph-camera", done: !!professional.foto_perfil_url },
+    { slug: "perfil-completo", nome: "Perfil completo", icon: "ph-fill ph-user-circle-check", done: perfilPct === 100 },
+    { slug: "portfolio", nome: "Portfólio caprichado", icon: "ph-fill ph-images", done: (professional.portfolio_urls?.length ?? 0) >= 3 },
+    { slug: "primeira-candidatura", nome: "Primeira vaga", icon: "ph-fill ph-paper-plane-tilt", done: totalCandidaturas >= 1 },
+    { slug: "em-movimento", nome: "Em movimento", icon: "ph-fill ph-lightning", done: totalCandidaturas >= 5 },
+    { slug: "comecou-estudar", nome: "Começou a estudar", icon: "ph-fill ph-graduation-cap", done: modulosQuizFeitos >= 1 },
+    { slug: "trilha-concluida", nome: "Trilha concluída", icon: "ph-fill ph-seal-check", done: modulosQuizFeitos >= TRILHA_AUTOESTIMA.modulos.length },
+  ];
+  const conquistasFeitas = conquistas.filter((c) => c.done).length;
+
   return (
     <div>
       <main className="page-x">
@@ -229,6 +252,41 @@ export default async function DashboardProfissionalPage() {
             <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
           </Link>
         )}
+
+        {/* Conquistas — fase 1: grade de ativação, privada e motivacional. Faixa
+            horizontal enxuta pra não empurrar as vagas (o produto principal) pra baixo */}
+        <div style={{
+          background: "var(--surface-card)", border: "1px solid var(--border-default)",
+          borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "14px 0 14px 16px", marginBottom: 20,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, paddingRight: 16 }}>
+            <i className="ph-fill ph-trophy" style={{ fontSize: 16, color: "var(--color-brand-primary)" }}></i>
+            <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", flex: 1 }}>
+              Suas conquistas
+            </p>
+            <span style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)" }}>
+              {conquistasFeitas} de {conquistas.length}
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingRight: 16, paddingBottom: 2, WebkitOverflowScrolling: "touch" }}>
+            {conquistas.map((c) => (
+              <div key={c.slug} style={{ flex: "0 0 auto", width: 68, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: c.done ? 1 : 0.5 }}>
+                <div style={{
+                  position: "relative", width: 48, height: 48, borderRadius: "50%",
+                  background: c.done ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
+                  color: c.done ? "var(--color-brand-primary)" : "var(--text-tertiary)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+                  border: c.done ? "1.5px solid var(--brand-magenta-100)" : "1.5px dashed var(--border-default)",
+                }}>
+                  <i className={c.done ? c.icon : "ph ph-lock-simple"}></i>
+                </div>
+                <p style={{ font: "600 10px/1.2 var(--font-body)", color: c.done ? "var(--text-secondary)" : "var(--text-tertiary)", textAlign: "center" }}>
+                  {c.nome}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Minhas candidaturas — o "e aí, me chamaram?" vem antes de tudo */}
         {candidaturas.length > 0 && (
