@@ -10,6 +10,24 @@ import { geocodeEndereco } from "@/lib/geocode";
 import { compressImage } from "@/lib/compressImage";
 import TemplateSelector from "./visual/TemplateSelector";
 import { PerfilTemplateData } from "@/components/perfilTemplates/types";
+import TemplateClassico from "@/components/perfilTemplates/TemplateClassico";
+import TemplateVitrine from "@/components/perfilTemplates/TemplateVitrine";
+import TemplateElegante from "@/components/perfilTemplates/TemplateElegante";
+import TemplateAurora from "@/components/perfilTemplates/TemplateAurora";
+import TemplateEstudio from "@/components/perfilTemplates/TemplateEstudio";
+
+const TEMPLATE_COMPONENTES = {
+  classico: TemplateClassico,
+  vitrine: TemplateVitrine,
+  elegante: TemplateElegante,
+  aurora: TemplateAurora,
+  estudio: TemplateEstudio,
+};
+
+// Perfil abre em "visualizar" (a pessoa vê o próprio perfil como as empresas
+// veem, com empurrão de completude) — "editar" e "visual" são ações a partir
+// dali, não a primeira tela.
+type PerfilView = "visualizar" | "editar" | "visual";
 
 const VINCULOS: Record<string, string> = { clt: "CLT", pj: "PJ", freela: "Freela / autônomo" };
 const OUTRA = "Outro";
@@ -28,7 +46,9 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
   const fileRef = useRef<HTMLInputElement>(null);
   const portfolioInputRef = useRef<HTMLInputElement>(null);
 
-  const [editing, setEditing] = useState(false);
+  const [view, setView] = useState<PerfilView>("visualizar");
+  const editing = view === "editar";
+  const isPro = p.plano === "pro";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -120,6 +140,24 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
     disponibilidade: disponibilidade || null, tipoVinculo: VINCULOS[tipoVinculo] || tipoVinculo || null,
     habilidades: selectedHabilidades, educacao, experienciaProf: experiencias, portfolioUrls,
   };
+
+  // Template ativo — mesma regra da página pública: grátis sempre vê Clássico
+  const activeTemplateId = (isPro ? (p.template_id ?? "classico") : "classico") as keyof typeof TEMPLATE_COMPONENTES;
+  const ActiveTemplate = TEMPLATE_COMPONENTES[activeTemplateId] ?? TemplateClassico;
+
+  // Força do perfil — mesmo modelo da home (6 itens); alimenta o empurrão de
+  // completude no "visualizar" e o banner orientador no "editar". Usa o estado
+  // atual (não p.*) pra refletir edições ao vivo.
+  const checksPerfil = [
+    { label: "Foto de perfil", done: !!avatarPreview, dica: "Coloque uma foto sua", icon: "ph-fill ph-camera" },
+    { label: "Apresentação", done: !!apresentacao, dica: "Escreva um pouco sobre você", icon: "ph-fill ph-chat-circle-text" },
+    { label: "Habilidades", done: selectedHabilidades.length > 0, dica: "Marque suas habilidades", icon: "ph-fill ph-star" },
+    { label: "Formação e cursos", done: educacao.length > 0, dica: "Adicione seus cursos", icon: "ph-fill ph-graduation-cap" },
+    { label: "Experiência", done: experiencias.length > 0, dica: "Conte sua experiência", icon: "ph-fill ph-briefcase" },
+    { label: "Portfólio", done: portfolioUrls.length > 0, dica: "Mostre fotos do seu trabalho", icon: "ph-fill ph-images" },
+  ];
+  const perfilPct = Math.round((checksPerfil.filter((c) => c.done).length / checksPerfil.length) * 100);
+  const faltandoPerfil = checksPerfil.filter((c) => !c.done);
   async function handleCepBlur() {
     const raw = cep.replace(/\D/g, "");
     if (raw.length !== 8) return;
@@ -216,7 +254,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
       setPortfolioUrls(allPortfolioUrls);
       setPortfolioNewFiles([]); setPortfolioPreviews([]);
-      setSuccess(true); setEditing(false); router.refresh();
+      setSuccess(true); setView("visualizar"); router.refresh();
     } catch (e) {
       const isNetworkError = e instanceof TypeError && /fetch/i.test(e.message);
       setError(isNetworkError ? "Falha de conexão. Verifique sua internet e tente novamente." : e instanceof Error ? e.message : "Erro ao salvar.");
@@ -238,7 +276,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
     setPortfolioUrls(p.portfolio_urls ?? []); setPortfolioNewFiles([]); setPortfolioPreviews([]);
     setSelectedHabilidades(p.habilidades ?? []);
     setNewEdu(null); setNewExp(null);
-    setEditing(false); setError("");
+    setView("visualizar"); setError("");
   }
 
   const inp: React.CSSProperties = {
@@ -262,12 +300,19 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         display: "flex", alignItems: "center", gap: 12,
         position: "sticky", top: 0, zIndex: 10,
       }}>
-        <Link href="/dashboard/profissional" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+        {/* Seta volta pra visualizar quando está em editar/visual; só sai da
+            página quando já está na visualização */}
+        {view === "visualizar" ? (
+          <Link href="/dashboard/profissional" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+        ) : (
+          <button onClick={() => { if (editing) { handleCancel(); } else { setView("visualizar"); } }}
+            style={{ fontSize: 22, color: "var(--text-tertiary)", background: "none", border: "none", cursor: "pointer", lineHeight: 1, padding: 0 }}>←</button>
+        )}
         <p style={{ flex: 1, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
-          Meu perfil
+          {view === "editar" ? "Editar perfil" : view === "visual" ? "Visual do perfil" : "Meu perfil"}
         </p>
-        {!editing ? (
-          <button onClick={() => { setEditing(true); setSuccess(false); }} style={{
+        {view === "visualizar" && (
+          <button onClick={() => { setView("editar"); setSuccess(false); }} style={{
             height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
             border: "none", background: "var(--color-brand-primary)",
             color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
@@ -275,7 +320,8 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
           }}>
             ✏️ Editar perfil
           </button>
-        ) : (
+        )}
+        {view === "editar" && (
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={handleCancel} disabled={loading} style={{
               height: 36, padding: "0 16px", borderRadius: "var(--radius-pill)",
@@ -294,6 +340,15 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
             </button>
           </div>
         )}
+        {view === "visual" && (
+          <button onClick={() => setView("visualizar")} style={{
+            height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
+            border: "1px solid var(--border-default)", background: "transparent",
+            color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, cursor: "pointer",
+          }}>
+            Concluído
+          </button>
+        )}
       </header>
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x) 48px" }}>
@@ -305,12 +360,94 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
           </div>
         )}
 
-        {!editing && (
-          <TemplateSelector data={templateData} templateAtual={p.template_id ?? "classico"} isPro={p.plano === "pro"} />
+        {/* VISUALIZAR — a home do perfil: empurrão de completude + preview de
+            como as empresas veem, com as ações (editar / mudar visual) a partir daqui */}
+        {view === "visualizar" && (
+          <>
+            {perfilPct < 100 && (
+              <button onClick={() => { setView("editar"); setSuccess(false); }} style={{
+                display: "flex", alignItems: "center", gap: 12, width: "100%", textAlign: "left",
+                background: "var(--surface-card)", border: "1px solid var(--border-default)",
+                borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "14px 16px",
+                marginBottom: 12, cursor: "pointer",
+              }}>
+                <svg width="44" height="44" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="var(--brand-magenta-50)" strokeWidth="4" />
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-brand-primary)" strokeWidth="4"
+                    strokeLinecap="round" strokeDasharray={`${(perfilPct / 100) * 100.5} 100.5`}
+                    transform="rotate(-90 20 20)" />
+                  <text x="20" y="24" textAnchor="middle" fontSize="10" fontWeight="700" fill="var(--color-brand-primary)">
+                    {perfilPct}%
+                  </text>
+                </svg>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ font: "700 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                    Complete seu perfil
+                  </p>
+                  <p style={{ font: "var(--text-caption)", color: "var(--text-secondary)" }}>
+                    {faltandoPerfil.length === 1
+                      ? `Falta ${faltandoPerfil[0].dica.toLowerCase()} pra ficar completo`
+                      : `Perfil completo é chamado primeiro — faltam ${faltandoPerfil.length} itens`}
+                  </p>
+                </div>
+                <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+              </button>
+            )}
+
+            <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 10 }}>
+              Como as empresas veem seu perfil
+            </p>
+            <div style={{
+              borderRadius: "var(--radius-xl)", overflow: "hidden", border: "1px solid var(--border-default)",
+              marginBottom: 14, background: "var(--surface-page)",
+            }}>
+              <ActiveTemplate p={templateData} preview contatosBloqueados={!isPro} />
+            </div>
+
+            <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+              <button onClick={() => { setView("editar"); setSuccess(false); }} style={{
+                flex: 1, height: 48, borderRadius: "var(--radius-pill)", border: "none",
+                background: "var(--color-brand-primary)", color: "#fff",
+                fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              }}>
+                <i className="ph ph-pencil-simple"></i> Editar informações
+              </button>
+              <button onClick={() => setView("visual")} style={{
+                flex: 1, height: 48, borderRadius: "var(--radius-pill)",
+                border: "1px solid var(--color-brand-primary)", background: "transparent",
+                color: "var(--color-brand-primary)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              }}>
+                <i className="ph ph-palette"></i> Mudar visual
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* VISUAL — seletor de templates (carrossel + preview + taglines) */}
+        {view === "visual" && (
+          <TemplateSelector data={templateData} templateAtual={p.template_id ?? "classico"} isPro={isPro} />
         )}
 
         {editing && (
         <>
+        {/* Banner orientador — transforma o formulário de "lista de campos" em
+            "checklist com o porquê", na linguagem do público */}
+        {faltandoPerfil.length > 0 && (
+          <div style={{
+            background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+            border: "1px solid var(--brand-magenta-100)", borderRadius: "var(--radius-xl)",
+            padding: "14px 16px", marginBottom: 12,
+          }}>
+            <p style={{ font: "700 14px/1.3 var(--font-display)", color: "var(--text-primary)", marginBottom: 4 }}>
+              Capricha aqui pra ser chamada primeiro 💪
+            </p>
+            <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+              Empresa chama quem tem perfil completo. Ainda falta: {faltandoPerfil.map((c) => c.dica.toLowerCase()).join(", ")}.
+            </p>
+          </div>
+        )}
         {/* Avatar + nome */}
         <div style={{ ...card, flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 12 }}>
           <div onClick={() => editing && fileRef.current?.click()} style={{
@@ -709,7 +846,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         )}
 
         {/* Perfil público — divulgação */}
-        {!editing && p.slug && (
+        {view === "visualizar" && p.slug && (
           <div style={{
             background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
             borderRadius: "var(--radius-xl)", border: "1px solid var(--brand-magenta-100)",
@@ -765,7 +902,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         )}
 
         {/* Seja PRO — perto de Conta/configurações, não como primeira coisa da tela */}
-        {!editing && (
+        {view === "visualizar" && (
           <Link href="/dashboard/profissional/planos" style={{ textDecoration: "none", display: "block", marginBottom: 12 }}>
             <div style={{
               background: p.plano === "pro" ? "var(--brand-magenta-50)" : "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
@@ -794,7 +931,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         )}
 
         {/* Conta — bloco separado com e-mail, suporte e sair */}
-        {!editing && (
+        {view === "visualizar" && (
           <div style={{
             background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
             border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
