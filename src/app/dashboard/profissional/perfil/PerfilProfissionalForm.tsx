@@ -279,6 +279,17 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
     setView("visualizar"); setError("");
   }
 
+  // Troca de modo pelo segmentado. Sempre sobe pro topo — senão, ao entrar no
+  // Visual estando rolado pra baixo, o carrossel de templates (que fica no topo)
+  // não aparecia. Sair do Editar descarta as edições (mesmo que Cancelar).
+  function irPara(v: PerfilView) {
+    if (v === view) return;
+    if (editing && v !== "editar") handleCancel();
+    setView(v);
+    setSuccess(false);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
+
   const inp: React.CSSProperties = {
     width: "100%", height: 46, padding: "0 14px",
     borderRadius: "var(--radius-md)", border: "1px solid var(--border-default)",
@@ -300,27 +311,11 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         display: "flex", alignItems: "center", gap: 12,
         position: "sticky", top: 0, zIndex: 10,
       }}>
-        {/* Seta volta pra visualizar quando está em editar/visual; só sai da
-            página quando já está na visualização */}
-        {view === "visualizar" ? (
-          <Link href="/dashboard/profissional" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
-        ) : (
-          <button onClick={() => { if (editing) { handleCancel(); } else { setView("visualizar"); } }}
-            style={{ fontSize: 22, color: "var(--text-tertiary)", background: "none", border: "none", cursor: "pointer", lineHeight: 1, padding: 0 }}>←</button>
-        )}
+        <Link href="/dashboard/profissional" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
         <p style={{ flex: 1, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
-          {view === "editar" ? "Editar perfil" : view === "visual" ? "Visual do perfil" : "Meu perfil"}
+          Meu perfil
         </p>
-        {view === "visualizar" && (
-          <button onClick={() => { setView("editar"); setSuccess(false); }} style={{
-            height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
-            border: "none", background: "var(--color-brand-primary)",
-            color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
-            boxShadow: "var(--shadow-sm)",
-          }}>
-            ✏️ Editar perfil
-          </button>
-        )}
+        {/* Salvar/Cancelar só no Editar; a troca entre modos é pelo segmentado */}
         {view === "editar" && (
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={handleCancel} disabled={loading} style={{
@@ -340,18 +335,36 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
             </button>
           </div>
         )}
-        {view === "visual" && (
-          <button onClick={() => setView("visualizar")} style={{
-            height: 36, padding: "0 18px", borderRadius: "var(--radius-pill)",
-            border: "1px solid var(--border-default)", background: "transparent",
-            color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14, cursor: "pointer",
-          }}>
-            Concluído
-          </button>
-        )}
       </header>
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x) 48px" }}>
+
+        {/* Segmentado de modos — sempre visível, os 3 no mesmo nível (Visual
+            deixou de ficar escondido lá embaixo) */}
+        <div style={{
+          display: "flex", gap: 4, background: "var(--surface-sunken)",
+          padding: 4, borderRadius: "var(--radius-pill)", marginBottom: 16,
+        }}>
+          {([
+            { v: "visualizar" as const, label: "Meu site", icon: "ph ph-globe" },
+            { v: "editar" as const, label: "Editar", icon: "ph ph-pencil-simple" },
+            { v: "visual" as const, label: "Visual", icon: "ph ph-palette" },
+          ]).map((seg) => {
+            const active = view === seg.v;
+            return (
+              <button key={seg.v} onClick={() => irPara(seg.v)} style={{
+                flex: 1, height: 40, borderRadius: "var(--radius-pill)", border: "none", cursor: "pointer",
+                background: active ? "var(--surface-card)" : "transparent",
+                color: active ? "var(--color-brand-primary)" : "var(--text-secondary)",
+                boxShadow: active ? "var(--shadow-xs)" : "none",
+                fontFamily: "var(--font-body)", fontWeight: active ? 700 : 600, fontSize: 13,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              }}>
+                <i className={seg.icon}></i> {seg.label}
+              </button>
+            );
+          })}
+        </div>
 
         {success && (
           <div style={{ background: "var(--color-success-bg)", border: "1px solid var(--color-success-border)", color: "var(--color-success-fg)",
@@ -361,11 +374,11 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         )}
 
         {/* VISUALIZAR — a home do perfil: empurrão de completude + preview de
-            como as empresas veem, com as ações (editar / mudar visual) a partir daqui */}
+            como as empresas veem. A troca de modo é pelo segmentado no topo. */}
         {view === "visualizar" && (
           <>
             {perfilPct < 100 && (
-              <button onClick={() => { setView("editar"); setSuccess(false); }} style={{
+              <button onClick={() => irPara("editar")} style={{
                 display: "flex", alignItems: "center", gap: 12, width: "100%", textAlign: "left",
                 background: "var(--surface-card)", border: "1px solid var(--border-default)",
                 borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "14px 16px",
@@ -402,25 +415,6 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
               marginBottom: 14, background: "var(--surface-page)",
             }}>
               <ActiveTemplate p={templateData} preview contatosBloqueados={!isPro} />
-            </div>
-
-            <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-              <button onClick={() => { setView("editar"); setSuccess(false); }} style={{
-                flex: 1, height: 48, borderRadius: "var(--radius-pill)", border: "none",
-                background: "var(--color-brand-primary)", color: "#fff",
-                fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-              }}>
-                <i className="ph ph-pencil-simple"></i> Editar informações
-              </button>
-              <button onClick={() => setView("visual")} style={{
-                flex: 1, height: 48, borderRadius: "var(--radius-pill)",
-                border: "1px solid var(--color-brand-primary)", background: "transparent",
-                color: "var(--color-brand-primary)", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-              }}>
-                <i className="ph ph-palette"></i> Mudar visual
-              </button>
             </div>
           </>
         )}
