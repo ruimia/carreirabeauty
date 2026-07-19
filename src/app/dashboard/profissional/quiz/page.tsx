@@ -33,7 +33,7 @@ export default async function QuizTrilhaPage() {
     <div>
       <main className="page-x" style={{ paddingBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-          <Link href="/dashboard/profissional/conteudo" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+          <Link href="/dashboard/profissional/crescer" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
           <p style={{ font: "600 16px/1.3 var(--font-display)", color: "var(--text-primary)" }}>{TRILHA_AUTOESTIMA.titulo}</p>
         </div>
         <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 20 }}>

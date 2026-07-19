@@ -29,7 +29,10 @@ export default async function ConteudoListaPage() {
   return (
     <div>
       <main className="page-x">
-        <p className="section-label">Conteúdo pra você crescer</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+          <Link href="/dashboard/profissional/crescer" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+          <p className="section-label" style={{ margin: 0 }}>Conteúdo pra você crescer</p>
+        </div>
 
         <Link href="/dashboard/profissional/quiz" style={{ textDecoration: "none" }}>
           <div style={{

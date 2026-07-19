@@ -66,8 +66,8 @@ const PROFISSIONAL_TABS: Tab[] = [
   {
     label: "Crescer",
     icon: "ph ph-sparkle",
-    href: "/dashboard/profissional/conteudo",
-    isActive: (p) => p.startsWith("/dashboard/profissional/conteudo") || p.startsWith("/dashboard/profissional/quiz"),
+    href: "/dashboard/profissional/crescer",
+    isActive: (p) => p.startsWith("/dashboard/profissional/crescer") || p.startsWith("/dashboard/profissional/conteudo") || p.startsWith("/dashboard/profissional/quiz"),
   },
   {
     label: "Perfil",
