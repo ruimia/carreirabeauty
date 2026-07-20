@@ -10,6 +10,11 @@ export const PLANOS_PROFISSIONAL = {
   pro:    { nome: "Pro",    candidaturas_mes: null, preco: 14.90, precoOriginal: 29 },
 } as const;
 
+// Compra avulsa do certificado — proposital mais caro que a mensalidade PRO
+// (R$14,90), funciona como âncora: ao lado do PRO (que dá isso + tudo mais),
+// o avulso faz o PRO parecer a escolha óbvia em vez de ganhar do nada.
+export const CERTIFICADO_AVULSO_PRECO = 29.90;
+
 export type PlanoEmpresa = keyof typeof PLANOS_EMPRESA;
 export type PlanoProfissional = keyof typeof PLANOS_PROFISSIONAL;
 

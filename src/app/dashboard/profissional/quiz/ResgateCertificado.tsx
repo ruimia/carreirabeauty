@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import CertificadoVisual from "@/components/CertificadoVisual";
+import { CERTIFICADO_AVULSO_PRECO, formatPreco, PLANOS_PROFISSIONAL } from "@/lib/planos";
 
 interface Props {
   professionalId: string;
@@ -22,8 +23,8 @@ export default function ResgateCertificado({
   const router = useRouter();
   const supabase = createClient();
   const [desbloqueado, setDesbloqueado] = useState(jaDesbloqueado);
-  const [tentativaRegistrada, setTentativaRegistrada] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<"pro" | "avulso" | null>(null);
+  const [erro, setErro] = useState("");
 
   if (!todosConcluidos) {
     return (
@@ -39,7 +40,7 @@ export default function ResgateCertificado({
   // Este é o momento de maior intenção do produto inteiro: toda pessoa que
   // termina a trilha chega até aqui querendo o certificado. Por isso mostra o
   // certificado de verdade (não só um ícone) antes do CTA — preview quando
-  // ainda falta desbloquear, conquistado quando já é PRO.
+  // ainda falta desbloquear, conquistado quando já é PRO/comprou avulso.
   if (desbloqueado) {
     return (
       <div>
@@ -51,26 +52,38 @@ export default function ResgateCertificado({
     );
   }
 
-  async function handleClick() {
-    setLoading(true);
+  async function handleResgatarPro() {
+    setLoading("pro");
+    setErro("");
     try {
-      if (isPro) {
-        await supabase.from("quiz_eventos").insert({
-          professional_id: professionalId, trilha_slug: trilhaSlug, evento: "certificado_desbloqueado",
-        });
-        await supabase.from("professionals").update({
-          certificado_autoestima_desbloqueado_em: new Date().toISOString(),
-        }).eq("id", professionalId);
-        setDesbloqueado(true);
-        router.refresh();
-      } else {
-        await supabase.from("quiz_eventos").insert({
-          professional_id: professionalId, trilha_slug: trilhaSlug, evento: "certificado_tentativa",
-        });
-        setTentativaRegistrada(true);
-      }
+      await supabase.from("quiz_eventos").insert({
+        professional_id: professionalId, trilha_slug: trilhaSlug, evento: "certificado_desbloqueado",
+      });
+      await supabase.from("professionals").update({
+        certificado_autoestima_desbloqueado_em: new Date().toISOString(),
+        certificado_autoestima_origem: "pro",
+      }).eq("id", professionalId);
+      setDesbloqueado(true);
+      router.refresh();
     } finally {
-      setLoading(false);
+      setLoading(null);
+    }
+  }
+
+  async function handleComprarAvulso() {
+    setLoading("avulso");
+    setErro("");
+    try {
+      await supabase.from("quiz_eventos").insert({
+        professional_id: professionalId, trilha_slug: trilhaSlug, evento: "certificado_tentativa",
+      });
+      const res = await fetch("/api/mp/certificado-avulso", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.init_point) throw new Error(data.error || "Erro ao iniciar pagamento");
+      window.location.href = data.init_point;
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Não deu pra iniciar o pagamento agora. Tenta de novo.");
+      setLoading(null);
     }
   }
 
@@ -86,30 +99,59 @@ export default function ResgateCertificado({
         <p style={{ font: "700 16px/1.3 var(--font-display)", color: "var(--text-primary)", marginBottom: 6 }}>
           Você completou a trilha! 🎉
         </p>
-        <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 16 }}>
-          {isPro
-            ? "Resgate agora o seu certificado."
-            : "O certificado é um benefício do PRO — desbloqueie e mostre no seu perfil que você investiu em atendimento e postura."}
-        </p>
 
-        {!isPro && tentativaRegistrada ? (
-          <Link href="/dashboard/profissional/planos" style={{
-            display: "block", height: 48, borderRadius: "var(--radius-pill)",
-            background: "var(--color-brand-primary)", color: "#fff",
-            fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
-            textDecoration: "none", lineHeight: "48px",
-          }}>
-            Ver plano PRO
-          </Link>
+        {isPro ? (
+          <>
+            <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 16 }}>
+              Resgate agora o seu certificado.
+            </p>
+            <button onClick={handleResgatarPro} disabled={loading !== null} style={{
+              height: 48, padding: "0 24px", borderRadius: "var(--radius-pill)", border: "none",
+              background: "var(--color-brand-primary)", color: "#fff",
+              fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
+              cursor: "pointer", opacity: loading ? 0.7 : 1,
+            }}>
+              {loading === "pro" ? "Aguarde…" : "Resgatar certificado"}
+            </button>
+          </>
         ) : (
-          <button onClick={handleClick} disabled={loading} style={{
-            height: 48, padding: "0 24px", borderRadius: "var(--radius-pill)", border: "none",
-            background: "var(--color-brand-primary)", color: "#fff",
-            fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
-            cursor: "pointer", opacity: loading ? 0.7 : 1,
-          }}>
-            {loading ? "Aguarde…" : isPro ? "Resgatar certificado" : "Desbloquear certificado"}
-          </button>
+          <>
+            <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 18 }}>
+              O certificado é um benefício do PRO — mostre no seu perfil que você investiu em atendimento e postura.
+            </p>
+
+            {/* PRO é o CTA principal: pelo preço da mensalidade, além do
+                certificado vem WhatsApp visível, candidaturas ilimitadas e
+                layouts PRO — o avulso custa mais e dá só o certificado. */}
+            <Link href="/dashboard/profissional/planos" style={{
+              display: "block", height: 48, borderRadius: "var(--radius-pill)",
+              background: "var(--color-brand-primary)", color: "#fff",
+              fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
+              textDecoration: "none", lineHeight: "48px", marginBottom: 10,
+            }}>
+              Virar PRO — R$ {formatPreco(PLANOS_PROFISSIONAL.pro.preco)}/mês
+            </Link>
+            <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginBottom: 10 }}>
+              certificado + WhatsApp visível + candidaturas ilimitadas + layouts PRO
+            </p>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0" }}>
+              <span style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
+              <span style={{ font: "var(--text-caption)", color: "var(--text-tertiary)" }}>ou</span>
+              <span style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
+            </div>
+
+            <button onClick={handleComprarAvulso} disabled={loading !== null} style={{
+              height: 44, padding: "0 20px", borderRadius: "var(--radius-pill)",
+              border: "1px solid var(--border-default)", background: "transparent",
+              color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 14,
+              cursor: "pointer", opacity: loading ? 0.7 : 1,
+            }}>
+              {loading === "avulso" ? "Aguarde…" : `Comprar só o certificado — R$ ${formatPreco(CERTIFICADO_AVULSO_PRECO)}`}
+            </button>
+
+            {erro && <p style={{ font: "var(--text-caption)", color: "var(--color-danger-fg)", marginTop: 10 }}>{erro}</p>}
+          </>
         )}
       </div>
     </div>
