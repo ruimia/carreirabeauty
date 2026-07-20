@@ -1,3 +1,9 @@
+export interface Depoimento {
+  nomeCliente: string;
+  estrelas: number;
+  texto: string;
+}
+
 export interface PerfilTemplateData {
   nome: string;
   funcao: string;
@@ -17,6 +23,7 @@ export interface PerfilTemplateData {
   educacao: { curso: string; instituicao?: string; ano?: string }[];
   experienciaProf: { cargo: string; empresa?: string; periodo?: string }[];
   portfolioUrls: string[];
+  depoimentos: Depoimento[];
 }
 
 export interface PerfilTemplateProps {

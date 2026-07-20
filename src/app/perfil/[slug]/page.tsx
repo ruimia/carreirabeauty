@@ -76,6 +76,13 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
     email = perfil?.email ?? null;
   }
 
+  const { data: depoimentosRows } = await supabase
+    .from("depoimentos")
+    .select("nome_cliente, estrelas, texto")
+    .eq("professional_id", p.id)
+    .eq("status", "aprovado")
+    .order("criado_em", { ascending: false });
+
   const tags = [
     p.experiencia ? `${p.experiencia} de experiência` : null,
   ].filter((t): t is string => !!t);
@@ -99,6 +106,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
     educacao: p.educacao ?? [],
     experienciaProf: p.experiencia_prof ?? [],
     portfolioUrls: p.portfolio_urls ?? [],
+    depoimentos: (depoimentosRows ?? []).map((d) => ({ nomeCliente: d.nome_cliente, estrelas: d.estrelas, texto: d.texto })),
   };
 
   // Templates PRO só renderizam pra quem ainda é PRO — se desceu de plano,

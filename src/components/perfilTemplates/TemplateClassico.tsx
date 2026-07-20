@@ -110,6 +110,24 @@ export default function TemplateClassico({ p, preview }: PerfilTemplateProps) {
         </Section>
       )}
 
+      {p.depoimentos.length > 0 && (
+        <Section title="Depoimentos">
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {p.depoimentos.map((d, i) => (
+              <div key={i} style={{ borderBottom: i < p.depoimentos.length - 1 ? "1px solid var(--border-default)" : "none", paddingBottom: i < p.depoimentos.length - 1 ? 14 : 0 }}>
+                <div style={{ display: "flex", gap: 2, marginBottom: 6 }}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <i key={n} className="ph-fill ph-star" style={{ fontSize: 13, color: n <= d.estrelas ? "#ffb020" : "var(--surface-sunken)" }}></i>
+                  ))}
+                </div>
+                <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 6 }}>&ldquo;{d.texto}&rdquo;</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{d.nomeCliente}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
       {(p.portfolioUrls.length > 0 || preview) && (
         <Section title="Portfólio">
           {p.portfolioUrls.length > 0 ? (

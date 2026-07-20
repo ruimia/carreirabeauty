@@ -20,7 +20,7 @@ export default async function CrescerHubPage() {
     .single();
   if (!professional) redirect("/onboarding/tipo");
 
-  const [{ data: progresso }, { data: certificadosRows }, { count: totalConteudos }, { count: candidaturas }] = await Promise.all([
+  const [{ data: progresso }, { data: certificadosRows }, { count: totalConteudos }, { count: candidaturas }, { count: depoimentosAprovados }, { count: depoimentosPendentes }] = await Promise.all([
     supabase
       .from("quiz_progresso")
       .select("trilha_slug, modulo_slug")
@@ -28,6 +28,8 @@ export default async function CrescerHubPage() {
     supabase.from("certificados").select("trilha_slug").eq("professional_id", professional.id),
     supabase.from("conteudos").select("*", { count: "exact", head: true }).eq("ativo", true),
     supabase.from("applications").select("*", { count: "exact", head: true }).eq("professional_id", professional.id),
+    supabase.from("depoimentos").select("*", { count: "exact", head: true }).eq("professional_id", professional.id).eq("status", "aprovado"),
+    supabase.from("depoimentos").select("*", { count: "exact", head: true }).eq("professional_id", professional.id).eq("status", "pendente"),
   ]);
 
   const { modulosFeitosTotal, trilhasConcluidas, trilhasTotal } = calcularProgressoGeral(progresso ?? []);
@@ -125,10 +127,15 @@ export default async function CrescerHubPage() {
         <p className="section-label">Suas provas — aparecem no seu site</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
           <Ferramenta
+            href="/dashboard/profissional/depoimentos"
             icon="ph-fill ph-chat-centered-text"
             titulo="Depoimentos de clientes"
-            desc="Peça uma recomendação pra quem você já atendeu"
-            emBreve
+            desc={depoimentosPendentes
+              ? `${depoimentosPendentes} aguardando sua aprovação`
+              : depoimentosAprovados
+                ? `${depoimentosAprovados} no seu perfil — peça mais`
+                : "Peça uma recomendação pra quem você já atendeu"}
+            badge={depoimentosPendentes ? String(depoimentosPendentes) : undefined}
           />
         </div>
 

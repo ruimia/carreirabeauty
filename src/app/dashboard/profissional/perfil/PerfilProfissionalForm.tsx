@@ -16,6 +16,7 @@ import TemplateElegante from "@/components/perfilTemplates/TemplateElegante";
 import TemplateAurora from "@/components/perfilTemplates/TemplateAurora";
 import TemplateEstudio from "@/components/perfilTemplates/TemplateEstudio";
 import { TRILHAS } from "@/lib/quizContent";
+import { Depoimento } from "@/components/perfilTemplates/types";
 
 const TEMPLATE_COMPONENTES = {
   classico: TemplateClassico,
@@ -41,7 +42,7 @@ interface ExpItem { empresa: string; cargo: string; periodo: string; }
 interface HabilidadeItem { nome: string; profissao: string | null; }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PerfilProfissionalForm({ professional: p, email, profissoes, habilidades, certificadosSlugs }: { professional: any; email: string; profissoes: string[]; habilidades: HabilidadeItem[]; certificadosSlugs: string[] }) {
+export default function PerfilProfissionalForm({ professional: p, email, profissoes, habilidades, certificadosSlugs, depoimentos }: { professional: any; email: string; profissoes: string[]; habilidades: HabilidadeItem[]; certificadosSlugs: string[]; depoimentos: Depoimento[] }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -140,6 +141,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
     apresentacao: apresentacao || null, experiencia: experiencia || null,
     disponibilidade: disponibilidade || null, tipoVinculo: VINCULOS[tipoVinculo] || tipoVinculo || null,
     habilidades: selectedHabilidades, educacao, experienciaProf: experiencias, portfolioUrls,
+    depoimentos,
   };
 
   // Template ativo — mesma regra da página pública: grátis sempre vê Clássico

@@ -19,10 +19,10 @@ export default async function PerfilProfissionalPage() {
 
   if (!professional) redirect("/onboarding/profissional");
 
-  const { data: certificados } = await supabase
-    .from("certificados")
-    .select("trilha_slug")
-    .eq("professional_id", professional.id);
+  const [{ data: certificados }, { data: depoimentosRows }] = await Promise.all([
+    supabase.from("certificados").select("trilha_slug").eq("professional_id", professional.id),
+    supabase.from("depoimentos").select("nome_cliente, estrelas, texto").eq("professional_id", professional.id).eq("status", "aprovado").order("criado_em", { ascending: false }),
+  ]);
 
   return (
     <PerfilProfissionalForm
@@ -31,6 +31,7 @@ export default async function PerfilProfissionalPage() {
       profissoes={profissoes}
       habilidades={habilidades ?? []}
       certificadosSlugs={(certificados ?? []).map((c) => c.trilha_slug)}
+      depoimentos={(depoimentosRows ?? []).map((d) => ({ nomeCliente: d.nome_cliente, estrelas: d.estrelas, texto: d.texto }))}
     />
   );
 }
