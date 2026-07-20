@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import CandidaturaSection from "./CandidaturaSection";
@@ -57,17 +58,19 @@ export default async function VagaPage({ params }: Props) {
   let professionalId: string | null = null;
   let nomeProfissional: string | null = null;
   let jaAplicou = false;
+  let isProInicial = false;
 
   if (user) {
     const { data: prof } = await supabase
       .from("professionals")
-      .select("id, nome")
+      .select("id, nome, plano")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (prof) {
       professionalId = prof.id;
       nomeProfissional = prof.nome;
+      isProInicial = prof.plano === "pro";
       const { data: app } = await supabase
         .from("applications")
         .select("id")
@@ -76,6 +79,21 @@ export default async function VagaPage({ params }: Props) {
         .maybeSingle();
       jaAplicou = !!app;
     }
+  }
+
+  // Total de candidatos da vaga — só busca se já aplicou (é o que alimenta o
+  // "veja como se destacar" na tela de confirmação); pra quem ainda não
+  // aplicou não faz sentido gastar a query. Client admin: RLS de applications
+  // só deixa o profissional ver as próprias candidaturas, então contar pelo
+  // client de sessão sempre daria 1, mesmo com outros candidatos na vaga.
+  let totalCandidatosInicial = 0;
+  if (jaAplicou) {
+    const admin = createAdminClient();
+    const { count } = await admin
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("job_id", vaga.id);
+    totalCandidatosInicial = count ?? 1;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -227,6 +245,8 @@ export default async function VagaPage({ params }: Props) {
             nomeProfissional={nomeProfissional}
             empresaNome={company.nome_estabelecimento ?? null}
             empresaWhatsapp={company.telefone ?? null}
+            totalCandidatosInicial={totalCandidatosInicial}
+            isProInicial={isProInicial}
           />
         </div>
       </main>

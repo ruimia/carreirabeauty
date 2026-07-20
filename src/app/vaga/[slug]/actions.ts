@@ -7,7 +7,7 @@ import { limiteCandidaturasMes } from "@/lib/planos";
 import { saoPauloStartOfMonthISO } from "@/lib/timezone";
 
 type CandidatarResult =
-  | { ok: true; jaAplicou: boolean }
+  | { ok: true; jaAplicou: boolean; totalCandidatos: number; isPro: boolean }
   | { ok: false; error: "NAO_AUTENTICADO" | "PERFIL_NAO_ENCONTRADO" | "LIMITE_PLANO" | "ERRO_DB" };
 
 export async function candidatar(jobId: string, mensagem: string | null): Promise<CandidatarResult> {
@@ -39,8 +39,23 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
     mensagem: mensagem || null,
   });
 
+  // Contagem de candidatos da vaga — usada na tela de confirmação pra mostrar
+  // a concorrência real e motivar a se destacar (PRO/certificados/perfil).
+  // Precisa do client admin: a RLS de applications só deixa o profissional ver
+  // as PRÓPRIAS candidaturas, então contar pelo client de sessão sempre dá 1,
+  // mesmo com dezenas de outros candidatos na mesma vaga. Só o total agregado
+  // é exposto aqui — nenhum dado pessoal de outros candidatos.
+  async function contarCandidatos() {
+    const admin = createAdminClient();
+    const { count } = await admin
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("job_id", jobId);
+    return count ?? 1;
+  }
+
   if (error) {
-    if (error.code === "23505") return { ok: true, jaAplicou: true };
+    if (error.code === "23505") return { ok: true, jaAplicou: true, totalCandidatos: await contarCandidatos(), isPro: prof.plano === "pro" };
     return { ok: false, error: "ERRO_DB" };
   }
 
@@ -83,5 +98,5 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
     }
   }
 
-  return { ok: true, jaAplicou: false };
+  return { ok: true, jaAplicou: false, totalCandidatos: await contarCandidatos(), isPro: prof.plano === "pro" };
 }

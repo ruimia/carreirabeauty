@@ -11,13 +11,20 @@ interface Props {
   nomeProfissional: string | null;
   empresaNome: string | null;
   empresaWhatsapp: string | null;
+  totalCandidatosInicial: number;
+  isProInicial: boolean;
 }
 
-export default function CandidaturaSection({ jobId, professionalId, jaAplicou, nomeProfissional, empresaNome, empresaWhatsapp }: Props) {
+export default function CandidaturaSection({
+  jobId, professionalId, jaAplicou, nomeProfissional, empresaNome, empresaWhatsapp,
+  totalCandidatosInicial, isProInicial,
+}: Props) {
   const [enviado, setEnviado] = useState(jaAplicou);
   const [mensagem, setMensagem] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [totalCandidatos, setTotalCandidatos] = useState(totalCandidatosInicial);
+  const [isPro, setIsPro] = useState(isProInicial);
 
   async function handleCandidatar() {
     if (!professionalId) return;
@@ -29,6 +36,8 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
         setError("Erro ao enviar candidatura. Tente novamente.");
         return;
       }
+      setTotalCandidatos(result.totalCandidatos);
+      setIsPro(result.isPro);
       setEnviado(true);
     } catch {
       setError("Erro ao enviar candidatura. Tente novamente.");
@@ -51,45 +60,51 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
     );
   }
 
-  // Já candidatou
+  // Já candidatou — toda vez, não só na primeira: a concorrência real da vaga
+  // é um gancho válido de novo a cada candidatura, não é "comemoração" que
+  // canse de se repetir.
   if (enviado) {
     return (
-      <div style={{
-        background: "var(--color-success-bg)", border: "1px solid var(--color-success-border, #BBF7D0)",
-        borderRadius: "var(--radius-xl)", padding: "20px 24px", textAlign: "center",
-      }}>
-        <p style={{ fontSize: 28, marginBottom: 8 }}>✅</p>
-        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--color-success-fg)" }}>
-          Candidatura enviada!
-        </p>
-        <p style={{ fontSize: 14, color: "var(--color-success-fg)", marginTop: 4, opacity: 0.8 }}>
-          A empresa receberá seu perfil e entrará em contato se tiver interesse.
-        </p>
+      <div>
+        <div style={{
+          background: "var(--color-success-bg)", border: "1px solid var(--color-success-border, #BBF7D0)",
+          borderRadius: "var(--radius-xl)", padding: "20px 24px", textAlign: "center", marginBottom: 16,
+        }}>
+          <p style={{ fontSize: 28, marginBottom: 8 }}>✅</p>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--color-success-fg)" }}>
+            Candidatura enviada!
+          </p>
+          <p style={{ fontSize: 14, color: "var(--color-success-fg)", marginTop: 4, opacity: 0.8 }}>
+            A empresa receberá seu perfil e entrará em contato se tiver interesse.
+          </p>
 
-        {empresaWhatsapp && (
-          <div style={{
-            marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-success-border, #BBF7D0)",
-          }}>
-            <p style={{ fontSize: 13, color: "var(--color-success-fg)", opacity: 0.85, marginBottom: 10 }}>
-              Quer acelerar? Manda uma mensagem direto pro WhatsApp{empresaNome ? ` da ${empresaNome}` : ""}.
-            </p>
-            <a
-              href={`https://wa.me/55${empresaWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
-                `Olá! Vi a vaga no CarreiraBeauty e acabei de me candidatar${nomeProfissional ? ` (${nomeProfissional})` : ""}. Gostaria de conversar sobre a oportunidade.`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none",
-                background: "#25d366", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700,
-                fontSize: 14, padding: "12px 22px", borderRadius: "var(--radius-pill)",
-              }}
-            >
-              <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 18 }}></i>
-              Chamar no WhatsApp
-            </a>
-          </div>
-        )}
+          {empresaWhatsapp && (
+            <div style={{
+              marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-success-border, #BBF7D0)",
+            }}>
+              <p style={{ fontSize: 13, color: "var(--color-success-fg)", opacity: 0.85, marginBottom: 10 }}>
+                Quer acelerar? Manda uma mensagem direto pro WhatsApp{empresaNome ? ` da ${empresaNome}` : ""}.
+              </p>
+              <a
+                href={`https://wa.me/55${empresaWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
+                  `Olá! Vi a vaga no CarreiraBeauty e acabei de me candidatar${nomeProfissional ? ` (${nomeProfissional})` : ""}. Gostaria de conversar sobre a oportunidade.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none",
+                  background: "#25d366", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700,
+                  fontSize: 14, padding: "12px 22px", borderRadius: "var(--radius-pill)",
+                }}
+              >
+                <i className="ph-fill ph-whatsapp-logo" style={{ fontSize: 18 }}></i>
+                Chamar no WhatsApp
+              </a>
+            </div>
+          )}
+        </div>
+
+        <DestaqueSection totalCandidatos={totalCandidatos} isPro={isPro} />
       </div>
     );
   }
@@ -138,6 +153,66 @@ export default function CandidaturaSection({ jobId, professionalId, jaAplicou, n
         {loading ? "Enviando…" : "Enviar candidatura"}
       </button>
     </div>
+  );
+}
+
+// "Veja como se destacar" — mostrado em toda candidatura (não só a primeira):
+// a concorrência da vaga é informação nova a cada vez, não uma comemoração
+// que cansa de se repetir. PRO some pra quem já é PRO.
+function DestaqueSection({ totalCandidatos, isPro }: { totalCandidatos: number; isPro: boolean }) {
+  const chamada = totalCandidatos > 1
+    ? `Já são ${totalCandidatos} candidatos nessa vaga — veja como se destacar:`
+    : "Você foi a primeira a se candidatar! Mesmo assim, vale se destacar:";
+
+  return (
+    <div>
+      <p style={{ font: "700 14px/1.4 var(--font-display)", color: "var(--text-primary)", marginBottom: 12, textAlign: "center" }}>
+        {chamada}
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {!isPro && (
+          <ItemDestaque
+            href="/dashboard/profissional/planos"
+            icon="ph-fill ph-star"
+            titulo="Vire PRO"
+            desc="Seu perfil se destaca visualmente pra quem contrata, entre os vários candidatos"
+          />
+        )}
+        <ItemDestaque
+          href="/dashboard/profissional/quiz"
+          icon="ph-fill ph-medal"
+          titulo="Ganhe certificados"
+          desc="Mostre no seu perfil que você investiu em atendimento e postura"
+        />
+        <ItemDestaque
+          href="/dashboard/profissional/perfil"
+          icon="ph-fill ph-user-circle-check"
+          titulo="Complete seu perfil"
+          desc="É grátis e rápido — perfil completo é chamado primeiro"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ItemDestaque({ href, icon, titulo, desc }: { href: string; icon: string; titulo: string; desc: string }) {
+  return (
+    <Link href={href} style={{ textDecoration: "none" }}>
+      <div className="job-feed-card" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <span style={{
+          width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
+          background: "var(--brand-magenta-50)", color: "var(--color-brand-primary)",
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
+        }}>
+          <i className={icon}></i>
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>{titulo}</p>
+          <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 2 }}>{desc}</p>
+        </div>
+        <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+      </div>
+    </Link>
   );
 }
 
