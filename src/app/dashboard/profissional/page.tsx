@@ -81,7 +81,7 @@ export default async function DashboardProfissionalPage() {
 
   const funcoes: string[] = professional.funcoes ?? [];
 
-  const [{ data: allJobs }, { data: applications }, { data: conteudos }, { data: vagasExternas }, { data: quizProgresso }] = await Promise.all([
+  const [{ data: allJobs }, { data: applications }, { data: vagasExternas }, { data: quizProgresso }] = await Promise.all([
     supabase
       .from("jobs")
       .select("id, titulo, funcao, funcoes, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
@@ -92,13 +92,6 @@ export default async function DashboardProfissionalPage() {
       .select("job_id, criado_em, jobs(titulo, funcao, funcao_outro, slug, companies(nome_estabelecimento, logo_url))")
       .eq("professional_id", professional.id)
       .order("criado_em", { ascending: false }),
-    supabase
-      .from("conteudos")
-      .select("titulo, slug, pro")
-      .eq("ativo", true)
-      .eq("pro", false)
-      .order("ordem", { ascending: true })
-      .limit(2),
     professional.cidade
       ? supabase
           .from("vagas_externas")
@@ -203,16 +196,24 @@ export default async function DashboardProfissionalPage() {
   // Conquistas de ativação (fase 1) — todas calculadas na hora a partir do que já
   // existe, sem tabela nova. São privadas e motivacionais: engajamento nunca vira
   // selo público. Ver badges-conquistas-selos-carreirabeauty.md.
+  const modulosFeitos = new Set((quizProgresso ?? []).map((p) => p.modulo_slug)).size;
+  const modulosTotal = TRILHA_AUTOESTIMA.modulos.length;
   const conquistas = calcularConquistas({
     temFoto: !!professional.foto_perfil_url,
     itensPerfilFeitos: doneCount,
     itensPerfilTotal: checks.length,
     portfolioCount: professional.portfolio_urls?.length ?? 0,
     candidaturas: (applications ?? []).length,
-    modulosFeitos: new Set((quizProgresso ?? []).map((p) => p.modulo_slug)).size,
-    modulosTotal: TRILHA_AUTOESTIMA.modulos.length,
+    modulosFeitos,
+    modulosTotal,
   });
   const conquistasFeitas = conquistas.filter((c) => c.done).length;
+
+  // Destaque do certificado na home — dado real: quem termina a trilha bate
+  // no paywall 100% das vezes (maior sinal de intenção de compra do produto).
+  // Some quando já desbloqueado, pra não incomodar depois de conquistado.
+  const trilhaConcluida = modulosFeitos >= modulosTotal;
+  const certificadoDesbloqueado = !!professional.certificado_autoestima_desbloqueado_em;
 
   return (
     <div>
@@ -266,6 +267,51 @@ export default async function DashboardProfissionalPage() {
             }}>
               Completar meu perfil <i className="ph-bold ph-arrow-right" style={{ fontSize: 15 }}></i>
             </div>
+          </Link>
+        )}
+
+        {/* Certificado/trilha — destaque proposital: dado real mostra que quem
+            termina a trilha bate no paywall 100% das vezes, o maior sinal de
+            intenção de compra do produto hoje. Some quando já desbloqueado. */}
+        {!certificadoDesbloqueado && (
+          <Link href="/dashboard/profissional/quiz" style={{
+            display: "block", textDecoration: "none", marginBottom: 20,
+            background: "var(--surface-card)", border: "1.5px solid var(--brand-magenta-100)",
+            borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-sm)", padding: 16,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span style={{
+                width: 48, height: 48, borderRadius: "var(--radius-md)", flexShrink: 0,
+                background: trilhaConcluida
+                  ? "linear-gradient(135deg, #DC00DC, #ffb020)"
+                  : "var(--brand-magenta-50)",
+                color: trilhaConcluida ? "#fff" : "var(--color-brand-primary)",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+              }}>
+                <i className="ph-fill ph-medal"></i>
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ font: "700 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                  {trilhaConcluida ? "Sua trilha está completa! 🎉" : modulosFeitos > 0 ? "Continue sua trilha" : "Ganhe um certificado grátis"}
+                </p>
+                <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 2 }}>
+                  {trilhaConcluida
+                    ? "Resgate seu certificado e mostre no seu perfil"
+                    : modulosFeitos > 0
+                      ? `Você já fez ${modulosFeitos} de ${modulosTotal} módulos`
+                      : "Complete a trilha Autoestima e Postura Profissional"}
+                </p>
+              </div>
+              <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+            </div>
+            {modulosFeitos > 0 && (
+              <div style={{ height: 6, borderRadius: 999, background: "var(--surface-sunken)", overflow: "hidden", marginTop: 12 }}>
+                <div style={{
+                  width: `${Math.round((modulosFeitos / modulosTotal) * 100)}%`, height: "100%",
+                  borderRadius: 999, background: "var(--color-brand-primary)",
+                }} />
+              </div>
+            )}
           </Link>
         )}
 
@@ -499,58 +545,6 @@ export default async function DashboardProfissionalPage() {
           </div>
         )}
 
-        {/* Crescer — quiz + conteúdos numa faixa só, fechando a home */}
-        <div style={{ marginTop: 4 }}>
-          <p className="section-label">Pra crescer na carreira</p>
-          <div className="card card-xl" style={{ padding: 18 }}>
-            <Link href="/dashboard/profissional/quiz" style={{
-              display: "flex", alignItems: "center", gap: 14, textDecoration: "none",
-              background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
-              border: "1px solid var(--brand-magenta-100)", borderRadius: "var(--radius-md)", padding: 14,
-            }}>
-              <span style={{
-                width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
-                background: "var(--color-brand-primary)", color: "#fff",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
-              }}>
-                <i className="ph-fill ph-seal-check"></i>
-              </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
-                  Autoestima e Postura Profissional
-                </p>
-                <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
-                  Complete a trilha e ganhe um certificado
-                </p>
-              </div>
-              <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
-            </Link>
-
-            {(conteudos?.length ?? 0) > 0 && (
-              <>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
-                  {conteudos!.map((c) => (
-                    <Link key={c.slug} href={`/dashboard/profissional/conteudo/${c.slug}`} style={{
-                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
-                      textDecoration: "none", background: "var(--surface-sunken)",
-                      borderRadius: "var(--radius-md)", padding: "10px 14px",
-                    }}>
-                      <span style={{ font: "600 13px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
-                        {c.titulo}
-                      </span>
-                      <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
-                    </Link>
-                  ))}
-                </div>
-                <Link href="/dashboard/profissional/conteudo" style={{
-                  display: "block", textAlign: "center", marginTop: 12, fontSize: 13, fontWeight: 600, color: "var(--color-brand-primary)", textDecoration: "none",
-                }}>
-                  Ver tudo →
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
       </main>
     </div>
   );

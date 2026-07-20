@@ -8,6 +8,7 @@ import Link from "next/link";
 import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
 import ResgateCertificado from "./ResgateCertificado";
 import VoltarLink from "@/components/VoltarLink";
+import CertificadoVisual from "@/components/CertificadoVisual";
 
 export default async function QuizTrilhaPage() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export default async function QuizTrilhaPage() {
 
   const { data: professional } = await supabase
     .from("professionals")
-    .select("id, plano, certificado_autoestima_desbloqueado_em")
+    .select("id, nome, plano, certificado_autoestima_desbloqueado_em")
     .eq("user_id", user.id)
     .single();
   if (!professional) redirect("/onboarding/tipo");
@@ -40,6 +41,16 @@ export default async function QuizTrilhaPage() {
         <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 20 }}>
           Complete os 6 módulos no seu ritmo e resgate seu certificado ao final.
         </p>
+
+        {/* Mostra o certificado logo de cara — gera o desejo antes de começar */}
+        {!todosConcluidos && (
+          <div style={{ marginBottom: 24 }}>
+            <CertificadoVisual trilhaNome={TRILHA_AUTOESTIMA.certificadoNome} nome={professional.nome} estado="preview" />
+            <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", textAlign: "center", marginTop: 8 }}>
+              É isso que você ganha ao completar a trilha 👇
+            </p>
+          </div>
+        )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
           {TRILHA_AUTOESTIMA.modulos.map((m, i) => {
@@ -72,6 +83,7 @@ export default async function QuizTrilhaPage() {
 
         <ResgateCertificado
           professionalId={professional.id}
+          nome={professional.nome}
           trilhaSlug={TRILHA_AUTOESTIMA.slug}
           certificadoNome={TRILHA_AUTOESTIMA.certificadoNome}
           isPro={professional.plano === "pro"}

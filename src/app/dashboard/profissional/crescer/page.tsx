@@ -100,39 +100,29 @@ export default async function CrescerHubPage() {
           />
         </div>
 
-        {/* APRENDER */}
-        <p className="section-label">Aprender</p>
+        {/* CERTIFICADOS — priorizado: dado real mostra que quem termina a trilha
+            bate no paywall 100% das vezes, o maior sinal de intenção de compra
+            do produto hoje. Fica logo após "Seu progresso", acima de tudo mais. */}
+        <p className="section-label">Certificados</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
           <Ferramenta
             href="/dashboard/profissional/quiz"
-            icon="ph-fill ph-seal-check"
-            titulo={TRILHA_AUTOESTIMA.titulo}
-            desc={modulosFeitos >= totalModulos
-              ? "Trilha concluída — certificado no seu site ✓"
-              : modulosFeitos > 0
-                ? `Você já fez ${modulosFeitos} de ${totalModulos} módulos`
-                : "Complete a trilha e ganhe um certificado"}
-          />
-          <Ferramenta
-            href="/dashboard/profissional/conteudo"
-            icon="ph-fill ph-book-open-text"
-            titulo="Guias rápidos"
-            desc={totalConteudos ? `${totalConteudos} conteúdo${totalConteudos > 1 ? "s" : ""} pra atender melhor e crescer` : "Dicas pra atender melhor e crescer"}
+            icon="ph-fill ph-medal"
+            titulo={certificados > 0 ? "Seu certificado" : TRILHA_AUTOESTIMA.titulo}
+            desc={certificados > 0
+              ? "Conquistado — aparece no seu site ✓"
+              : modulosFeitos >= totalModulos
+                ? "Trilha completa! Resgate seu certificado"
+                : modulosFeitos > 0
+                  ? `Você já fez ${modulosFeitos} de ${totalModulos} módulos`
+                  : "Complete a trilha e ganhe um certificado pro seu site"}
+            badge={certificados > 0 ? "✓" : undefined}
           />
         </div>
 
         {/* SUAS PROVAS */}
         <p className="section-label">Suas provas — aparecem no seu site</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-          <Ferramenta
-            href="/dashboard/profissional/quiz"
-            icon="ph-fill ph-medal"
-            titulo="Certificados"
-            desc={certificados > 0
-              ? `Você tem ${certificados} certificado — aparece no seu perfil`
-              : "Faça as trilhas e ganhe certificados pro seu perfil"}
-            badge={certificados > 0 ? String(certificados) : undefined}
-          />
           <Ferramenta
             icon="ph-fill ph-chat-centered-text"
             titulo="Depoimentos de clientes"
@@ -152,9 +142,17 @@ export default async function CrescerHubPage() {
           />
         </div>
 
-        {/* DIA A DIA */}
+        {/* DIA A DIA — conteúdo desce pra cá: consumo mais raso e passivo,
+            junto de materiais de apoio, em vez de competir com Certificados
+            por atenção como "aprendizado" */}
         <p className="section-label">Pro dia a dia</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <Ferramenta
+            href="/dashboard/profissional/conteudo"
+            icon="ph-fill ph-book-open-text"
+            titulo="Guias rápidos"
+            desc={totalConteudos ? `${totalConteudos} conteúdo${totalConteudos > 1 ? "s" : ""} pra atender melhor e crescer` : "Dicas pra atender melhor e crescer"}
+          />
           <Ferramenta
             icon="ph-fill ph-toolbox"
             titulo="Materiais"
