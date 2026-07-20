@@ -133,10 +133,21 @@ export default async function DashboardProfissionalPage() {
     const fNormalizado = normaliza(f);
     return RAIZES_BELEZA.filter((raiz) => contemTermo(fNormalizado, raiz));
   });
+  // A Adzuna agrega o mesmo anúncio repostado em vários portais — sem isso, o
+  // profissional via a mesma vaga repetida várias vezes na lista (já achamos
+  // caso real com 10 cópias do mesmo anúncio). external_id é único, mas
+  // título+empresa não — dedup por eles, mantendo a primeira ocorrência
+  // (lista já vem ordenada por mais recente).
+  const vistosExternos = new Set<string>();
   const vagasExternasFiltradas = (vagasExternas ?? []).filter((v) => {
     if (palavrasFuncoes.length === 0) return true;
     const t = normaliza(v.titulo);
     return palavrasFuncoes.some((p) => contemTermo(t, p));
+  }).filter((v) => {
+    const chave = `${normaliza(v.titulo)}|${normaliza(v.empresa ?? "")}`;
+    if (vistosExternos.has(chave)) return false;
+    vistosExternos.add(chave);
+    return true;
   }).slice(0, 5).map((v) => ({
     // tempo relativo calculado aqui (servidor) — a lista é client component e
     // recalcular lá divergiria na hidratação
