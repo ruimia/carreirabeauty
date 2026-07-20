@@ -107,8 +107,12 @@ export default function Shell({ children, role, userName, subtitle, logoUrl }: P
           flex-direction: column;
           z-index: 20;
         }
-        .ds-main { flex: 1; display: flex; flex-direction: column; }
-        .ds-content { flex: 1; padding-bottom: 88px; }
+        /* min-width: 0 é essencial: sem isso o .ds-main (flex item) usa
+           min-width:auto e não encolhe abaixo do conteúdo — qualquer filho largo
+           (ex: faixa com scroll horizontal) estica a página inteira em vez de
+           rolar internamente, quebrando o responsivo no mobile. */
+        .ds-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .ds-content { flex: 1; min-width: 0; padding-bottom: 88px; }
         .ds-bottom-nav {
           position: fixed;
           bottom: 0; left: 0; right: 0;
