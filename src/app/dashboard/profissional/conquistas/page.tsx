@@ -4,9 +4,9 @@ export const metadata = { title: "Suas conquistas" };
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
 import { calcularConquistas, checksPerfil } from "@/lib/conquistas";
+import VoltarLink from "@/components/VoltarLink";
 
 export default async function ConquistasPage() {
   const supabase = await createClient();
@@ -45,7 +45,7 @@ export default async function ConquistasPage() {
     <div>
       <main className="page-x" style={{ paddingBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <Link href="/dashboard/profissional/crescer" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+          <VoltarLink fallbackHref="/dashboard/profissional/crescer" />
           <p style={{ font: "800 20px/1.2 var(--font-display)", color: "var(--text-primary)" }}>Suas conquistas</p>
         </div>
 

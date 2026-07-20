@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import VoltarLink from "@/components/VoltarLink";
 
 export default async function ConteudoListaPage() {
   const supabase = await createClient();
@@ -30,7 +31,7 @@ export default async function ConteudoListaPage() {
     <div>
       <main className="page-x">
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-          <Link href="/dashboard/profissional/crescer" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
+          <VoltarLink fallbackHref="/dashboard/profissional/crescer" />
           <p className="section-label" style={{ margin: 0 }}>Conteúdo pra você crescer</p>
         </div>
 
