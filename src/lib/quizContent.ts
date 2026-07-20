@@ -2,6 +2,10 @@ export interface QuizPergunta {
   pergunta: string;
   opcoes: string[];
   correta: number;
+  /** mostrado na hora, assim que ela acerta (estilo Duolingo) */
+  feedbackSucesso: string;
+  /** mostrado na hora, assim que ela erra — explica o porquê, não só corrige */
+  feedbackErro: string;
 }
 
 export interface QuizModulo {
@@ -38,6 +42,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Cancelar o atendimento sem avisar",
           ],
           correta: 0,
+          feedbackSucesso: "Isso aí! Avisar mostra respeito pelo tempo do cliente e evita estresse na chegada.",
+          feedbackErro: "Quase lá! O ideal é avisar assim que perceber o atraso — silêncio ou cancelar sem explicação passa desleixo.",
         },
         {
           pergunta: "Qual atitude passa mais profissionalismo logo na chegada?",
@@ -47,6 +53,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Esperar o cliente puxar assunto",
           ],
           correta: 0,
+          feedbackSucesso: "Exato! Esse gesto simples já mostra profissionalismo antes mesmo de começar o serviço.",
+          feedbackErro: "Repensa aí: começar sem falar nada ou esperar o cliente puxar assunto deixa o clima estranho logo de cara.",
         },
         {
           pergunta: "Um cliente novo chega meio desconfiado. A melhor forma de gerar confiança logo de cara é:",
@@ -56,6 +64,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Ignorar e seguir direto pro serviço",
           ],
           correta: 1,
+          feedbackSucesso: "Isso mesmo! Explicar o que vai rolar tira a desconfiança e já cria conexão.",
+          feedbackErro: "Não é bem assim — ignorar ou falar mal da concorrência só afasta quem ainda não te conhece.",
         },
         {
           pergunta: "Sobre aparência pessoal no atendimento, o mais importante é:",
@@ -65,6 +75,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Não importa, só o resultado do serviço conta",
           ],
           correta: 1,
+          feedbackSucesso: "Na régua! Aparência cuidada passa profissionalismo, sem precisar de marca.",
+          feedbackErro: "Repara: roupa de marca não é o que conta, e a aparência também faz parte do serviço.",
         },
       ],
     },
@@ -82,6 +94,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Fazer do seu jeito, sem confirmar",
           ],
           correta: 1,
+          feedbackSucesso: "Isso! Confirmar o que entendeu evita retrabalho e mostra que você prestou atenção.",
+          feedbackErro: "Cuidado: fingir que entendeu ou fazer no seu jeito sem confirmar é receita pra cliente insatisfeito.",
         },
         {
           pergunta: "Escuta ativa quer dizer:",
@@ -91,6 +105,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Concordar com tudo sem prestar atenção",
           ],
           correta: 1,
+          feedbackSucesso: "Exato! Escuta ativa é sobre entender de verdade, não só esperar sua vez de falar.",
+          feedbackErro: "Repensa: ouvir só esperando a vez ou concordar sem prestar atenção não é escuta de verdade.",
         },
         {
           pergunta: "Qual tom de voz costuma funcionar melhor num atendimento?",
@@ -100,6 +116,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Sempre animado e alto, não importa a situação",
           ],
           correta: 0,
+          feedbackSucesso: "Isso mesmo! Ajustar o tom ao cliente cria mais conexão que um jeito fixo de falar.",
+          feedbackErro: "Não é bem isso — tom sempre baixo ou sempre alto não combina com toda situação.",
         },
         {
           pergunta: "O cliente ficou em silêncio durante o atendimento. Você:",
@@ -109,6 +127,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Pergunta se ele está bravo com alguma coisa",
           ],
           correta: 1,
+          feedbackSucesso: "Na régua! Respeitar o silêncio sem sumir é o equilíbrio certo.",
+          feedbackErro: "Cuidado: insistir em puxar assunto ou presumir que ele está bravo pode deixar o cliente incomodado.",
         },
       ],
     },
@@ -126,6 +146,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Ficar em silêncio e não responder nada",
           ],
           correta: 1,
+          feedbackSucesso: "Isso aí! Ouvir com calma antes de reagir já resolve metade da reclamação.",
+          feedbackErro: "Repensa: discutir ou ficar em silêncio só piora a situação com o cliente.",
         },
         {
           pergunta: "Reclamação sobre o trabalho significa que:",
@@ -135,6 +157,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "O cliente está sempre errado e não merece resposta",
           ],
           correta: 1,
+          feedbackSucesso: "Exato! Separar a crítica do trabalho de crítica pessoal é o que te protege emocionalmente.",
+          feedbackErro: "Não é bem assim — reclamação não te define como profissional, mas também não pode ser ignorada.",
         },
         {
           pergunta: "Depois de resolver uma reclamação, o que ajuda a seguir em frente?",
@@ -144,6 +168,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Comentar com outros clientes o que aconteceu",
           ],
           correta: 1,
+          feedbackSucesso: "Isso mesmo! Aprender e seguir em frente é mais saudável que remoer o dia inteiro.",
+          feedbackErro: "Cuidado: ficar remoendo ou comentar com outros clientes só espalha o desconforto.",
         },
         {
           pergunta: "Se você errou mesmo, a atitude mais profissional é:",
@@ -153,6 +179,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Culpar o produto ou o horário",
           ],
           correta: 1,
+          feedbackSucesso: "Na régua! Assumir o erro com solução na mão é o que constrói confiança de verdade.",
+          feedbackErro: "Repensa: negar ou culpar o produto/horário mina a confiança que você construiu até aqui.",
         },
       ],
     },
@@ -170,6 +198,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Nunca mais responder esse cliente",
           ],
           correta: 1,
+          feedbackSucesso: "Isso aí! Responder no seu horário normal é saudável e não significa desrespeito.",
+          feedbackErro: "Cuidado: responder de madrugada ou sumir pro cliente são dois extremos que não ajudam.",
         },
         {
           pergunta: "Escrever tudo em CAIXA ALTA numa mensagem geralmente passa a sensação de:",
@@ -179,6 +209,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Nada, é neutro",
           ],
           correta: 1,
+          feedbackSucesso: "Exato! CAIXA ALTA costuma soar como grito, mesmo sem essa intenção.",
+          feedbackErro: "Repensa: caixa alta não passa educação nem é neutro — geralmente soa como estar nervosa.",
         },
         {
           pergunta: "Qual é uma boa prática ao combinar horário por mensagem?",
@@ -188,6 +220,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Deixar em aberto pra ver depois",
           ],
           correta: 0,
+          feedbackSucesso: "Isso mesmo! Registrar por escrito evita mal-entendido de data e horário.",
+          feedbackErro: "Cuidado: combinar de boca ou deixar em aberto é convite pro esquecimento e confusão.",
         },
         {
           pergunta: "Um cliente manda uma mensagem grosseira. A resposta mais profissional é:",
@@ -197,6 +231,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Ignorar para sempre sem explicação",
           ],
           correta: 1,
+          feedbackSucesso: "Na régua! Manter a educação e avaliar depois protege sua reputação.",
+          feedbackErro: "Repensa: responder no mesmo tom ou ignorar sem explicação pode piorar a situação.",
         },
       ],
     },
@@ -214,6 +250,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Não responder e sumir",
           ],
           correta: 1,
+          feedbackSucesso: "Isso aí! Explicar o motivo com educação é o jeito certo de manter seu valor.",
+          feedbackErro: "Cuidado: aceitar mesmo não podendo ou sumir sem resposta enfraquece seu trabalho.",
         },
         {
           pergunta: "Um cliente atrasa direto para os horários marcados. Uma atitude profissional é:",
@@ -223,6 +261,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Cancelar sem avisar da próxima vez",
           ],
           correta: 1,
+          feedbackSucesso: "Exato! Conversar com educação evita que o atraso vire hábito sem parecer chata.",
+          feedbackErro: "Repensa: nunca comentar ou cancelar sem avisar são extremos que prejudicam a relação.",
         },
         {
           pergunta: "Dizer 'não' pra um pedido fora do combinado é:",
@@ -232,6 +272,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Algo que só profissional grande pode fazer",
           ],
           correta: 1,
+          feedbackSucesso: "Isso mesmo! Dizer não com educação é profissionalismo, não falta de educação.",
+          feedbackErro: "Não é bem assim — dizer não é legítimo em qualquer fase da carreira, não só pra quem já é grande.",
         },
         {
           pergunta: "Impor limites com respeito significa:",
@@ -241,6 +283,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Evitar qualquer tipo de recusa",
           ],
           correta: 1,
+          feedbackSucesso: "Na régua! Clareza com educação é o equilíbrio ideal pra impor limite.",
+          feedbackErro: "Cuidado: ser dura ou evitar toda recusa não é o caminho — o equilíbrio é a chave.",
         },
       ],
     },
@@ -258,6 +302,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Algo que só acontece com iniciantes",
           ],
           correta: 1,
+          feedbackSucesso: "Isso aí! Insegurança antes de um atendimento novo é normal e não diz nada sobre sua competência.",
+          feedbackErro: "Repensa: isso não é exclusivo de iniciante nem significa que você não deveria estar na profissão.",
         },
         {
           pergunta: "Comparar seu trabalho com o de outras profissionais o tempo todo tende a:",
@@ -267,6 +313,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Não ter nenhum efeito",
           ],
           correta: 1,
+          feedbackSucesso: "Exato! Comparação excessiva geralmente trava mais do que motiva.",
+          feedbackErro: "Cuidado: achar que comparação sempre motiva ou não tem efeito ignora o quanto isso pode pesar.",
         },
         {
           pergunta: "Uma forma saudável de lidar com um dia ruim de trabalho é:",
@@ -276,6 +324,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Desistir de tentar melhorar",
           ],
           correta: 1,
+          feedbackSucesso: "Isso mesmo! Um dia ruim não apaga tudo que você já construiu.",
+          feedbackErro: "Repensa: concluir que não serve pra profissão ou desistir generaliza um momento só.",
         },
         {
           pergunta: "Reconhecer o próprio valor profissional inclui:",
@@ -285,6 +335,8 @@ export const TRILHA_AUTOESTIMA: Trilha = {
             "Nunca comemorar nenhuma conquista",
           ],
           correta: 0,
+          feedbackSucesso: "Na régua! Sua experiência e seus resultados já são prova do seu valor.",
+          feedbackErro: "Cuidado: só confiar quando alguém elogia ou nunca comemorar suas conquistas mina sua autoconfiança.",
         },
       ],
     },
