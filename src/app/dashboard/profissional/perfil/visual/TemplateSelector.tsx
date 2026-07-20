@@ -76,13 +76,10 @@ export default function TemplateSelector({ data, templateAtual, isPro }: {
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer",
             }}
           >
+            {/* Sem badge "PRO" aqui de propósito — deixa a pessoa provar o
+                tema livremente; o aviso real só aparece ao tentar aplicar
+                (modal de paywall em handleAplicar), não durante a exploração. */}
             {t.nome}
-            {t.pro && (
-              <span style={{
-                fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: "var(--radius-pill)",
-                background: "var(--color-brand-primary)", color: "#fff",
-              }}>PRO</span>
-            )}
           </button>
         ))}
       </div>
