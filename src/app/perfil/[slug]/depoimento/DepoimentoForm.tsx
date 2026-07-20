@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { maskPhone } from "@/lib/cep";
 
-export default function DepoimentoForm({ professionalId }: { professionalId: string }) {
+export default function DepoimentoForm({ professionalId, slug }: { professionalId: string; slug: string }) {
   const supabase = createClient();
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -48,9 +49,15 @@ export default function DepoimentoForm({ professionalId }: { professionalId: str
         <p style={{ font: "700 17px/1.3 var(--font-display)", color: "var(--text-primary)", marginBottom: 6 }}>
           Depoimento enviado!
         </p>
-        <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
+        <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 18 }}>
           Obrigado por avaliar — assim que o profissional aprovar, seu depoimento aparece no perfil dela.
         </p>
+        <Link href={`/perfil/${slug}`} style={{
+          display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none",
+          font: "700 14px/1 var(--font-body)", color: "var(--color-brand-primary)",
+        }}>
+          Ver perfil completo <i className="ph-bold ph-arrow-right" style={{ fontSize: 13 }}></i>
+        </Link>
       </div>
     );
   }

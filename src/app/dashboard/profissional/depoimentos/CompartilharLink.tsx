@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export default function CompartilharLink({ slug }: { slug: string }) {
   const [copiado, setCopiado] = useState(false);
-  const url = typeof window !== "undefined" ? `${window.location.origin}/depoimento/${slug}` : "";
+  const url = typeof window !== "undefined" ? `${window.location.origin}/perfil/${slug}/depoimento` : "";
 
   async function handleCopiar() {
     if (!url) return;
@@ -50,7 +50,7 @@ export default function CompartilharLink({ slug }: { slug: string }) {
           flex: 1, minWidth: 0, fontSize: 13.5, color: "var(--text-link)", fontFamily: "var(--font-body)",
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
-          carreirabeauty.com/depoimento/{slug}
+          carreirabeauty.com/perfil/{slug}/depoimento
         </p>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
