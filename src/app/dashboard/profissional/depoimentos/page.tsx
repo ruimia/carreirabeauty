@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import VoltarLink from "@/components/VoltarLink";
 import CompartilharLink from "./CompartilharLink";
+import MensagensSugeridas from "./MensagensSugeridas";
 import ModerarBotoes from "./ModerarBotoes";
 
 export default async function DepoimentosPage() {
@@ -42,6 +43,7 @@ export default async function DepoimentosPage() {
         </p>
 
         {professional.slug && <CompartilharLink slug={professional.slug} />}
+        {professional.slug && <MensagensSugeridas slug={professional.slug} />}
 
         {pendentes.length > 0 && (
           <>
