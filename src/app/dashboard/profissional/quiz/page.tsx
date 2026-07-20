@@ -50,8 +50,8 @@ export default async function QuizIndexPage() {
                     width: 48, height: 48, borderRadius: "var(--radius-md)", flexShrink: 0,
                     background: conquistada
                       ? "linear-gradient(135deg, #DC00DC, #ffb020)"
-                      : p.feitos > 0 ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
-                    color: conquistada ? "#fff" : p.feitos > 0 ? "var(--color-brand-primary)" : "var(--text-tertiary)",
+                      : "var(--brand-magenta-50)",
+                    color: conquistada ? "#fff" : "var(--color-brand-primary)",
                     display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
                   }}>
                     <i className={conquistada ? "ph-fill ph-medal" : t.icone}></i>
