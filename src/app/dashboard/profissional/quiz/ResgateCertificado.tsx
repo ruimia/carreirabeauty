@@ -133,6 +133,8 @@ export default function ResgateCertificado({
             </Link>
             <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginBottom: 10 }}>
               certificado + WhatsApp visível + candidaturas ilimitadas + layouts PRO
+              <br />
+              <i className="ph ph-credit-card" style={{ marginRight: 3 }}></i>pagamento no cartão de crédito
             </p>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0" }}>
@@ -149,9 +151,27 @@ export default function ResgateCertificado({
             }}>
               {loading === "avulso" ? "Aguarde…" : `Comprar só o certificado — R$ ${formatPreco(CERTIFICADO_AVULSO_PRECO)}`}
             </button>
+            <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 8 }}>
+              <i className="ph ph-qr-code" style={{ marginRight: 3 }}></i>Pix ou cartão
+            </p>
 
             {erro && <p style={{ font: "var(--text-caption)", color: "var(--color-danger-fg)", marginTop: 10 }}>{erro}</p>}
           </>
+        )}
+
+        {!isPro && (
+          <a
+            href="https://wa.me/5511910028403?text=Ol%C3%A1%2C+tenho+d%C3%BAvidas+sobre+o+certificado+no+CarreiraBeauty"
+            target="_blank" rel="noopener noreferrer"
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              marginTop: 18, paddingTop: 16, borderTop: "1px solid var(--border-default)",
+              font: "600 13px/1 var(--font-body)", color: "#1ea952", textDecoration: "none",
+            }}
+          >
+            <i className="ph ph-whatsapp-logo" style={{ fontSize: 16 }}></i>
+            Ficou com dúvida? Fala com a gente
+          </a>
         )}
       </div>
     </div>
