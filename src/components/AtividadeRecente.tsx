@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { EventoAtividade } from "@/lib/atividadeRecente";
 
 function tempoRelativo(iso: string): string {
@@ -8,8 +11,20 @@ function tempoRelativo(iso: string): string {
   return `há ${horas}h`;
 }
 
-export default function AtividadeRecente({ eventos }: { eventos: EventoAtividade[] }) {
+// maxVisivel: quando informado, colapsa a lista e mostra um "Ver mais". Sem ele
+// o comportamento é o de antes (lista inteira) — a landing e o dashboard da
+// empresa continuam iguais.
+export default function AtividadeRecente({ eventos, maxVisivel }: {
+  eventos: EventoAtividade[];
+  maxVisivel?: number;
+}) {
+  const [expandido, setExpandido] = useState(false);
+
   if (eventos.length === 0) return null;
+
+  const podeColapsar = typeof maxVisivel === "number" && eventos.length > maxVisivel;
+  const visiveis = podeColapsar && !expandido ? eventos.slice(0, maxVisivel) : eventos;
+  const ocultos = podeColapsar ? eventos.length - maxVisivel : 0;
 
   return (
     <div style={{
@@ -24,18 +39,37 @@ export default function AtividadeRecente({ eventos }: { eventos: EventoAtividade
         </p>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {eventos.map((ev, i) => (
+        {visiveis.map((ev, i) => (
           <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
             <i className={ev.tipo === "profissional" ? "ph-fill ph-user-circle" : "ph-fill ph-storefront"} style={{
               fontSize: 15, color: "var(--color-brand-primary)", marginTop: 2, flexShrink: 0,
             }}></i>
             <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", lineHeight: 1.5, flex: 1 }}>
               {ev.texto}
-              <span style={{ color: "var(--text-tertiary)", fontSize: 12 }}> · {tempoRelativo(ev.criadoEm)}</span>
+              {/* horário calculado no cliente diverge do render do servidor por
+                  alguns segundos — diferença esperada, não é erro de markup */}
+              <span suppressHydrationWarning style={{ color: "var(--text-tertiary)", fontSize: 12 }}> · {tempoRelativo(ev.criadoEm)}</span>
             </p>
           </div>
         ))}
       </div>
+
+      {podeColapsar && (
+        <button
+          onClick={() => setExpandido((v) => !v)}
+          style={{
+            width: "100%", marginTop: 12, paddingTop: 10, height: 34,
+            borderTop: "1px solid var(--border-default)", border: "none",
+            borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: "var(--border-default)",
+            background: "none", cursor: "pointer",
+            font: "700 13px/1 var(--font-body)", color: "var(--color-brand-primary)",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+          }}
+        >
+          {expandido ? "Ver menos" : `Ver mais ${ocultos}`}
+          <i className={expandido ? "ph-bold ph-caret-up" : "ph-bold ph-caret-down"} style={{ fontSize: 12 }}></i>
+        </button>
+      )}
     </div>
   );
 }

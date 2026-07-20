@@ -5,7 +5,7 @@ export const metadata = { title: "Vagas para você" };
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import VagaExternaCard from "@/components/VagaExternaCard";
+import VagasExternasLista from "@/components/VagasExternasLista";
 import AtividadeRecente from "@/components/AtividadeRecente";
 import { getAtividadeRecente } from "@/lib/atividadeRecente";
 import { distanciaKm } from "@/lib/geocode";
@@ -129,7 +129,12 @@ export default async function DashboardProfissionalPage() {
     if (palavrasFuncoes.length === 0) return true;
     const t = normaliza(v.titulo);
     return palavrasFuncoes.some((p) => contemTermo(t, p));
-  }).slice(0, 5);
+  }).slice(0, 5).map((v) => ({
+    // tempo relativo calculado aqui (servidor) — a lista é client component e
+    // recalcular lá divergiria na hidratação
+    ...v,
+    publicadoRelativo: formatoDataRelativa(v.publicado_em),
+  }));
 
   const appliedJobIds = new Set((applications ?? []).map((a) => a.job_id));
 
@@ -225,64 +230,74 @@ export default async function DashboardProfissionalPage() {
             : "A gente tá de olho em vagas pra você."}
         </p>
 
-        {/* Perfil incompleto — uma linha discreta com anel de progresso, não um cartaz */}
+        {/* Perfil incompleto — card de destaque: é a ação de maior impacto pra
+            ela ser chamada, então ganha peso visual e CTA explícito */}
         {perfilPct < 100 && (
           <Link href="/dashboard/profissional/perfil" style={{
-            display: "flex", alignItems: "center", gap: 12, textDecoration: "none", marginBottom: 20,
-            background: "var(--surface-card)", border: "1px solid var(--border-default)",
-            borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "12px 16px",
+            display: "block", textDecoration: "none", marginBottom: 20,
+            background: "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+            border: "1.5px solid var(--brand-magenta-100)",
+            borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-sm)", padding: 18,
           }}>
-            <svg width="40" height="40" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
-              <circle cx="20" cy="20" r="16" fill="none" stroke="var(--brand-magenta-50)" strokeWidth="4" />
-              <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-brand-primary)" strokeWidth="4"
-                strokeLinecap="round" strokeDasharray={`${(perfilPct / 100) * 100.5} 100.5`}
-                transform="rotate(-90 20 20)" />
-              <text x="20" y="24" textAnchor="middle" fontSize="10" fontWeight="700" fill="var(--color-brand-primary)">
-                {perfilPct}%
-              </text>
-            </svg>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ font: "600 14px/1.3 var(--font-body)", color: "var(--text-primary)" }}>
-                Complete seu perfil
-              </p>
-              <p style={{ font: "var(--text-caption)", color: "var(--text-secondary)" }}>
-                Perfil caprichado é chamado primeiro
-              </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <svg width="60" height="60" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+                <circle cx="20" cy="20" r="16" fill="none" stroke="var(--surface-card)" strokeWidth="4.5" />
+                <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-brand-primary)" strokeWidth="4.5"
+                  strokeLinecap="round" strokeDasharray={`${(perfilPct / 100) * 100.5} 100.5`}
+                  transform="rotate(-90 20 20)" />
+                <text x="20" y="24" textAnchor="middle" fontSize="11" fontWeight="800" fill="var(--color-brand-primary)">
+                  {perfilPct}%
+                </text>
+              </svg>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ font: "800 18px/1.25 var(--font-display)", color: "var(--text-primary)", marginBottom: 4 }}>
+                  Complete seu perfil
+                </p>
+                <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", lineHeight: 1.45 }}>
+                  {faltando.length === 1
+                    ? `Falta só ${faltando[0].toLowerCase()} — perfil completo é chamado primeiro`
+                    : `Faltam ${faltando.length} itens — perfil completo é chamado primeiro`}
+                </p>
+              </div>
             </div>
-            <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+            <div style={{
+              marginTop: 14, height: 46, borderRadius: "var(--radius-pill)",
+              background: "var(--color-brand-primary)", color: "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              font: "700 15px/1 var(--font-body)", boxShadow: "var(--shadow-xs)",
+            }}>
+              Completar meu perfil <i className="ph-bold ph-arrow-right" style={{ fontSize: 15 }}></i>
+            </div>
           </Link>
         )}
 
-        {/* Conquistas — fase 1: grade de ativação, privada e motivacional. Faixa
-            horizontal enxuta pra não empurrar as vagas (o produto principal) pra baixo */}
+        {/* Conquistas — deliberadamente discretas: são motivacionais, não a ação
+            principal. Só ícones + contador, sem rótulos, pra ocupar pouca altura
+            (o title dá o nome de cada uma no toque/hover) */}
         <div style={{
           background: "var(--surface-card)", border: "1px solid var(--border-default)",
-          borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "14px 0 14px 16px", marginBottom: 20,
+          borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "10px 0 10px 14px", marginBottom: 20,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, paddingRight: 16 }}>
-            <i className="ph-fill ph-trophy" style={{ fontSize: 16, color: "var(--color-brand-primary)" }}></i>
-            <p style={{ font: "700 13px/1 var(--font-display)", color: "var(--text-primary)", flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8, paddingRight: 14 }}>
+            <i className="ph-fill ph-trophy" style={{ fontSize: 13, color: "var(--text-tertiary)" }}></i>
+            <p style={{ font: "700 11px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", flex: 1 }}>
               Suas conquistas
             </p>
-            <span style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)" }}>
-              {conquistasFeitas} de {conquistas.length}
+            <span style={{ font: "700 11px/1 var(--font-body)", color: "var(--text-tertiary)" }}>
+              {conquistasFeitas}/{conquistas.length}
             </span>
           </div>
-          <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingRight: 16, paddingBottom: 2, WebkitOverflowScrolling: "touch" }}>
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingRight: 14, WebkitOverflowScrolling: "touch" }}>
             {conquistas.map((c) => (
-              <div key={c.slug} style={{ flex: "0 0 auto", width: 68, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: c.done ? 1 : 0.5 }}>
-                <div style={{
-                  position: "relative", width: 48, height: 48, borderRadius: "50%",
-                  background: c.done ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
-                  color: c.done ? "var(--color-brand-primary)" : "var(--text-tertiary)",
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
-                  border: c.done ? "1.5px solid var(--brand-magenta-100)" : "1.5px dashed var(--border-default)",
-                }}>
-                  <i className={c.done ? c.icon : "ph ph-lock-simple"}></i>
-                </div>
-                <p style={{ font: "600 10px/1.2 var(--font-body)", color: c.done ? "var(--text-secondary)" : "var(--text-tertiary)", textAlign: "center" }}>
-                  {c.nome}
-                </p>
+              <div key={c.slug} title={c.nome} style={{
+                flex: "0 0 auto", width: 32, height: 32, borderRadius: "50%",
+                background: c.done ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
+                color: c.done ? "var(--color-brand-primary)" : "var(--text-tertiary)",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                border: c.done ? "1px solid var(--brand-magenta-100)" : "1px dashed var(--border-default)",
+                opacity: c.done ? 1 : 0.6,
+              }}>
+                <i className={c.done ? c.icon : "ph ph-lock-simple"}></i>
               </div>
             ))}
           </div>
@@ -462,7 +477,7 @@ export default async function DashboardProfissionalPage() {
 
         {atividades.length > 0 && (
           <div style={{ marginBottom: 24 }}>
-            <AtividadeRecente eventos={atividades} />
+            <AtividadeRecente eventos={atividades} maxVisivel={3} />
           </div>
         )}
 
@@ -480,11 +495,7 @@ export default async function DashboardProfissionalPage() {
               </a>
               <span style={{ flex: 1, height: 1, background: "var(--border-default)" }} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {vagasExternasFiltradas.map((v) => (
-                <VagaExternaCard key={v.id} vaga={v} professionalId={professional.id} publicadoRelativo={formatoDataRelativa(v.publicado_em)} />
-              ))}
-            </div>
+            <VagasExternasLista vagas={vagasExternasFiltradas} professionalId={professional.id} maxVisivel={3} />
           </div>
         )}
 
