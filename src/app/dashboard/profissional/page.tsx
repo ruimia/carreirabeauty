@@ -10,6 +10,7 @@ import AtividadeRecente from "@/components/AtividadeRecente";
 import { getAtividadeRecente } from "@/lib/atividadeRecente";
 import { distanciaKm } from "@/lib/geocode";
 import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import { calcularConquistas } from "@/lib/conquistas";
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -202,18 +203,15 @@ export default async function DashboardProfissionalPage() {
   // Conquistas de ativação (fase 1) — todas calculadas na hora a partir do que já
   // existe, sem tabela nova. São privadas e motivacionais: engajamento nunca vira
   // selo público. Ver badges-conquistas-selos-carreirabeauty.md.
-  const totalCandidaturas = (applications ?? []).length;
-  const modulosQuizFeitos = new Set((quizProgresso ?? []).map((p) => p.modulo_slug)).size;
-  const conquistas = [
-    { slug: "perfil-no-ar", nome: "Perfil no ar", icon: "ph-fill ph-rocket-launch", done: true },
-    { slug: "primeira-foto", nome: "Primeira foto", icon: "ph-fill ph-camera", done: !!professional.foto_perfil_url },
-    { slug: "perfil-completo", nome: "Perfil completo", icon: "ph-fill ph-user-circle-check", done: perfilPct === 100 },
-    { slug: "portfolio", nome: "Portfólio caprichado", icon: "ph-fill ph-images", done: (professional.portfolio_urls?.length ?? 0) >= 3 },
-    { slug: "primeira-candidatura", nome: "Primeira vaga", icon: "ph-fill ph-paper-plane-tilt", done: totalCandidaturas >= 1 },
-    { slug: "em-movimento", nome: "Em movimento", icon: "ph-fill ph-lightning", done: totalCandidaturas >= 5 },
-    { slug: "comecou-estudar", nome: "Começou a estudar", icon: "ph-fill ph-graduation-cap", done: modulosQuizFeitos >= 1 },
-    { slug: "trilha-concluida", nome: "Trilha concluída", icon: "ph-fill ph-seal-check", done: modulosQuizFeitos >= TRILHA_AUTOESTIMA.modulos.length },
-  ];
+  const conquistas = calcularConquistas({
+    temFoto: !!professional.foto_perfil_url,
+    itensPerfilFeitos: doneCount,
+    itensPerfilTotal: checks.length,
+    portfolioCount: professional.portfolio_urls?.length ?? 0,
+    candidaturas: (applications ?? []).length,
+    modulosFeitos: new Set((quizProgresso ?? []).map((p) => p.modulo_slug)).size,
+    modulosTotal: TRILHA_AUTOESTIMA.modulos.length,
+  });
   const conquistasFeitas = conquistas.filter((c) => c.done).length;
 
   return (
@@ -272,9 +270,10 @@ export default async function DashboardProfissionalPage() {
         )}
 
         {/* Conquistas — deliberadamente discretas: são motivacionais, não a ação
-            principal. Só ícones + contador, sem rótulos, pra ocupar pouca altura
-            (o title dá o nome de cada uma no toque/hover) */}
-        <div style={{
+            principal. Só ícones + contador; o nome e o "como conquistar" de cada
+            uma ficam na tela de detalhe, pra onde a faixa leva ao ser tocada. */}
+        <Link href="/dashboard/profissional/conquistas" style={{
+          display: "block", textDecoration: "none",
           background: "var(--surface-card)", border: "1px solid var(--border-default)",
           borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)", padding: "10px 0 10px 14px", marginBottom: 20,
         }}>
@@ -286,6 +285,7 @@ export default async function DashboardProfissionalPage() {
             <span style={{ font: "700 11px/1 var(--font-body)", color: "var(--text-tertiary)" }}>
               {conquistasFeitas}/{conquistas.length}
             </span>
+            <i className="ph ph-caret-right" style={{ fontSize: 13, color: "var(--text-tertiary)" }}></i>
           </div>
           <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingRight: 14, WebkitOverflowScrolling: "touch" }}>
             {conquistas.map((c) => (
@@ -301,7 +301,7 @@ export default async function DashboardProfissionalPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Link>
 
         {/* Minhas candidaturas — o "e aí, me chamaram?" vem antes de tudo */}
         {candidaturas.length > 0 && (

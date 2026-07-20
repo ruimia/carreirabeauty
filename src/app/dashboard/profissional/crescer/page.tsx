@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import { calcularConquistas, checksPerfil } from "@/lib/conquistas";
 
 export default async function CrescerHubPage() {
   const supabase = await createClient();
@@ -14,23 +15,36 @@ export default async function CrescerHubPage() {
 
   const { data: professional } = await supabase
     .from("professionals")
-    .select("id, slug, plano, certificado_autoestima_desbloqueado_em")
+    .select("id, slug, plano, certificado_autoestima_desbloqueado_em, foto_perfil_url, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
     .eq("user_id", user.id)
     .single();
   if (!professional) redirect("/onboarding/tipo");
 
-  const [{ data: progresso }, { count: totalConteudos }] = await Promise.all([
+  const [{ data: progresso }, { count: totalConteudos }, { count: candidaturas }] = await Promise.all([
     supabase
       .from("quiz_progresso")
       .select("modulo_slug")
       .eq("professional_id", professional.id)
       .eq("trilha_slug", TRILHA_AUTOESTIMA.slug),
     supabase.from("conteudos").select("*", { count: "exact", head: true }).eq("ativo", true),
+    supabase.from("applications").select("*", { count: "exact", head: true }).eq("professional_id", professional.id),
   ]);
 
   const totalModulos = TRILHA_AUTOESTIMA.modulos.length;
   const modulosFeitos = new Set((progresso ?? []).map((p) => p.modulo_slug)).size;
   const certificados = professional.certificado_autoestima_desbloqueado_em ? 1 : 0;
+
+  const checks = checksPerfil(professional);
+  const conquistas = calcularConquistas({
+    temFoto: !!professional.foto_perfil_url,
+    itensPerfilFeitos: checks.filter((c) => c.done).length,
+    itensPerfilTotal: checks.length,
+    portfolioCount: professional.portfolio_urls?.length ?? 0,
+    candidaturas: candidaturas ?? 0,
+    modulosFeitos,
+    modulosTotal: totalModulos,
+  });
+  const conquistasFeitas = conquistas.filter((c) => c.done).length;
 
   return (
     <div>
@@ -69,6 +83,21 @@ export default async function CrescerHubPage() {
               {i < arr.length - 1 && <i className="ph-bold ph-arrow-right" style={{ color: "var(--color-brand-primary)", fontSize: 14, opacity: 0.5 }}></i>}
             </div>
           ))}
+        </div>
+
+        {/* SEU PROGRESSO — conquistas são privadas/motivacionais (não viram selo
+            público); aqui entram como âncora de "onde eu tô" antes das ferramentas */}
+        <p className="section-label">Seu progresso</p>
+        <div style={{ marginBottom: 24 }}>
+          <Ferramenta
+            href="/dashboard/profissional/conquistas"
+            icon="ph-fill ph-trophy"
+            titulo="Suas conquistas"
+            desc={conquistasFeitas === conquistas.length
+              ? "Você conquistou todas! 🎉"
+              : `${conquistasFeitas} de ${conquistas.length} — veja o que falta pra conquistar as outras`}
+            badge={`${conquistasFeitas}/${conquistas.length}`}
+          />
         </div>
 
         {/* APRENDER */}

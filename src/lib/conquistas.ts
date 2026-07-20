@@ -1,0 +1,112 @@
+// Conquistas de ativação (fase 1) — privadas e motivacionais, calculadas na
+// hora a partir do que já existe, sem tabela própria.
+// Ver badges-conquistas-selos-carreirabeauty.md para a taxonomia completa:
+// engajamento vira Conquista (privada), nunca Selo público.
+
+export interface Conquista {
+  slug: string;
+  nome: string;
+  icon: string;
+  /** o que a pessoa precisa fazer, na voz dela */
+  comoConquistar: string;
+  done: boolean;
+  /** progresso parcial, quando a conquista é contável (ex: "2 de 5") */
+  progresso?: string;
+}
+
+export interface EntradaConquistas {
+  temFoto: boolean;
+  itensPerfilFeitos: number;
+  itensPerfilTotal: number;
+  portfolioCount: number;
+  candidaturas: number;
+  modulosFeitos: number;
+  modulosTotal: number;
+}
+
+const PORTFOLIO_META = 3;
+const CANDIDATURAS_META = 5;
+
+export function calcularConquistas(e: EntradaConquistas): Conquista[] {
+  return [
+    {
+      slug: "perfil-no-ar",
+      nome: "Perfil no ar",
+      icon: "ph-fill ph-rocket-launch",
+      comoConquistar: "Você ganhou assim que criou sua conta — seu site já está no ar!",
+      done: true,
+    },
+    {
+      slug: "primeira-foto",
+      nome: "Primeira foto",
+      icon: "ph-fill ph-camera",
+      comoConquistar: "Coloque uma foto sua no perfil",
+      done: e.temFoto,
+    },
+    {
+      slug: "perfil-completo",
+      nome: "Perfil completo",
+      icon: "ph-fill ph-user-circle-check",
+      comoConquistar: "Preencha os 6 itens do seu perfil",
+      done: e.itensPerfilFeitos >= e.itensPerfilTotal,
+      progresso: `${Math.min(e.itensPerfilFeitos, e.itensPerfilTotal)} de ${e.itensPerfilTotal}`,
+    },
+    {
+      slug: "portfolio",
+      nome: "Portfólio caprichado",
+      icon: "ph-fill ph-images",
+      comoConquistar: `Adicione ${PORTFOLIO_META} fotos do seu trabalho`,
+      done: e.portfolioCount >= PORTFOLIO_META,
+      progresso: `${Math.min(e.portfolioCount, PORTFOLIO_META)} de ${PORTFOLIO_META}`,
+    },
+    {
+      slug: "primeira-candidatura",
+      nome: "Primeira vaga",
+      icon: "ph-fill ph-paper-plane-tilt",
+      comoConquistar: "Candidate-se a uma vaga",
+      done: e.candidaturas >= 1,
+    },
+    {
+      slug: "em-movimento",
+      nome: "Em movimento",
+      icon: "ph-fill ph-lightning",
+      comoConquistar: `Candidate-se a ${CANDIDATURAS_META} vagas`,
+      done: e.candidaturas >= CANDIDATURAS_META,
+      progresso: `${Math.min(e.candidaturas, CANDIDATURAS_META)} de ${CANDIDATURAS_META}`,
+    },
+    {
+      slug: "comecou-estudar",
+      nome: "Começou a estudar",
+      icon: "ph-fill ph-graduation-cap",
+      comoConquistar: "Conclua o primeiro módulo de uma trilha",
+      done: e.modulosFeitos >= 1,
+    },
+    {
+      slug: "trilha-concluida",
+      nome: "Trilha concluída",
+      icon: "ph-fill ph-seal-check",
+      comoConquistar: "Conclua todos os módulos da trilha e ganhe seu certificado",
+      done: e.modulosTotal > 0 && e.modulosFeitos >= e.modulosTotal,
+      progresso: `${Math.min(e.modulosFeitos, e.modulosTotal)} de ${e.modulosTotal}`,
+    },
+  ];
+}
+
+/** Itens da força-do-perfil — mesma régua usada no anel de completude */
+export function checksPerfil(p: {
+  foto_perfil_url?: string | null;
+  educacao_basica?: string | null;
+  habilidades?: unknown[] | null;
+  educacao?: unknown[] | null;
+  experiencia_prof?: unknown[] | null;
+  portfolio_urls?: unknown[] | null;
+}) {
+  return [
+    { label: "Foto de perfil", done: !!p.foto_perfil_url },
+    { label: "Apresentação", done: !!p.educacao_basica },
+    { label: "Habilidades", done: (p.habilidades?.length ?? 0) > 0 },
+    { label: "Formação e cursos", done: (p.educacao?.length ?? 0) > 0 },
+    { label: "Experiência profissional", done: (p.experiencia_prof?.length ?? 0) > 0 },
+    { label: "Portfólio", done: (p.portfolio_urls?.length ?? 0) > 0 },
+  ];
+}
