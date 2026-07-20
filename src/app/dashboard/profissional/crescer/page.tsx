@@ -147,8 +147,8 @@ export default async function CrescerHubPage() {
           <Ferramenta
             href="/dashboard/profissional/perfil"
             icon="ph-fill ph-globe"
-            titulo="Meu Site"
-            desc="Seu perfil já tá pronto ✓ — use como cartão de visita"
+            titulo="Meu perfil"
+            desc="Já tá pronto ✓ — é seu site, use como cartão de visita"
           />
         </div>
 
