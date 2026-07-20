@@ -9,6 +9,8 @@ interface Resultado {
   chamadasApi: number;
   vagasEncontradas: number;
   erros: string[];
+  bairrosReforcados: number;
+  vagasReforco: number;
 }
 
 export default function AtualizarCacheButton() {
@@ -42,6 +44,7 @@ export default function AtualizarCacheButton() {
         <div className="text-sm text-gray-600 space-y-1">
           <p><strong>{resultado.cidadesProcessadas}</strong> cidade(s) processada(s), <strong>{resultado.chamadasApi}</strong> chamada(s) à API</p>
           <p><strong>{resultado.vagasEncontradas}</strong> vaga(s) de beleza encontrada(s) e salva(s)</p>
+          <p><strong>{resultado.vagasReforco}</strong> vaga(s) de reforço (busca por bairro) em <strong>{resultado.bairrosReforcados}</strong> bairro(s) com pouca cobertura</p>
           {resultado.erros.length > 0 && (
             <div className="text-rose-600">
               <p className="font-semibold">{resultado.erros.length} erro(s):</p>

@@ -42,11 +42,14 @@ const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE
 // segurança abaixo garante que os genéricos só entram se o contexto de beleza
 // aparecer também (título ou descrição), senão contaminaria com vaga de
 // recepção/auxiliar de qualquer outro tipo de negócio.
+// Fisioterapeuta e Biomédico(a) apareceram na base de profissionais mas nunca
+// entravam na busca — a Adzuna nunca era nem perguntada sobre essas vagas.
 const TERMOS_BELEZA = [
   "cabeleireiro", "cabeleireira", "manicure", "pedicure", "esteticista",
   "maquiador", "maquiadora", "barbeiro", "massoterapeuta", "sobrancelhas",
   "cilios", "depilador", "depiladora", "podologo",
   "recepcionista", "auxiliar", "assistente",
+  "fisioterapeuta", "biomedico", "biomedica",
 ].join(" ");
 
 // Núcleo: termos inequivocamente de beleza — presença sozinha no título já basta.
@@ -56,6 +59,17 @@ const NUCLEO_BELEZA = [
   "cabeleir", "manicur", "pedicur", "esteticist", "estetica", "maquiad",
   "barbeir", "massoterap", "massagem", "sobrancel", "cilio", "depilad",
   "podolog", "spa", "beleza", "cabelo", "unha", "nail",
+  "fisioterap", "biomedic",
+];
+
+// Mesmas raízes usadas em src/app/dashboard/profissional/page.tsx pra casar
+// vaga agregada com a função do profissional — reaproveitada aqui pra decidir
+// quem precisa do fallback por bairro (ver buscarFallbackPorBairro).
+const RAIZES_FUNCAO = [
+  "cabeleir", "hair", "manicur", "pedicur", "unha", "esteticist", "estetica",
+  "maquiad", "barbeir", "barber", "massoterap", "massagem", "sobrancel",
+  "cilio", "depilad", "podolog", "recepcion", "auxiliar", "assistente",
+  "fisioterap", "biomedic",
 ];
 
 function normaliza(s) {
@@ -82,17 +96,20 @@ function ehVagaDeBeleza(v) {
   return temNucleoBeleza(titulo);
 }
 
-async function buscarCidades() {
+async function buscarProfissionais() {
   const { data, error } = await supabase
     .from("professionals")
-    .select("cidade, estado")
+    .select("id, cidade, estado, bairro, funcoes")
     .not("cidade", "eq", "")
     .not("slug", "is", null);
   if (error) throw error;
+  return data;
+}
 
+function cidadesUnicas(profissionais) {
   const vistos = new Set();
   const cidades = [];
-  for (const p of data) {
+  for (const p of profissionais) {
     const cidade = (p.cidade ?? "").trim();
     const estado = (p.estado ?? "").trim();
     if (!cidade) continue;
@@ -216,12 +233,118 @@ async function processarCidade(cidade, estado) {
   return vagas.length;
 }
 
+// Mínimo de vagas relevantes que um profissional devia ter na lista — abaixo
+// disso, a busca por cidade inteira não achou o suficiente pra função dele.
+const MINIMO_VAGAS_RELEVANTES = 5;
+
+function palavrasDaFuncao(funcoes) {
+  return (funcoes ?? []).flatMap((f) => {
+    const fNorm = normaliza(f);
+    return RAIZES_FUNCAO.filter((raiz) => contemTermo(fNorm, raiz));
+  });
+}
+
+function contaVagasRelevantes(vagasDaCidade, funcoes) {
+  const palavras = palavrasDaFuncao(funcoes);
+  if (palavras.length === 0) return vagasDaCidade.length; // sem função reconhecida, não filtra (mesma regra do dashboard)
+  return vagasDaCidade.filter((v) => palavras.some((p) => contemTermo(normaliza(v.titulo), p))).length;
+}
+
+// Fallback por bairro/CEP: quando a cidade inteira não rendeu 5+ vagas
+// relevantes pra função do profissional, refaz a busca ancorada no bairro dele
+// (já resolvido a partir do CEP no cadastro) com raio maior — mais preciso que
+// repetir a cidade toda, e não depende de geocoding próprio (a Adzuna já
+// geocodifica o texto do "where", igual faz hoje com a cidade).
+const RAIO_KM_FALLBACK = 60;
+
+async function buscarFallbackPorBairro(profissionais) {
+  // Reconsulta o que já está salvo pra cada cidade, pra decidir quem precisa de reforço
+  const cidades = cidadesUnicas(profissionais);
+  const vagasPorCidade = new Map();
+  for (const { cidade } of cidades) {
+    const { data } = await supabase.from("vagas_externas").select("titulo").eq("cidade_busca", cidade);
+    vagasPorCidade.set(cidade, data ?? []);
+  }
+
+  const bairrosNecessarios = new Map(); // chave `${bairro}|${cidade}|${estado}` -> { bairro, cidade, estado }
+  for (const p of profissionais) {
+    const bairro = (p.bairro ?? "").trim();
+    const cidade = (p.cidade ?? "").trim();
+    const estado = (p.estado ?? "").trim();
+    if (!bairro || !cidade) continue;
+    const relevantes = contaVagasRelevantes(vagasPorCidade.get(cidade) ?? [], p.funcoes);
+    if (relevantes >= MINIMO_VAGAS_RELEVANTES) continue;
+    const chave = `${bairro}|${cidade}|${estado}`;
+    if (!bairrosNecessarios.has(chave)) bairrosNecessarios.set(chave, { bairro, cidade, estado });
+  }
+
+  const combos = [...bairrosNecessarios.values()];
+  console.log(`\n${combos.length} bairro(s) precisam de reforço (menos de ${MINIMO_VAGAS_RELEVANTES} vagas relevantes na cidade toda):\n`);
+
+  let totalVagas = 0;
+  for (let i = 0; i < combos.length; i += TAMANHO_LOTE) {
+    const lote = combos.slice(i, i + TAMANHO_LOTE);
+    const resultados = await Promise.all(lote.map(async ({ bairro, cidade, estado }) => {
+      const where = `${bairro}, ${cidade}`;
+      console.log(`📍 ${where} (reforço, raio ${RAIO_KM_FALLBACK}km)`);
+      const url = new URL(`https://api.adzuna.com/v1/api/jobs/br/search/1`);
+      url.searchParams.set("app_id", APP_ID);
+      url.searchParams.set("app_key", APP_KEY);
+      url.searchParams.set("what_or", TERMOS_BELEZA);
+      url.searchParams.set("where", where);
+      url.searchParams.set("distance", String(RAIO_KM_FALLBACK));
+      url.searchParams.set("results_per_page", "50");
+      url.searchParams.set("content-type", "application/json");
+
+      const res = await fetch(url.toString());
+      if (!res.ok) {
+        console.error(`  ✗ erro Adzuna (${where}): ${res.status}`);
+        return 0;
+      }
+      const json = await res.json();
+      const vagas = (json.results ?? []).filter(ehVagaDeBeleza);
+      console.log(`  ${vagas.length} vaga(s) de reforço encontrada(s)`);
+      if (DRY_RUN || vagas.length === 0) return vagas.length;
+
+      // Salva com cidade_busca = cidade do profissional (não o bairro) — é
+      // essa a chave que a home usa (professional.cidade), então o reforço
+      // some transparente na mesma lista, sem precisar mudar a leitura.
+      const linhas = vagas.map((v) => {
+        const { cidade: cidadeReal, estado: estadoReal } = localizacaoReal(v, cidade, estado);
+        return {
+          fonte: "adzuna",
+          external_id: String(v.id),
+          cidade_busca: cidade,
+          titulo: v.title,
+          empresa: v.company?.display_name ?? null,
+          cidade: cidadeReal,
+          estado: estadoReal,
+          url: v.redirect_url,
+          descricao: v.description ?? null,
+          salario_min: v.salary_min ?? null,
+          salario_max: v.salary_max ?? null,
+          publicado_em: v.created ?? null,
+          categoria: v.category?.label ?? null,
+          atualizado_em: new Date().toISOString(),
+        };
+      });
+      const { error } = await supabase.from("vagas_externas").upsert(linhas, { onConflict: "fonte,external_id,cidade_busca" });
+      if (error) console.error(`  ✗ erro ao salvar: ${error.message}`);
+      return vagas.length;
+    }));
+    totalVagas += resultados.reduce((a, b) => a + b, 0);
+  }
+
+  return { combos: combos.length, totalVagas };
+}
+
 // Processa cidades em lotes concorrentes — sequencial estourava o tempo
 // que a função serverless do botão manual do admin tem disponível
 const TAMANHO_LOTE = 4;
 
 async function main() {
-  const cidades = await buscarCidades();
+  const profissionais = await buscarProfissionais();
+  const cidades = cidadesUnicas(profissionais);
   console.log(`${cidades.length} cidade(s) com profissionais ativos:\n`);
 
   let totalVagas = 0;
@@ -232,6 +355,9 @@ async function main() {
   }
 
   console.log(`\n${DRY_RUN ? "DRY-RUN — nada foi salvo. " : ""}Total: ${totalVagas} vaga(s) em ${cidades.length} cidade(s).`);
+
+  const fallback = await buscarFallbackPorBairro(profissionais);
+  console.log(`\n${DRY_RUN ? "DRY-RUN — nada foi salvo. " : ""}Reforço por bairro: ${fallback.totalVagas} vaga(s) em ${fallback.combos} bairro(s).`);
 }
 
 main();

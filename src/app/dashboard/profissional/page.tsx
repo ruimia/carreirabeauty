@@ -34,6 +34,7 @@ const RAIZES_BELEZA = [
   "cabeleir", "hair", "manicur", "pedicur", "unha", "esteticist", "estetica",
   "maquiad", "barbeir", "barber", "massoterap", "massagem", "sobrancel",
   "cilio", "depilad", "podolog", "recepcion", "auxiliar", "assistente",
+  "fisioterap", "biomedic",
 ];
 
 function normaliza(s: string) {

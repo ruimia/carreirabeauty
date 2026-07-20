@@ -41,6 +41,6 @@ export async function rodarAtualizacaoAdzuna(): Promise<StatsAtualizacaoAdzuna &
       erro: mensagem,
       executado_por: user.id,
     });
-    return { cidadesProcessadas: 0, chamadasApi: 0, vagasEncontradas: 0, erros: [mensagem], erro: mensagem };
+    return { cidadesProcessadas: 0, chamadasApi: 0, vagasEncontradas: 0, erros: [mensagem], bairrosReforcados: 0, vagasReforco: 0, erro: mensagem };
   }
 }
