@@ -42,6 +42,17 @@ export default function CompartilharLink({ slug }: { slug: string }) {
       <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", lineHeight: 1.5 }}>
         Manda esse link pra quem você já atendeu. É rápido, sem precisar criar conta.
       </p>
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8, background: "var(--surface-card)",
+        border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", padding: "10px 12px",
+      }}>
+        <p style={{
+          flex: 1, minWidth: 0, fontSize: 13.5, color: "var(--text-link)", fontFamily: "var(--font-body)",
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          carreirabeauty.com/depoimento/{slug}
+        </p>
+      </div>
       <div style={{ display: "flex", gap: 8 }}>
         <button onClick={handleCopiar} style={{
           flex: 1, height: 42, borderRadius: "var(--radius-pill)", border: "1px solid var(--color-brand-primary)",
