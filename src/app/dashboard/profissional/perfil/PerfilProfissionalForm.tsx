@@ -312,8 +312,14 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         position: "sticky", top: 0, zIndex: 10,
       }}>
         <Link href="/dashboard/profissional" style={{ fontSize: 22, color: "var(--text-tertiary)", textDecoration: "none", lineHeight: 1 }}>←</Link>
-        <p style={{ flex: 1, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
-          Meu perfil
+        {/* Nome em vez de "Meu perfil": a aba de baixo e o primeiro botão de modo
+            já dizem "Perfil" — repetir 3x era o que deixava a hierarquia confusa.
+            Aqui o header identifica de quem é o perfil. */}
+        <p style={{
+          flex: 1, minWidth: 0, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17,
+          color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          {nome || "Meu perfil"}
         </p>
         {/* Salvar/Cancelar só no Editar; a troca entre modos é pelo segmentado */}
         {view === "editar" && (
@@ -339,28 +345,28 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
       <main style={{ maxWidth: 480, margin: "0 auto", padding: "20px var(--space-page-x) 48px" }}>
 
-        {/* Segmentado de modos — sempre visível, os 3 no mesmo nível (Visual
-            deixou de ficar escondido lá embaixo) */}
-        <div style={{
-          display: "flex", gap: 4, background: "var(--surface-sunken)",
-          padding: 4, borderRadius: "var(--radius-pill)", marginBottom: 16,
-        }}>
+        {/* Botões de modo — sempre visíveis, os 3 no mesmo nível. Ativo é
+            preenchido com a cor da marca e inativo é card branco com borda:
+            precisa ler como botão tocável, não como texto. */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
           {([
-            { v: "visualizar" as const, label: "Meu site", icon: "ph ph-globe" },
-            { v: "editar" as const, label: "Editar", icon: "ph ph-pencil-simple" },
-            { v: "visual" as const, label: "Visual", icon: "ph ph-palette" },
+            { v: "visualizar" as const, label: "Meu perfil", icon: "ph-fill ph-eye" },
+            { v: "editar" as const, label: "Editar", icon: "ph-fill ph-pencil-simple" },
+            { v: "visual" as const, label: "Visual", icon: "ph-fill ph-palette" },
           ]).map((seg) => {
             const active = view === seg.v;
             return (
               <button key={seg.v} onClick={() => irPara(seg.v)} style={{
-                flex: 1, height: 40, borderRadius: "var(--radius-pill)", border: "none", cursor: "pointer",
-                background: active ? "var(--surface-card)" : "transparent",
-                color: active ? "var(--color-brand-primary)" : "var(--text-secondary)",
-                boxShadow: active ? "var(--shadow-xs)" : "none",
-                fontFamily: "var(--font-body)", fontWeight: active ? 700 : 600, fontSize: 13,
+                flex: 1, minWidth: 0, height: 46, borderRadius: "var(--radius-md)", cursor: "pointer",
+                background: active ? "var(--color-brand-primary)" : "var(--surface-card)",
+                border: active ? "1.5px solid var(--color-brand-primary)" : "1.5px solid var(--border-default)",
+                color: active ? "#fff" : "var(--text-secondary)",
+                boxShadow: active ? "var(--shadow-sm)" : "var(--shadow-xs)",
+                fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
               }}>
-                <i className={seg.icon}></i> {seg.label}
+                <i className={seg.icon} style={{ fontSize: 15 }}></i>
+                <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{seg.label}</span>
               </button>
             );
           })}
