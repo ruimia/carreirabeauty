@@ -1,6 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { MercadoPagoConfig, PreApproval, Payment } from "mercadopago";
+import crypto from "crypto";
+
+// Confere que a notificação veio mesmo do Mercado Pago (não de alguém que
+// descobriu a URL) — esquema oficial deles: HMAC-SHA256 de
+// "id:{data.id};request-id:{x-request-id};ts:{ts};" usando o segredo do
+// webhook, comparado ao v1 enviado no header x-signature.
+// https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks#editor_5
+function assinaturaValida(req: NextRequest): boolean {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error("[MP webhook] MP_WEBHOOK_SECRET não configurado — rejeitando por segurança");
+    return false;
+  }
+
+  const signatureHeader = req.headers.get("x-signature");
+  const requestId = req.headers.get("x-request-id");
+  if (!signatureHeader || !requestId) return false;
+
+  const partes = Object.fromEntries(
+    signatureHeader.split(",").map((p) => {
+      const [k, v] = p.split("=").map((s) => s?.trim());
+      return [k, v];
+    })
+  );
+  const ts = partes.ts;
+  const v1 = partes.v1;
+  if (!ts || !v1) return false;
+
+  // data.id vem da query string da notificação (não do corpo) — é isso que
+  // o MP realmente assina
+  const dataId = (req.nextUrl.searchParams.get("data.id") ?? req.nextUrl.searchParams.get("id") ?? "").toLowerCase();
+  const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+  const hashCalculado = crypto.createHmac("sha256", secret).update(manifest).digest("hex");
+
+  const a = Buffer.from(hashCalculado);
+  const b = Buffer.from(v1);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 const PLANO_KEY_MAP: Record<string, { plano: string; tabela: "companies" | "professionals" }> = {
   empresa_premium:  { plano: "premium", tabela: "companies" },
@@ -103,6 +141,11 @@ async function tratarPagamento(paymentId: string) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!assinaturaValida(req)) {
+    console.error("[MP webhook] assinatura inválida — requisição rejeitada");
+    return NextResponse.json({ error: "Assinatura inválida" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
 
