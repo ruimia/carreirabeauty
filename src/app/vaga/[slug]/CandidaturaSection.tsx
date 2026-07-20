@@ -162,7 +162,7 @@ export default function CandidaturaSection({
 function DestaqueSection({ totalCandidatos, isPro }: { totalCandidatos: number; isPro: boolean }) {
   const chamada = totalCandidatos > 1
     ? `Já são ${totalCandidatos} candidatos nessa vaga — veja como se destacar:`
-    : "Você foi a primeira a se candidatar! Mesmo assim, vale se destacar:";
+    : "Veja como se destacar:";
 
   return (
     <div>
