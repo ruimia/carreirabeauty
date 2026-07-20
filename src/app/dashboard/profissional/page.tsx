@@ -81,7 +81,7 @@ export default async function DashboardProfissionalPage() {
 
   const funcoes: string[] = professional.funcoes ?? [];
 
-  const [{ data: allJobs }, { data: applications }, { data: vagasExternas }, { data: quizProgresso }, { data: certificados }] = await Promise.all([
+  const [{ data: allJobs }, { data: applications }, { data: vagasExternas }, { data: quizProgresso }, { data: certificados }, { count: depoimentosAprovados }, { count: depoimentosPendentes }] = await Promise.all([
     supabase
       .from("jobs")
       .select("id, titulo, funcao, funcoes, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
@@ -112,6 +112,16 @@ export default async function DashboardProfissionalPage() {
       .from("certificados")
       .select("trilha_slug")
       .eq("professional_id", professional.id),
+    supabase
+      .from("depoimentos")
+      .select("*", { count: "exact", head: true })
+      .eq("professional_id", professional.id)
+      .eq("status", "aprovado"),
+    supabase
+      .from("depoimentos")
+      .select("*", { count: "exact", head: true })
+      .eq("professional_id", professional.id)
+      .eq("status", "pendente"),
   ]);
 
   const atividades = await getAtividadeRecente(supabase, 10);
@@ -235,6 +245,15 @@ export default async function DashboardProfissionalPage() {
             : "A gente tá de olho em vagas pra você."}
         </p>
 
+        {/* Isso é sucesso — os 3 pilares que fazem o perfil ser notado e
+            chamado: perfil completo, certificado e prova social. Os 3 cards
+            abaixo (perfil/certificados/depoimentos) vivem sob esse guarda-chuva,
+            mesmo sem um card visual único agrupando — a repetição do estilo já
+            comunica que são a mesma "categoria" de ação. */}
+        <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+          Isso é sucesso
+        </p>
+
         {/* Perfil incompleto — card de destaque: é a ação de maior impacto pra
             ela ser chamada, então ganha peso visual e CTA explícito */}
         {perfilPct < 100 && (
@@ -328,6 +347,46 @@ export default async function DashboardProfissionalPage() {
             )}
           </Link>
         )}
+
+        {/* Depoimentos — terceiro pilar de "sucesso": prova social real de
+            quem já foi atendida. Pendente de aprovação é o estado de maior
+            prioridade (ação real esperando), por isso ganha o destaque forte
+            igual ao do certificado quando existe. */}
+        <Link href="/dashboard/profissional/depoimentos" style={{
+          display: "block", textDecoration: "none", marginBottom: 20,
+          background: "var(--surface-card)", border: "1.5px solid var(--brand-magenta-100)",
+          borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-sm)", padding: 16,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <span style={{
+              width: 48, height: 48, borderRadius: "var(--radius-md)", flexShrink: 0,
+              background: (depoimentosPendentes ?? 0) > 0
+                ? "linear-gradient(135deg, #DC00DC, #ffb020)"
+                : "var(--brand-magenta-50)",
+              color: (depoimentosPendentes ?? 0) > 0 ? "#fff" : "var(--color-brand-primary)",
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+            }}>
+              <i className="ph-fill ph-chat-centered-text"></i>
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ font: "700 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
+                {(depoimentosPendentes ?? 0) > 0
+                  ? `${depoimentosPendentes} depoimento${depoimentosPendentes! > 1 ? "s" : ""} esperando aprovação`
+                  : (depoimentosAprovados ?? 0) > 0
+                    ? "Ganhe mais depoimentos"
+                    : "Ganhe depoimentos grátis"}
+              </p>
+              <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 2 }}>
+                {(depoimentosPendentes ?? 0) > 0
+                  ? "Aprove e mostre no seu perfil"
+                  : (depoimentosAprovados ?? 0) > 0
+                    ? `${depoimentosAprovados} no seu perfil — peça pra outro cliente avaliar`
+                    : "Peça pra quem você já atendeu avaliar seu trabalho"}
+              </p>
+            </div>
+            <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
+          </div>
+        </Link>
 
         {/* Conquistas — deliberadamente discretas: são motivacionais, não a ação
             principal. Só ícones + contador; o nome e o "como conquistar" de cada
