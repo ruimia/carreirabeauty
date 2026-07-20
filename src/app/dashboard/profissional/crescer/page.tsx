@@ -5,7 +5,7 @@ export const metadata = { title: "Crescer" };
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import { calcularProgressoGeral } from "@/lib/quizContent";
 import { calcularConquistas, checksPerfil } from "@/lib/conquistas";
 
 export default async function CrescerHubPage() {
@@ -15,24 +15,24 @@ export default async function CrescerHubPage() {
 
   const { data: professional } = await supabase
     .from("professionals")
-    .select("id, slug, plano, certificado_autoestima_desbloqueado_em, foto_perfil_url, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
+    .select("id, slug, plano, foto_perfil_url, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
     .eq("user_id", user.id)
     .single();
   if (!professional) redirect("/onboarding/tipo");
 
-  const [{ data: progresso }, { count: totalConteudos }, { count: candidaturas }] = await Promise.all([
+  const [{ data: progresso }, { data: certificadosRows }, { count: totalConteudos }, { count: candidaturas }] = await Promise.all([
     supabase
       .from("quiz_progresso")
-      .select("modulo_slug")
-      .eq("professional_id", professional.id)
-      .eq("trilha_slug", TRILHA_AUTOESTIMA.slug),
+      .select("trilha_slug, modulo_slug")
+      .eq("professional_id", professional.id),
+    supabase.from("certificados").select("trilha_slug").eq("professional_id", professional.id),
     supabase.from("conteudos").select("*", { count: "exact", head: true }).eq("ativo", true),
     supabase.from("applications").select("*", { count: "exact", head: true }).eq("professional_id", professional.id),
   ]);
 
-  const totalModulos = TRILHA_AUTOESTIMA.modulos.length;
-  const modulosFeitos = new Set((progresso ?? []).map((p) => p.modulo_slug)).size;
-  const certificados = professional.certificado_autoestima_desbloqueado_em ? 1 : 0;
+  const { modulosFeitosTotal, trilhasConcluidas, trilhasTotal } = calcularProgressoGeral(progresso ?? []);
+  const certificadosConquistados = certificadosRows?.length ?? 0;
+  const temTrilhaPendenteDeResgate = trilhasConcluidas > certificadosConquistados;
 
   const checks = checksPerfil(professional);
   const conquistas = calcularConquistas({
@@ -41,8 +41,9 @@ export default async function CrescerHubPage() {
     itensPerfilTotal: checks.length,
     portfolioCount: professional.portfolio_urls?.length ?? 0,
     candidaturas: candidaturas ?? 0,
-    modulosFeitos,
-    modulosTotal: totalModulos,
+    modulosFeitosTotal,
+    trilhasConcluidas,
+    trilhasTotal,
   });
   const conquistasFeitas = conquistas.filter((c) => c.done).length;
 
@@ -100,23 +101,23 @@ export default async function CrescerHubPage() {
           />
         </div>
 
-        {/* CERTIFICADOS — priorizado: dado real mostra que quem termina a trilha
-            bate no paywall 100% das vezes, o maior sinal de intenção de compra
-            do produto hoje. Fica logo após "Seu progresso", acima de tudo mais. */}
+        {/* CERTIFICADOS — priorizado: dado real mostra que quem termina uma
+            trilha bate no paywall quase toda vez, o maior sinal de intenção de
+            compra do produto hoje. Fica logo após "Seu progresso", acima de
+            tudo mais. Uma trilha nova (Preço Justo, Mãos Seguras) foi somada
+            ao catálogo — o card mostra o agregado das 3, não uma só. */}
         <p className="section-label">Certificados</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
           <Ferramenta
             href="/dashboard/profissional/quiz"
             icon="ph-fill ph-medal"
-            titulo={certificados > 0 ? "Seu certificado" : TRILHA_AUTOESTIMA.titulo}
-            desc={certificados > 0
-              ? "Conquistado — aparece no seu site ✓"
-              : modulosFeitos >= totalModulos
-                ? "Trilha completa! Resgate seu certificado"
-                : modulosFeitos > 0
-                  ? `Você já fez ${modulosFeitos} de ${totalModulos} módulos`
-                  : "Complete a trilha e ganhe um certificado pro seu site"}
-            badge={certificados > 0 ? "✓" : undefined}
+            titulo="Trilhas e certificados"
+            desc={temTrilhaPendenteDeResgate
+              ? "Trilha completa! Resgate seu certificado"
+              : certificadosConquistados > 0
+                ? `${certificadosConquistados} de ${trilhasTotal} conquistados`
+                : "Complete trilhas rápidas e ganhe certificados pro seu site"}
+            badge={certificadosConquistados > 0 ? `${certificadosConquistados}/${trilhasTotal}` : undefined}
           />
         </div>
 

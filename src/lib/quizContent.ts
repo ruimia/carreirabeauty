@@ -19,6 +19,12 @@ export interface QuizModulo {
 export interface Trilha {
   slug: string;
   titulo: string;
+  /** frase curta explicando o ganho — usada nos cards de listagem */
+  descricao: string;
+  /** ícone representativo da trilha inteira (cards de listagem) */
+  icone: string;
+  /** nome do certificado — pensado pra soar como algo que ela quer ter e a
+      empresa valoriza ver, não como "nome de curso" */
   certificadoNome: string;
   modulos: QuizModulo[];
 }
@@ -26,7 +32,9 @@ export interface Trilha {
 export const TRILHA_AUTOESTIMA: Trilha = {
   slug: "autoestima-postura",
   titulo: "Autoestima e Postura Profissional",
-  certificadoNome: "Atendimento e Postura Profissional Certificado",
+  descricao: "Pontualidade, comunicação e postura que fazem o cliente confiar em você.",
+  icone: "ph-fill ph-handshake",
+  certificadoNome: "Atendimento Nota 10",
   modulos: [
     {
       slug: "primeira-impressao",
@@ -342,3 +350,382 @@ export const TRILHA_AUTOESTIMA: Trilha = {
     },
   ],
 };
+
+export const TRILHA_PRECO_JUSTO: Trilha = {
+  slug: "preco-justo",
+  titulo: "Preço Justo",
+  descricao: "Aprenda a cobrar o que seu trabalho vale, sem perder cliente.",
+  icone: "ph-fill ph-hand-coins",
+  certificadoNome: "Preço Justo",
+  modulos: [
+    {
+      slug: "calculo-preco",
+      titulo: "Como calcular seu preço",
+      descricao: "A conta por trás de um preço justo: custo, tempo e lucro.",
+      icone: "ph-fill ph-calculator",
+      perguntas: [
+        {
+          pergunta: "Pra saber quanto cobrar por um serviço, o primeiro passo é:",
+          opcoes: [
+            "Copiar o preço de quem você admira",
+            "Somar custo do material, seu tempo e o que você quer ganhar",
+            "Cobrar o que o cliente disser que pode pagar",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso aí! Preço de verdade nasce da sua conta, não da conta dos outros.",
+          feedbackErro: "Repensa: copiar preço alheio ou deixar o cliente decidir ignora seus custos e seu tempo.",
+        },
+        {
+          pergunta: "Se você cobra menos que seu custo + tempo, no fim do mês:",
+          opcoes: [
+            "Você trabalha de graça ou no prejuízo, mesmo com a agenda cheia",
+            "Isso nunca faz diferença",
+            "Só afeta quem tem poucos clientes",
+          ],
+          correta: 0,
+          feedbackSucesso: "Exato! Agenda cheia com preço errado só significa trabalhar mais pra ganhar pouco.",
+          feedbackErro: "Cuidado: preço abaixo do custo pesa no bolso, não importa quantos clientes você tenha.",
+        },
+        {
+          pergunta: "Seu tempo de trabalho (o quanto você demora em cada serviço) deve entrar na conta do preço?",
+          opcoes: [
+            "Sim — tempo também é custo, mesmo sem gastar dinheiro nele",
+            "Não, só material importa",
+            "Só se o cliente perguntar",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso mesmo! Seu tempo vale dinheiro — ele também compõe o preço.",
+          feedbackErro: "Repensa: ignorar seu tempo de trabalho é um dos motivos mais comuns de cobrar barato demais.",
+        },
+        {
+          pergunta: "Antes de definir um preço novo, também vale:",
+          opcoes: [
+            "Ver o que profissionais da sua região com experiência parecida cobram",
+            "Escolher um número aleatório",
+            "Nunca mudar o preço, seja qual for a situação",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Pesquisar o mercado local ajuda a calibrar um preço justo pros dois lados.",
+          feedbackErro: "Cuidado: preço no chute ou fixo pra sempre ignora tanto seus custos quanto o mercado.",
+        },
+      ],
+    },
+    {
+      slug: "separar-contas",
+      titulo: "Separando as contas",
+      descricao: "Por que o dinheiro do trabalho não pode se misturar com o de casa.",
+      icone: "ph-fill ph-wallet",
+      perguntas: [
+        {
+          pergunta: "Misturar o dinheiro do trabalho com o dinheiro de casa costuma causar:",
+          opcoes: [
+            "Mais clareza sobre quanto você realmente ganha",
+            "Confusão sobre se o negócio está dando lucro de verdade",
+            "Nenhuma diferença no controle financeiro",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso aí! Sem separar as contas, fica quase impossível saber se o trabalho está sendo lucrativo.",
+          feedbackErro: "Repensa: misturar as contas confunde, não esclarece — dificulta saber se sobra dinheiro de verdade.",
+        },
+        {
+          pergunta: "Uma forma simples de começar a separar as finanças é:",
+          opcoes: [
+            "Ter uma conta ou 'potinho' só pro dinheiro do trabalho",
+            "Guardar tudo na carteira junto",
+            "Anotar só de vez em quando, quando lembrar",
+          ],
+          correta: 0,
+          feedbackSucesso: "Exato! Um espaço separado, mesmo simples, já muda o jogo do controle financeiro.",
+          feedbackErro: "Cuidado: guardar tudo junto ou anotar de vez em quando dificulta enxergar pra onde o dinheiro vai.",
+        },
+        {
+          pergunta: "Reservar uma parte do que você ganha todo mês (mesmo pouco) serve pra:",
+          opcoes: [
+            "Nada, é melhor gastar tudo e reservar só quando sobrar",
+            "Ter um respiro em mês fraco ou imprevisto",
+            "Só quem ganha muito precisa fazer isso",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Reserva, mesmo pequena, é o que te protege em mês de vaca magra.",
+          feedbackErro: "Repensa: reserva não é só pra quem ganha muito — quem tem menos margem é quem mais precisa dela.",
+        },
+        {
+          pergunta: "Anotar entradas e saídas do trabalho, mesmo num caderno simples, ajuda a:",
+          opcoes: [
+            "Enxergar se o negócio está de fato dando lucro",
+            "Perder tempo à toa",
+            "Só serve pra quem tem MEI",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Anotar é o jeito mais simples de saber, de verdade, se o mês fechou no azul.",
+          feedbackErro: "Cuidado: anotar não é perda de tempo, e vale pra qualquer profissional, com ou sem MEI.",
+        },
+      ],
+    },
+    {
+      slug: "cobrar-sem-culpa",
+      titulo: "Cobrando sem culpa",
+      descricao: "Lidar com pedido de desconto e desconforto na hora de cobrar.",
+      icone: "ph-fill ph-hand-coins",
+      perguntas: [
+        {
+          pergunta: "Um cliente pede desconto na hora do pagamento. A atitude mais saudável é:",
+          opcoes: [
+            "Aceitar sempre, pra não perder o cliente",
+            "Avaliar com calma se faz sentido pro seu negócio, sem se sentir culpada por dizer não",
+            "Nunca dar desconto, em nenhuma hipótese",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso aí! Avaliar sem culpa é diferente de aceitar tudo ou negar tudo — o equilíbrio é o que protege seu negócio.",
+          feedbackErro: "Repensa: aceitar sempre corrói seu preço, e nunca avaliar te deixa engessada demais.",
+        },
+        {
+          pergunta: "Sentir desconforto ao cobrar o preço combinado geralmente vem de:",
+          opcoes: [
+            "Achar que seu trabalho vale menos do que realmente vale",
+            "Sempre é sinal de que o preço está errado",
+            "Não tem relação com autoestima profissional",
+          ],
+          correta: 0,
+          feedbackSucesso: "Exato! Esse desconforto quase sempre é sobre autoestima profissional, não sobre o preço em si.",
+          feedbackErro: "Cuidado: desconforto ao cobrar nem sempre significa preço errado — muitas vezes é insegurança sobre o próprio valor.",
+        },
+        {
+          pergunta: "Se um cliente reclama do preço toda vez que fecha com você, isso é sinal de que:",
+          opcoes: [
+            "Você precisa baixar o preço pra sempre",
+            "Vale conversar com clareza sobre o valor entregue, ou aceitar que esse cliente pode não ser o ideal",
+            "Você deve parar de atender esse cliente sem explicação",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Clareza sobre o valor entregue resolve mais reclamação de preço do que desconto.",
+          feedbackErro: "Repensa: baixar preço sempre ou sumir sem explicação não resolve a raiz da reclamação.",
+        },
+        {
+          pergunta: "Cobrar o preço justo, mesmo com medo de perder cliente, é:",
+          opcoes: [
+            "Um sinal de profissionalismo e respeito pelo seu trabalho",
+            "Sempre um erro",
+            "Algo que só profissional famosa pode fazer",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Cobrar direito é profissionalismo — não é exclusividade de quem já é conhecida.",
+          feedbackErro: "Cuidado: cobrar certo não é erro nem privilégio de poucas — é o que sustenta qualquer carreira a longo prazo.",
+        },
+      ],
+    },
+  ],
+};
+
+export const TRILHA_MAOS_SEGURAS: Trilha = {
+  slug: "maos-seguras",
+  titulo: "Mãos Seguras",
+  descricao: "Princípios de higiene e segurança que passam confiança pro cliente.",
+  icone: "ph-fill ph-shield-check",
+  certificadoNome: "Mãos Seguras",
+  modulos: [
+    {
+      slug: "higiene-entre-clientes",
+      titulo: "Higiene entre um cliente e outro",
+      descricao: "O básico que protege você e cada cliente que senta na sua cadeira.",
+      icone: "ph-fill ph-drop",
+      perguntas: [
+        {
+          pergunta: "Entre um atendimento e outro, o ideal é:",
+          opcoes: [
+            "Higienizar mãos e superfícies antes do próximo cliente",
+            "Só lavar as mãos no início do dia",
+            "Não precisa repetir se o cliente anterior 'parecia limpo'",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso aí! Higienizar entre atendimentos protege você e cada cliente que senta na sua cadeira.",
+          feedbackErro: "Cuidado: higiene não depende da 'aparência' do cliente anterior — repetir sempre é o que garante segurança.",
+        },
+        {
+          pergunta: "Lavar as mãos com água e sabão, ou usar álcool em gel, antes de atender:",
+          opcoes: [
+            "É só frescura, não faz diferença real",
+            "Reduz de verdade o risco de contaminação",
+            "Só é necessário se o cliente pedir",
+          ],
+          correta: 1,
+          feedbackSucesso: "Exato! É um hábito simples que faz diferença real na segurança do atendimento.",
+          feedbackErro: "Repensa: não é frescura nem depende do cliente pedir — é proteção básica pra ambos os lados.",
+        },
+        {
+          pergunta: "Reutilizar a mesma toalha ou material de pano sem lavar entre clientes diferentes é:",
+          opcoes: [
+            "Tranquilo, desde que pareça limpo",
+            "Um risco real de contaminação cruzada",
+            "Só importa em clínica, não em salão",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Reutilizar sem lavar é uma das formas mais comuns de contaminação cruzada.",
+          feedbackErro: "Cuidado: 'parecer limpo' não garante nada, e esse cuidado vale pra qualquer ambiente de atendimento.",
+        },
+        {
+          pergunta: "Manter o espaço de trabalho organizado e limpo durante o expediente:",
+          opcoes: [
+            "Só importa no fim do dia",
+            "Ajuda a manter a higiene ao longo de todos os atendimentos",
+            "Não tem relação com segurança",
+          ],
+          correta: 1,
+          feedbackSucesso: "Na régua! Organização ao longo do dia sustenta a higiene em cada atendimento, não só no fechamento.",
+          feedbackErro: "Repensa: esperar o fim do dia pra organizar deixa os atendimentos do meio do expediente vulneráveis.",
+        },
+      ],
+    },
+    {
+      slug: "materiais-descarte",
+      titulo: "Cuidado com materiais e descarte",
+      descricao: "Descartáveis, instrumentos reutilizáveis e onde guardar cada coisa.",
+      icone: "ph-fill ph-trash",
+      perguntas: [
+        {
+          pergunta: "Materiais de uso único (descartáveis) devem ser:",
+          opcoes: [
+            "Usados em um cliente só e descartados depois",
+            "Reaproveitados se ainda parecem em bom estado",
+            "Guardados pra usar quando faltar material novo",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso aí! Descartável é descartável — usar em um cliente só é o que garante a segurança dele.",
+          feedbackErro: "Cuidado: reaproveitar material de uso único anula a proteção que ele deveria oferecer.",
+        },
+        {
+          pergunta: "Instrumentos reutilizáveis (não descartáveis) precisam de:",
+          opcoes: [
+            "Limpeza e desinfecção adequadas entre um uso e outro",
+            "Uma passada rápida de pano seco",
+            "Nenhum cuidado especial se forem de metal",
+          ],
+          correta: 0,
+          feedbackSucesso: "Exato! Instrumento reutilizável exige desinfecção de verdade, não só uma limpeza visual.",
+          feedbackErro: "Repensa: pano seco ou 'é de metal, não suja' não substituem uma desinfecção adequada.",
+        },
+        {
+          pergunta: "Guardar instrumentos limpos junto com os sujos, no mesmo espaço:",
+          opcoes: [
+            "Não tem problema, desde que fiquem em cantos diferentes",
+            "Contamina os que já estavam limpos",
+            "É prático e recomendado",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Misturar limpo com sujo, mesmo em cantos diferentes, compromete os dois.",
+          feedbackErro: "Cuidado: separar por canto não basta — limpo e sujo precisam ficar em espaços realmente distintos.",
+        },
+        {
+          pergunta: "Ter um local específico só pra descarte de materiais usados:",
+          opcoes: [
+            "É frescura de clínica grande",
+            "Ajuda a manter o ambiente organizado e seguro",
+            "Só é necessário se exigido por lei",
+          ],
+          correta: 1,
+          feedbackSucesso: "Na régua! Um espaço de descarte próprio é simples de montar e já eleva o padrão do seu atendimento.",
+          feedbackErro: "Repensa: não é exclusividade de clínica grande — é um cuidado que qualquer profissional pode adotar.",
+        },
+      ],
+    },
+    {
+      slug: "seguranca-visivel",
+      titulo: "Segurança que o cliente enxerga",
+      descricao: "Como transformar cuidado com higiene em confiança percebida.",
+      icone: "ph-fill ph-shield-check",
+      perguntas: [
+        {
+          pergunta: "Um cliente que vê você higienizando as mãos e os materiais na frente dele tende a:",
+          opcoes: [
+            "Sentir mais confiança no seu atendimento",
+            "Achar estranho e desconfiar de você",
+            "Não notar nem se importar",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso aí! Higiene à vista aumenta a confiança — muitos clientes reparam nisso, mesmo sem comentar.",
+          feedbackErro: "Cuidado: a maioria dos clientes nota sim, e isso pesa positivamente na percepção do seu trabalho.",
+        },
+        {
+          pergunta: "Comentar rapidamente com o cliente sobre os cuidados de higiene que você toma é:",
+          opcoes: [
+            "Desnecessário, ele já deveria saber",
+            "Uma forma simples de reforçar profissionalismo",
+            "Algo que só clínica precisa fazer",
+          ],
+          correta: 1,
+          feedbackSucesso: "Exato! Um comentário rápido já reforça que você leva a segurança a sério.",
+          feedbackErro: "Repensa: não é desnecessário nem exclusivo de clínica — é um diferencial que qualquer profissional pode usar.",
+        },
+        {
+          pergunta: "Ter as unhas, mãos e uniforme/roupa de trabalho visivelmente cuidados:",
+          opcoes: [
+            "Não tem nada a ver com higiene percebida",
+            "Reforça a sensação de cuidado e segurança no atendimento",
+            "Só importa em fotos pro Instagram",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Aparência cuidada reforça, na hora, a sensação de segurança que você transmite.",
+          feedbackErro: "Cuidado: isso vale no dia a dia real do atendimento, não só pra registro em foto.",
+        },
+        {
+          pergunta: "Manter esses cuidados de higiene sempre, mesmo com a agenda cheia e corrida, é:",
+          opcoes: [
+            "Importante — é justamente quando a rotina aperta que o descuido mais aparece",
+            "Dispensável em dias corridos",
+            "Só importa se o cliente perceber",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Manter o padrão mesmo na correria é o que separa profissional de confiança de quem só improvisa.",
+          feedbackErro: "Repensa: dia corrido é exatamente quando o cuidado não pode cair — e não depende do cliente perceber ou não.",
+        },
+      ],
+    },
+  ],
+};
+
+/** Todas as trilhas disponíveis — a ordem aqui é a ordem de exibição na listagem */
+export const TRILHAS: Trilha[] = [TRILHA_AUTOESTIMA, TRILHA_PRECO_JUSTO, TRILHA_MAOS_SEGURAS];
+
+export function getTrilha(slug: string): Trilha | undefined {
+  return TRILHAS.find((t) => t.slug === slug);
+}
+
+export interface ProgressoTrilha {
+  slug: string;
+  titulo: string;
+  icone: string;
+  feitos: number;
+  total: number;
+  concluida: boolean;
+}
+
+export interface ProgressoGeral {
+  porTrilha: ProgressoTrilha[];
+  modulosFeitosTotal: number;
+  trilhasConcluidas: number;
+  trilhasTotal: number;
+}
+
+/** Junta o progresso bruto do banco (quiz_progresso, sem filtro de trilha) com
+    o catálogo de trilhas — fonte única usada pela listagem de trilhas, pelas
+    conquistas e pelos cards de destaque na home/Crescer. */
+export function calcularProgressoGeral(progresso: { trilha_slug: string; modulo_slug: string }[]): ProgressoGeral {
+  const feitosPorTrilha = new Map<string, Set<string>>();
+  for (const p of progresso) {
+    if (!feitosPorTrilha.has(p.trilha_slug)) feitosPorTrilha.set(p.trilha_slug, new Set());
+    feitosPorTrilha.get(p.trilha_slug)!.add(p.modulo_slug);
+  }
+
+  const porTrilha: ProgressoTrilha[] = TRILHAS.map((t) => {
+    const feitos = feitosPorTrilha.get(t.slug)?.size ?? 0;
+    const total = t.modulos.length;
+    return { slug: t.slug, titulo: t.titulo, icone: t.icone, feitos, total, concluida: feitos >= total };
+  });
+
+  return {
+    porTrilha,
+    modulosFeitosTotal: porTrilha.reduce((acc, t) => acc + t.feitos, 0),
+    trilhasConcluidas: porTrilha.filter((t) => t.concluida).length,
+    trilhasTotal: TRILHAS.length,
+  };
+}

@@ -5,7 +5,6 @@ export const metadata = { title: "Conteúdo" };
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
 import VoltarLink from "@/components/VoltarLink";
 
 export default async function ConteudoListaPage() {
@@ -51,10 +50,10 @@ export default async function ConteudoListaPage() {
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
-                {TRILHA_AUTOESTIMA.titulo}
+                Trilhas e certificados
               </p>
               <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)" }}>
-                Complete a trilha e ganhe um certificado pro seu perfil
+                Complete uma trilha e ganhe um certificado pro seu perfil
               </p>
             </div>
             <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>

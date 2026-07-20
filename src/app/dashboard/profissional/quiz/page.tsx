@@ -1,95 +1,86 @@
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Trilha de certificado" };
+export const metadata = { title: "Trilhas e certificados" };
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
-import ResgateCertificado from "./ResgateCertificado";
+import { TRILHAS, calcularProgressoGeral } from "@/lib/quizContent";
 import VoltarLink from "@/components/VoltarLink";
-import CertificadoVisual from "@/components/CertificadoVisual";
 
-export default async function QuizTrilhaPage() {
+export default async function QuizIndexPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: professional } = await supabase
     .from("professionals")
-    .select("id, nome, plano, certificado_autoestima_desbloqueado_em")
+    .select("id")
     .eq("user_id", user.id)
     .single();
   if (!professional) redirect("/onboarding/tipo");
 
-  const { data: progresso } = await supabase
-    .from("quiz_progresso")
-    .select("modulo_slug")
-    .eq("professional_id", professional.id)
-    .eq("trilha_slug", TRILHA_AUTOESTIMA.slug);
+  const [{ data: progresso }, { data: certificados }] = await Promise.all([
+    supabase.from("quiz_progresso").select("trilha_slug, modulo_slug").eq("professional_id", professional.id),
+    supabase.from("certificados").select("trilha_slug").eq("professional_id", professional.id),
+  ]);
 
-  const concluidos = new Set((progresso ?? []).map((p) => p.modulo_slug));
-  const todosConcluidos = TRILHA_AUTOESTIMA.modulos.every((m) => concluidos.has(m.slug));
+  const { porTrilha } = calcularProgressoGeral(progresso ?? []);
+  const conquistadas = new Set((certificados ?? []).map((c) => c.trilha_slug));
 
   return (
     <div>
       <main className="page-x" style={{ paddingBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
           <VoltarLink fallbackHref="/dashboard/profissional/crescer" />
-          <p style={{ font: "600 16px/1.3 var(--font-display)", color: "var(--text-primary)" }}>{TRILHA_AUTOESTIMA.titulo}</p>
+          <p style={{ font: "600 16px/1.3 var(--font-display)", color: "var(--text-primary)" }}>Trilhas e certificados</p>
         </div>
         <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 20 }}>
-          Complete os 6 módulos no seu ritmo e resgate seu certificado ao final.
+          Cada trilha é rápida e vale um certificado pro seu perfil.
         </p>
 
-        {/* Mostra o certificado logo de cara — gera o desejo antes de começar */}
-        {!todosConcluidos && (
-          <div style={{ marginBottom: 24 }}>
-            <CertificadoVisual trilhaNome={TRILHA_AUTOESTIMA.certificadoNome} nome={professional.nome} estado="preview" />
-            <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", textAlign: "center", marginTop: 8 }}>
-              É isso que você ganha ao completar a trilha 👇
-            </p>
-          </div>
-        )}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-          {TRILHA_AUTOESTIMA.modulos.map((m, i) => {
-            const feito = concluidos.has(m.slug);
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {TRILHAS.map((t) => {
+            const p = porTrilha.find((x) => x.slug === t.slug)!;
+            const conquistada = conquistadas.has(t.slug);
             return (
-              <Link key={m.slug} href={`/dashboard/profissional/quiz/${m.slug}`} style={{ textDecoration: "none" }}>
+              <Link key={t.slug} href={`/dashboard/profissional/quiz/${t.slug}`} style={{ textDecoration: "none" }}>
                 <div className="job-feed-card" style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <span style={{
-                    width: 44, height: 44, borderRadius: "var(--radius-md)", flexShrink: 0,
-                    background: feito ? "var(--color-success-bg)" : "var(--brand-magenta-50)",
-                    color: feito ? "var(--color-success-fg)" : "var(--color-brand-primary)",
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
+                    width: 48, height: 48, borderRadius: "var(--radius-md)", flexShrink: 0,
+                    background: conquistada
+                      ? "linear-gradient(135deg, #DC00DC, #ffb020)"
+                      : p.feitos > 0 ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
+                    color: conquistada ? "#fff" : p.feitos > 0 ? "var(--color-brand-primary)" : "var(--text-tertiary)",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
                   }}>
-                    <i className={feito ? "ph-fill ph-check-circle" : m.icone}></i>
+                    <i className={conquistada ? "ph-fill ph-medal" : t.icone}></i>
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ font: "500 11px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 2 }}>
-                      Módulo {i + 1}
-                    </p>
                     <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
-                      {m.titulo}
+                      {t.titulo}
+                    </p>
+                    <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 2 }}>
+                      {conquistada
+                        ? "Certificado conquistado ✓"
+                        : p.total > 0 && p.feitos >= p.total
+                          ? "Trilha completa! Resgate seu certificado"
+                          : p.feitos > 0
+                            ? `${p.feitos} de ${p.total} módulos`
+                            : t.descricao}
                     </p>
                   </div>
+                  {conquistada && (
+                    <span className="status-pill" style={{ background: "var(--color-success-bg)", color: "var(--color-success-fg)", flexShrink: 0 }}>
+                      <i className="ph-fill ph-check-circle"></i>
+                    </span>
+                  )}
                   <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
                 </div>
               </Link>
             );
           })}
         </div>
-
-        <ResgateCertificado
-          professionalId={professional.id}
-          nome={professional.nome}
-          trilhaSlug={TRILHA_AUTOESTIMA.slug}
-          certificadoNome={TRILHA_AUTOESTIMA.certificadoNome}
-          isPro={professional.plano === "pro"}
-          jaDesbloqueado={!!professional.certificado_autoestima_desbloqueado_em}
-          todosConcluidos={todosConcluidos}
-        />
       </main>
     </div>
   );

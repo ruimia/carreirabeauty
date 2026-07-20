@@ -9,7 +9,7 @@ import VagasExternasLista from "@/components/VagasExternasLista";
 import AtividadeRecente from "@/components/AtividadeRecente";
 import { getAtividadeRecente } from "@/lib/atividadeRecente";
 import { distanciaKm } from "@/lib/geocode";
-import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import { calcularProgressoGeral } from "@/lib/quizContent";
 import { calcularConquistas } from "@/lib/conquistas";
 
 const FUNCAO_LABEL: Record<string, string> = {
@@ -81,7 +81,7 @@ export default async function DashboardProfissionalPage() {
 
   const funcoes: string[] = professional.funcoes ?? [];
 
-  const [{ data: allJobs }, { data: applications }, { data: vagasExternas }, { data: quizProgresso }] = await Promise.all([
+  const [{ data: allJobs }, { data: applications }, { data: vagasExternas }, { data: quizProgresso }, { data: certificados }] = await Promise.all([
     supabase
       .from("jobs")
       .select("id, titulo, funcao, funcoes, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
@@ -106,9 +106,12 @@ export default async function DashboardProfissionalPage() {
       : Promise.resolve({ data: [] }),
     supabase
       .from("quiz_progresso")
-      .select("modulo_slug")
-      .eq("professional_id", professional.id)
-      .eq("trilha_slug", TRILHA_AUTOESTIMA.slug),
+      .select("trilha_slug, modulo_slug")
+      .eq("professional_id", professional.id),
+    supabase
+      .from("certificados")
+      .select("trilha_slug")
+      .eq("professional_id", professional.id),
   ]);
 
   const atividades = await getAtividadeRecente(supabase, 10);
@@ -196,24 +199,27 @@ export default async function DashboardProfissionalPage() {
   // Conquistas de ativação (fase 1) — todas calculadas na hora a partir do que já
   // existe, sem tabela nova. São privadas e motivacionais: engajamento nunca vira
   // selo público. Ver badges-conquistas-selos-carreirabeauty.md.
-  const modulosFeitos = new Set((quizProgresso ?? []).map((p) => p.modulo_slug)).size;
-  const modulosTotal = TRILHA_AUTOESTIMA.modulos.length;
+  const { porTrilha, modulosFeitosTotal, trilhasConcluidas, trilhasTotal } = calcularProgressoGeral(quizProgresso ?? []);
   const conquistas = calcularConquistas({
     temFoto: !!professional.foto_perfil_url,
     itensPerfilFeitos: doneCount,
     itensPerfilTotal: checks.length,
     portfolioCount: professional.portfolio_urls?.length ?? 0,
     candidaturas: (applications ?? []).length,
-    modulosFeitos,
-    modulosTotal,
+    modulosFeitosTotal,
+    trilhasConcluidas,
+    trilhasTotal,
   });
   const conquistasFeitas = conquistas.filter((c) => c.done).length;
 
-  // Destaque do certificado na home — dado real: quem termina a trilha bate
-  // no paywall 100% das vezes (maior sinal de intenção de compra do produto).
-  // Some quando já desbloqueado, pra não incomodar depois de conquistado.
-  const trilhaConcluida = modulosFeitos >= modulosTotal;
-  const certificadoDesbloqueado = !!professional.certificado_autoestima_desbloqueado_em;
+  // Destaque do certificado na home — dado real: quem termina uma trilha bate
+  // no paywall quase toda vez (maior sinal de intenção de compra do produto).
+  // Some quando os 3 certificados já foram conquistados.
+  const certificadosConquistados = certificados?.length ?? 0;
+  // Trilha terminada (respondeu tudo) mas ainda não resgatou o certificado —
+  // é o momento de maior intenção, merece o CTA mais forte
+  const temTrilhaPendenteDeResgate = trilhasConcluidas > certificadosConquistados;
+  const trilhaEmAndamento = porTrilha.find((t) => t.feitos > 0 && !t.concluida);
 
   return (
     <div>
@@ -270,10 +276,10 @@ export default async function DashboardProfissionalPage() {
           </Link>
         )}
 
-        {/* Certificado/trilha — destaque proposital: dado real mostra que quem
-            termina a trilha bate no paywall 100% das vezes, o maior sinal de
-            intenção de compra do produto hoje. Some quando já desbloqueado. */}
-        {!certificadoDesbloqueado && (
+        {/* Certificados — destaque proposital: dado real mostra que quem termina
+            uma trilha bate no paywall quase toda vez, o maior sinal de intenção
+            de compra do produto hoje. Some quando os 3 já foram conquistados. */}
+        {certificadosConquistados < trilhasTotal && (
           <Link href="/dashboard/profissional/quiz" style={{
             display: "block", textDecoration: "none", marginBottom: 20,
             background: "var(--surface-card)", border: "1.5px solid var(--brand-magenta-100)",
@@ -282,32 +288,40 @@ export default async function DashboardProfissionalPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <span style={{
                 width: 48, height: 48, borderRadius: "var(--radius-md)", flexShrink: 0,
-                background: trilhaConcluida
+                background: temTrilhaPendenteDeResgate
                   ? "linear-gradient(135deg, #DC00DC, #ffb020)"
                   : "var(--brand-magenta-50)",
-                color: trilhaConcluida ? "#fff" : "var(--color-brand-primary)",
+                color: temTrilhaPendenteDeResgate ? "#fff" : "var(--color-brand-primary)",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
               }}>
                 <i className="ph-fill ph-medal"></i>
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ font: "700 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
-                  {trilhaConcluida ? "Sua trilha está completa! 🎉" : modulosFeitos > 0 ? "Continue sua trilha" : "Ganhe um certificado grátis"}
+                  {temTrilhaPendenteDeResgate
+                    ? "Sua trilha está completa! 🎉"
+                    : trilhaEmAndamento
+                      ? "Continue sua trilha"
+                      : certificadosConquistados > 0
+                        ? "Ganhe mais certificados"
+                        : "Ganhe certificados grátis"}
                 </p>
                 <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 2 }}>
-                  {trilhaConcluida
+                  {temTrilhaPendenteDeResgate
                     ? "Resgate seu certificado e mostre no seu perfil"
-                    : modulosFeitos > 0
-                      ? `Você já fez ${modulosFeitos} de ${modulosTotal} módulos`
-                      : "Complete a trilha Autoestima e Postura Profissional"}
+                    : trilhaEmAndamento
+                      ? `${trilhaEmAndamento.titulo} — ${trilhaEmAndamento.feitos} de ${trilhaEmAndamento.total} módulos`
+                      : certificadosConquistados > 0
+                        ? `${certificadosConquistados} de ${trilhasTotal} conquistados — continue evoluindo`
+                        : "Trilhas rápidas sobre atendimento, preço e higiene"}
                 </p>
               </div>
               <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
             </div>
-            {modulosFeitos > 0 && (
+            {trilhaEmAndamento && (
               <div style={{ height: 6, borderRadius: 999, background: "var(--surface-sunken)", overflow: "hidden", marginTop: 12 }}>
                 <div style={{
-                  width: `${Math.round((modulosFeitos / modulosTotal) * 100)}%`, height: "100%",
+                  width: `${Math.round((trilhaEmAndamento.feitos / trilhaEmAndamento.total) * 100)}%`, height: "100%",
                   borderRadius: 999, background: "var(--color-brand-primary)",
                 }} />
               </div>

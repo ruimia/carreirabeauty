@@ -5,7 +5,7 @@ export const metadata = { title: "Suas conquistas" };
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import { calcularProgressoGeral } from "@/lib/quizContent";
 import { calcularConquistas, checksPerfil } from "@/lib/conquistas";
 import VoltarLink from "@/components/VoltarLink";
 
@@ -23,11 +23,10 @@ export default async function ConquistasPage() {
 
   const [{ count: candidaturas }, { data: quizProgresso }] = await Promise.all([
     supabase.from("applications").select("*", { count: "exact", head: true }).eq("professional_id", professional.id),
-    supabase.from("quiz_progresso").select("modulo_slug")
-      .eq("professional_id", professional.id)
-      .eq("trilha_slug", TRILHA_AUTOESTIMA.slug),
+    supabase.from("quiz_progresso").select("trilha_slug, modulo_slug").eq("professional_id", professional.id),
   ]);
 
+  const { modulosFeitosTotal, trilhasConcluidas, trilhasTotal } = calcularProgressoGeral(quizProgresso ?? []);
   const checks = checksPerfil(professional);
   const conquistas = calcularConquistas({
     temFoto: !!professional.foto_perfil_url,
@@ -35,8 +34,9 @@ export default async function ConquistasPage() {
     itensPerfilTotal: checks.length,
     portfolioCount: professional.portfolio_urls?.length ?? 0,
     candidaturas: candidaturas ?? 0,
-    modulosFeitos: new Set((quizProgresso ?? []).map((p) => p.modulo_slug)).size,
-    modulosTotal: TRILHA_AUTOESTIMA.modulos.length,
+    modulosFeitosTotal,
+    trilhasConcluidas,
+    trilhasTotal,
   });
 
   const feitas = conquistas.filter((c) => c.done).length;

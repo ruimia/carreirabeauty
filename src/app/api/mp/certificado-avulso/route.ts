@@ -3,19 +3,26 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { CERTIFICADO_AVULSO_PRECO } from "@/lib/planos";
-import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import { getTrilha } from "@/lib/quizContent";
 
 export async function POST(req: NextRequest) {
+  const { trilhaSlug } = await req.json();
+  const trilha = getTrilha(trilhaSlug);
+  if (!trilha) return NextResponse.json({ error: "Trilha inválida" }, { status: 400 });
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
   const { data: professional } = await supabase
-    .from("professionals").select("id, plano, certificado_autoestima_desbloqueado_em")
+    .from("professionals").select("id, plano")
     .eq("user_id", user.id).single();
   if (!professional) return NextResponse.json({ error: "Perfil não encontrado" }, { status: 404 });
-  if (professional.plano === "pro" || professional.certificado_autoestima_desbloqueado_em) {
-    return NextResponse.json({ error: "Você já tem o certificado" }, { status: 400 });
+
+  const { data: jaTem } = await supabase
+    .from("certificados").select("id").eq("professional_id", professional.id).eq("trilha_slug", trilhaSlug).maybeSingle();
+  if (professional.plano === "pro" || jaTem) {
+    return NextResponse.json({ error: "Você já tem esse certificado" }, { status: 400 });
   }
 
   const { data: profile } = await supabase.from("profiles").select("email").eq("id", user.id).single();
@@ -32,7 +39,8 @@ export async function POST(req: NextRequest) {
     .from("pagamentos_avulsos")
     .insert({
       professional_id: professional.id,
-      produto: "certificado_autoestima",
+      produto: "certificado",
+      trilha_slug: trilhaSlug,
       valor: CERTIFICADO_AVULSO_PRECO,
       status: "pendente",
     })
@@ -50,8 +58,8 @@ export async function POST(req: NextRequest) {
     const result = await preference.create({
       body: {
         items: [{
-          id: "certificado_autoestima",
-          title: `Certificado — ${TRILHA_AUTOESTIMA.certificadoNome}`,
+          id: `certificado_${trilhaSlug}`,
+          title: `Certificado — ${trilha.certificadoNome}`,
           quantity: 1,
           unit_price: CERTIFICADO_AVULSO_PRECO,
           currency_id: "BRL",
@@ -60,9 +68,9 @@ export async function POST(req: NextRequest) {
         external_reference: pagamento.id,
         notification_url: `${appUrl}/api/webhooks/mercadopago`,
         back_urls: {
-          success: `${appUrl}/dashboard/profissional/quiz`,
-          pending: `${appUrl}/dashboard/profissional/quiz`,
-          failure: `${appUrl}/dashboard/profissional/quiz`,
+          success: `${appUrl}/dashboard/profissional/quiz/${trilhaSlug}`,
+          pending: `${appUrl}/dashboard/profissional/quiz/${trilhaSlug}`,
+          failure: `${appUrl}/dashboard/profissional/quiz/${trilhaSlug}`,
         },
         auto_return: "approved",
       },

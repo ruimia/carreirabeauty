@@ -59,10 +59,9 @@ export default function ResgateCertificado({
       await supabase.from("quiz_eventos").insert({
         professional_id: professionalId, trilha_slug: trilhaSlug, evento: "certificado_desbloqueado",
       });
-      await supabase.from("professionals").update({
-        certificado_autoestima_desbloqueado_em: new Date().toISOString(),
-        certificado_autoestima_origem: "pro",
-      }).eq("id", professionalId);
+      await supabase.from("certificados").insert({
+        professional_id: professionalId, trilha_slug: trilhaSlug, origem: "pro",
+      });
       setDesbloqueado(true);
       router.refresh();
     } finally {
@@ -77,7 +76,11 @@ export default function ResgateCertificado({
       await supabase.from("quiz_eventos").insert({
         professional_id: professionalId, trilha_slug: trilhaSlug, evento: "certificado_tentativa",
       });
-      const res = await fetch("/api/mp/certificado-avulso", { method: "POST" });
+      const res = await fetch("/api/mp/certificado-avulso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trilhaSlug }),
+      });
       const data = await res.json();
       if (!res.ok || !data.init_point) throw new Error(data.error || "Erro ao iniciar pagamento");
       window.location.href = data.init_point;
@@ -117,7 +120,7 @@ export default function ResgateCertificado({
         ) : (
           <>
             <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginBottom: 18 }}>
-              O certificado é um benefício do PRO — mostre no seu perfil que você investiu em atendimento e postura.
+              O certificado é um benefício do PRO — mostre no seu perfil que você tem o selo {certificadoNome}.
             </p>
 
             {/* PRO é o CTA principal: pelo preço da mensalidade, além do

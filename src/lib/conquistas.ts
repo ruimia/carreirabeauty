@@ -24,8 +24,11 @@ export interface EntradaConquistas {
   itensPerfilTotal: number;
   portfolioCount: number;
   candidaturas: number;
-  modulosFeitos: number;
-  modulosTotal: number;
+  /** soma de módulos concluídos em TODAS as trilhas (não uma só) */
+  modulosFeitosTotal: number;
+  /** quantas trilhas inteiras já foram concluídas */
+  trilhasConcluidas: number;
+  trilhasTotal: number;
 }
 
 const PORTFOLIO_META = 3;
@@ -93,7 +96,7 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       nome: "Começou a estudar",
       icon: "ph-fill ph-graduation-cap",
       comoConquistar: "Conclua o primeiro módulo de uma trilha",
-      done: e.modulosFeitos >= 1,
+      done: e.modulosFeitosTotal >= 1,
       href: "/dashboard/profissional/quiz",
       cta: "Ir pra trilha",
     },
@@ -101,9 +104,9 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       slug: "trilha-concluida",
       nome: "Trilha concluída",
       icon: "ph-fill ph-seal-check",
-      comoConquistar: "Conclua todos os módulos da trilha e ganhe seu certificado",
-      done: e.modulosTotal > 0 && e.modulosFeitos >= e.modulosTotal,
-      progresso: `${Math.min(e.modulosFeitos, e.modulosTotal)} de ${e.modulosTotal}`,
+      comoConquistar: "Conclua todos os módulos de uma trilha e ganhe seu certificado",
+      done: e.trilhasConcluidas >= 1,
+      progresso: `${e.trilhasConcluidas} de ${e.trilhasTotal}`,
       href: "/dashboard/profissional/quiz",
       cta: "Continuar trilha",
     },

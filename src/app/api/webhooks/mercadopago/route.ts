@@ -117,7 +117,7 @@ async function tratarPagamento(paymentId: string) {
 
   const { data: pagamento } = await supabase
     .from("pagamentos_avulsos")
-    .select("id, professional_id, produto, status")
+    .select("id, professional_id, produto, trilha_slug, status")
     .eq("id", pagamentoId)
     .maybeSingle();
   if (!pagamento) return;
@@ -129,14 +129,13 @@ async function tratarPagamento(paymentId: string) {
 
   // Idempotente: só concede se ainda não tinha sido concedido — evita
   // reprocessar notificação duplicada do MP
-  if (novoStatus === "aprovado" && pagamento.status !== "aprovado" && pagamento.produto === "certificado_autoestima") {
+  if (novoStatus === "aprovado" && pagamento.status !== "aprovado" && pagamento.produto === "certificado" && pagamento.trilha_slug) {
     await supabase
-      .from("professionals")
-      .update({
-        certificado_autoestima_desbloqueado_em: new Date().toISOString(),
-        certificado_autoestima_origem: "avulso",
-      })
-      .eq("id", pagamento.professional_id);
+      .from("certificados")
+      .upsert(
+        { professional_id: pagamento.professional_id, trilha_slug: pagamento.trilha_slug, origem: "avulso" },
+        { onConflict: "professional_id,trilha_slug" }
+      );
   }
 }
 

@@ -73,7 +73,7 @@ export default function QuizModuloForm({ professionalId, trilhaSlug, modulo, pro
         <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 6, marginBottom: 20 }}>
           Você acertou {resultado.acertos} de {resultado.total} perguntas.
         </p>
-        <Link href="/dashboard/profissional/quiz" style={{
+        <Link href={`/dashboard/profissional/quiz/${trilhaSlug}`} style={{
           display: "block", height: 48, borderRadius: "var(--radius-pill)",
           background: "var(--color-brand-primary)", color: "#fff",
           fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,

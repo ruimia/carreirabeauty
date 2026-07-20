@@ -3,9 +3,16 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Jornada do Quiz — Admin" };
 
 import { createClient } from "@/lib/supabase/server";
-import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
+import Link from "next/link";
+import { TRILHAS, getTrilha } from "@/lib/quizContent";
 
-export default async function AdminQuizPage() {
+interface Props {
+  searchParams: Promise<{ trilha?: string }>;
+}
+
+export default async function AdminQuizPage({ searchParams }: Props) {
+  const { trilha: trilhaSlugParam } = await searchParams;
+  const trilha = getTrilha(trilhaSlugParam ?? "") ?? TRILHAS[0];
   const supabase = await createClient();
 
   const [
@@ -13,12 +20,12 @@ export default async function AdminQuizPage() {
     { data: eventos },
     { count: totalProfissionais },
   ] = await Promise.all([
-    supabase.from("quiz_progresso").select("professional_id, modulo_slug, concluido_em").eq("trilha_slug", TRILHA_AUTOESTIMA.slug),
-    supabase.from("quiz_eventos").select("professional_id, evento, criado_em").eq("trilha_slug", TRILHA_AUTOESTIMA.slug),
+    supabase.from("quiz_progresso").select("professional_id, modulo_slug, concluido_em").eq("trilha_slug", trilha.slug),
+    supabase.from("quiz_eventos").select("professional_id, evento, criado_em").eq("trilha_slug", trilha.slug),
     supabase.from("professionals").select("*", { count: "exact", head: true }),
   ]);
 
-  const totalModulos = TRILHA_AUTOESTIMA.modulos.length;
+  const totalModulos = trilha.modulos.length;
 
   // Progresso por profissional (quantos módulos cada um concluiu)
   const modulosPorProfissional = new Map<string, Set<string>>();
@@ -36,8 +43,8 @@ export default async function AdminQuizPage() {
 
   const funil = [
     { label: "Total de profissionais", valor: totalProfissionais ?? 0, cor: "bg-gray-100 text-gray-700" },
-    { label: "Iniciaram a trilha (≥1 módulo)", valor: iniciaram, cor: "bg-blue-50 text-blue-600" },
-    { label: "Completaram a trilha (6/6)", valor: completaramTrilha, cor: "bg-purple-50 text-purple-600" },
+    { label: `Iniciaram a trilha (≥1 módulo)`, valor: iniciaram, cor: "bg-blue-50 text-blue-600" },
+    { label: `Completaram a trilha (${totalModulos}/${totalModulos})`, valor: completaramTrilha, cor: "bg-purple-50 text-purple-600" },
     { label: "Tentaram resgatar o certificado", valor: tentativas.size, cor: "bg-amber-50 text-amber-600" },
     { label: "Desbloquearam o certificado (viraram/já eram PRO)", valor: desbloqueados.size, cor: "bg-rose-50 text-rose-600" },
   ];
@@ -57,7 +64,20 @@ export default async function AdminQuizPage() {
     <div className="space-y-6 py-4">
       <div>
         <h1 className="text-xl font-bold text-gray-800">Jornada do Quiz</h1>
-        <p className="text-sm text-gray-400 mt-1">Trilha piloto: {TRILHA_AUTOESTIMA.titulo}</p>
+        <p className="text-sm text-gray-400 mt-1">Trilha: {trilha.titulo}</p>
+      </div>
+
+      {/* Seletor de trilha — funil é sempre de uma trilha por vez */}
+      <div className="flex gap-2 flex-wrap">
+        {TRILHAS.map((t) => (
+          <Link
+            key={t.slug}
+            href={`/admin/quiz?trilha=${t.slug}`}
+            className={`text-sm px-3 py-1.5 rounded-full border ${t.slug === trilha.slug ? "bg-rose-500 text-white border-rose-500" : "text-gray-600 border-gray-200"}`}
+          >
+            {t.titulo}
+          </Link>
+        ))}
       </div>
 
       {/* Stats gerais */}
@@ -68,7 +88,7 @@ export default async function AdminQuizPage() {
         </div>
         <div className="rounded-xl p-4 bg-purple-50 text-purple-600">
           <p className="text-3xl font-bold">{completaramTrilha}</p>
-          <p className="text-sm mt-1 opacity-70">Completaram (6/6)</p>
+          <p className="text-sm mt-1 opacity-70">Completaram ({totalModulos}/{totalModulos})</p>
         </div>
         <div className="rounded-xl p-4 bg-rose-50 text-rose-600 col-span-2 sm:col-span-1">
           <p className="text-3xl font-bold">{desbloqueados.size}</p>
@@ -114,7 +134,7 @@ export default async function AdminQuizPage() {
           <h2 className="font-semibold text-gray-700 text-sm">Conclusão por módulo</h2>
         </div>
         <div className="p-4 space-y-3">
-          {TRILHA_AUTOESTIMA.modulos.map((m, i) => {
+          {trilha.modulos.map((m, i) => {
             const count = profissionaisPorModulo.get(m.slug)?.size ?? 0;
             const pct = iniciaram > 0 ? Math.round((count / iniciaram) * 100) : 0;
             return (
