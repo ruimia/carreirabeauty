@@ -160,7 +160,9 @@ export default function CandidaturaSection({
 // a concorrência da vaga é informação nova a cada vez, não uma comemoração
 // que cansa de se repetir. PRO some pra quem já é PRO.
 function DestaqueSection({ totalCandidatos, isPro }: { totalCandidatos: number; isPro: boolean }) {
-  const chamada = totalCandidatos > 1
+  // Número só aparece quando é de fato uma concorrência grande (>10) — com
+  // poucos candidatos, o número não ajuda em nada e só soa estranho.
+  const chamada = totalCandidatos > 10
     ? `Já são ${totalCandidatos} candidatos nessa vaga — veja como se destacar:`
     : "Veja como se destacar:";
 
