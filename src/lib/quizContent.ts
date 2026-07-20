@@ -683,8 +683,340 @@ export const TRILHA_MAOS_SEGURAS: Trilha = {
   ],
 };
 
+export const TRILHA_CLIENTE_FIEL: Trilha = {
+  slug: "cliente-fiel",
+  titulo: "Cliente Fiel",
+  descricao: "Como fazer o cliente voltar e ainda te indicar pra outras pessoas.",
+  icone: "ph-fill ph-heart-straight",
+  certificadoNome: "Cliente Fiel",
+  modulos: [
+    {
+      slug: "primeira-experiencia",
+      titulo: "A experiência que faz o cliente voltar",
+      descricao: "O que conta além da técnica na hora de fidelizar.",
+      icone: "ph-fill ph-smiley",
+      perguntas: [
+        {
+          pergunta: "Além de um bom resultado técnico, o que mais pesa pra um cliente querer voltar?",
+          opcoes: [
+            "Só o preço baixo importa",
+            "Se sentir bem tratado durante todo o atendimento",
+            "Nada além da técnica importa",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso aí! Um bom atendimento soma com a técnica — cliente lembra de como foi tratado, não só do resultado.",
+          feedbackErro: "Repensa: preço baixo não fideliza sozinho, e a experiência do atendimento pesa tanto quanto a técnica.",
+        },
+        {
+          pergunta: "Chamar o cliente pelo nome e lembrar de detalhes da conversa anterior:",
+          opcoes: [
+            "Não faz diferença nenhuma",
+            "Faz o cliente se sentir especial e lembrado",
+            "Só importa em salão grande",
+          ],
+          correta: 1,
+          feedbackSucesso: "Exato! Pequenos detalhes lembrados fazem o cliente sentir que é importante pra você, não só mais um.",
+          feedbackErro: "Cuidado: esse cuidado vale em qualquer tamanho de negócio, e faz sim diferença na fidelização.",
+        },
+        {
+          pergunta: "Se um atendimento não saiu como o cliente esperava, o melhor caminho é:",
+          opcoes: [
+            "Fingir que está tudo certo e não comentar nada",
+            "Ouvir com atenção e ver o que pode ser ajustado",
+            "Discutir que o cliente não entende do assunto",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Ouvir e ajustar transforma um problema em prova de que você se importa com o resultado dela.",
+          feedbackErro: "Repensa: ignorar ou discutir só afasta o cliente — ouvir é o que abre espaço pra ele confiar de novo.",
+        },
+        {
+          pergunta: "Um cliente satisfeito com o atendimento como um todo (não só a técnica) tende a:",
+          opcoes: [
+            "Voltar e falar bem de você pra outras pessoas",
+            "Isso não influencia se ele volta ou indica",
+            "Só voltar se você baixar o preço",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Experiência boa de verdade gera indicação de graça — o melhor tipo de propaganda que existe.",
+          feedbackErro: "Cuidado: a experiência completa é justamente o que mais influencia se ele volta e te indica.",
+        },
+      ],
+    },
+    {
+      slug: "pos-atendimento",
+      titulo: "Depois que o cliente sai",
+      descricao: "O contato pós-atendimento que mantém você na cabeça dele.",
+      icone: "ph-fill ph-chat-teardrop-dots",
+      perguntas: [
+        {
+          pergunta: "Mandar uma mensagem simples alguns dias depois do atendimento, perguntando como ficou o resultado:",
+          opcoes: [
+            "É chato e incomoda o cliente",
+            "Mostra cuidado e mantém você na lembrança dele",
+            "Só serve se o atendimento deu errado",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso aí! Uma mensagem breve mostra cuidado de verdade e faz seu nome ficar na cabeça do cliente.",
+          feedbackErro: "Repensa: mandada com naturalidade, essa mensagem soa como cuidado, não como incômodo.",
+        },
+        {
+          pergunta: "Se o cliente demora pra marcar um novo horário, uma boa prática é:",
+          opcoes: [
+            "Nunca mais entrar em contato",
+            "Mandar uma lembrança gentil, sem cobrar ou pressionar",
+            "Cobrar explicações sobre por que não voltou",
+          ],
+          correta: 1,
+          feedbackSucesso: "Exato! Uma lembrança gentil reaproxima sem parecer chato ou insistente demais.",
+          feedbackErro: "Cuidado: sumir de vez ou cobrar explicações afasta — o meio-termo gentil é o que reconquista.",
+        },
+        {
+          pergunta: "Guardar informações do cliente (preferências, datas, o que ele já fez) ajuda a:",
+          opcoes: [
+            "Nada, é só burocracia",
+            "Personalizar o próximo atendimento e mostrar atenção",
+            "Só importa se você usar um sistema caro",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Até um caderno simples com essas informações já melhora muito a experiência do cliente.",
+          feedbackErro: "Repensa: não precisa de sistema caro — o que importa é usar essa informação pra atender melhor.",
+        },
+        {
+          pergunta: "Comemorar datas importantes do cliente (aniversário, por exemplo) com uma mensagem rápida:",
+          opcoes: [
+            "É perda de tempo",
+            "Fortalece o vínculo e mostra que você se importa",
+            "Só faz sentido pra clientes que gastam muito",
+          ],
+          correta: 1,
+          feedbackSucesso: "Na régua! Esse tipo de gesto simples fortalece o vínculo com qualquer cliente, não só os que mais gastam.",
+          feedbackErro: "Cuidado: não é perda de tempo nem exclusividade de cliente grande — é um gesto simples que fideliza.",
+        },
+      ],
+    },
+    {
+      slug: "pedindo-indicacao",
+      titulo: "Pedindo indicação sem parecer chata",
+      descricao: "Como pedir avaliação e indicação de um jeito natural.",
+      icone: "ph-fill ph-megaphone",
+      perguntas: [
+        {
+          pergunta: "O melhor momento pra pedir uma avaliação ou indicação é:",
+          opcoes: [
+            "Logo depois que o cliente elogiou o resultado, satisfeito",
+            "No meio de um atendimento corrido",
+            "Nunca — é melhor esperar o cliente lembrar sozinho",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso aí! O momento de satisfação é o gancho natural pra pedir uma avaliação ou indicação.",
+          feedbackErro: "Repensa: esperar o cliente lembrar sozinho raramente funciona — o pedido natural vem logo após o elogio.",
+        },
+        {
+          pergunta: "Pedir pra um cliente satisfeito te marcar ou comentar nas redes sociais:",
+          opcoes: [
+            "É constrangedor e não deve ser feito",
+            "É uma forma simples e válida de divulgação",
+            "Só funciona pra quem já tem muitos seguidores",
+          ],
+          correta: 1,
+          feedbackSucesso: "Exato! Pedir com naturalidade é uma das formas mais simples e eficazes de divulgar seu trabalho.",
+          feedbackErro: "Cuidado: não precisa de muitos seguidores pra funcionar, e não tem nada de constrangedor em pedir com jeito.",
+        },
+        {
+          pergunta: "Oferecer um pequeno benefício (tipo desconto na próxima vez) pra quem indica um novo cliente:",
+          opcoes: [
+            "Não faz sentido nenhum",
+            "Pode incentivar indicações de forma saudável",
+            "Só funciona em negócio grande",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Um pequeno incentivo bem pensado motiva o cliente a te indicar mais vezes.",
+          feedbackErro: "Repensa: essa prática funciona em qualquer tamanho de negócio, inclusive o seu.",
+        },
+        {
+          pergunta: "Se um cliente elogia mas não comenta sobre indicar você, o ideal é:",
+          opcoes: [
+            "Perguntar com naturalidade se ele conhece alguém que também precisaria do serviço",
+            "Ficar esperando ele oferecer sozinho",
+            "Insistir de forma incômoda até ele indicar",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Perguntar com naturalidade abre a porta sem parecer chata ou insistente.",
+          feedbackErro: "Cuidado: ficar esperando ou insistir demais não funciona tão bem quanto um convite natural e leve.",
+        },
+      ],
+    },
+  ],
+};
+
+export const TRILHA_AGENDA_CHEIA: Trilha = {
+  slug: "agenda-cheia",
+  titulo: "Agenda Cheia",
+  descricao: "Organize horários, evite furo e lide com atraso sem perder a cabeça.",
+  icone: "ph-fill ph-calendar-check",
+  certificadoNome: "Agenda Cheia",
+  modulos: [
+    {
+      slug: "organizando-horarios",
+      titulo: "Organizando os horários",
+      descricao: "Como montar uma agenda que funciona pra você e pro cliente.",
+      icone: "ph-fill ph-calendar",
+      perguntas: [
+        {
+          pergunta: "Deixar um intervalo entre um atendimento e outro na agenda serve pra:",
+          opcoes: [
+            "Nada, é só tempo perdido",
+            "Absorver atrasos e não atropelar o próximo cliente",
+            "Só faz sentido em dia fraco de movimento",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso aí! Esse intervalo é o que evita que um atraso vire uma bola de neve no resto do dia.",
+          feedbackErro: "Repensa: esse intervalo não é tempo perdido — ele protege sua agenda em qualquer dia, cheio ou fraco.",
+        },
+        {
+          pergunta: "Anotar todos os agendamentos em um só lugar (caderno ou app), em vez de decorar ou espalhar em vários lugares:",
+          opcoes: [
+            "Evita esquecimento e choque de horários",
+            "Não faz diferença nenhuma",
+            "Só é necessário pra quem tem muitos clientes",
+          ],
+          correta: 0,
+          feedbackSucesso: "Exato! Um lugar só pra agenda evita esquecimento e choque de horário, mesmo com poucos clientes.",
+          feedbackErro: "Cuidado: essa organização ajuda desde o primeiro cliente — não é algo só pra agenda cheia de verdade.",
+        },
+        {
+          pergunta: "Confirmar o horário com o cliente um dia antes do atendimento:",
+          opcoes: [
+            "É desnecessário e chato",
+            "Reduz esquecimento e ajuda a evitar furo",
+            "Só vale pra cliente novo",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso mesmo! Uma confirmação simples no dia anterior já reduz bastante o risco de furo.",
+          feedbackErro: "Repensa: esse cuidado vale pra qualquer cliente, novo ou antigo — não é chato, é prevenção.",
+        },
+        {
+          pergunta: "Reservar um tempo fixo do seu dia só pra organizar a agenda da semana:",
+          opcoes: [
+            "É perda de tempo que podia ser usado atendendo",
+            "Ajuda a enxergar furos, encaixes e evitar sobrecarga",
+            "Só faz sentido se você tiver um assistente",
+          ],
+          correta: 1,
+          feedbackSucesso: "Na régua! Esse tempo de organização se paga evitando confusão e sobrecarga na semana.",
+          feedbackErro: "Cuidado: não precisa de assistente pra isso — é um hábito simples que qualquer profissional pode ter.",
+        },
+      ],
+    },
+    {
+      slug: "evitando-furos",
+      titulo: "Evitando furo e cancelamento",
+      descricao: "Práticas simples que reduzem falta e cancelamento de última hora.",
+      icone: "ph-fill ph-calendar-x",
+      perguntas: [
+        {
+          pergunta: "Pedir um sinal (valor adiantado) pra confirmar horários, principalmente com cliente novo:",
+          opcoes: [
+            "É abusivo e afasta cliente",
+            "É uma prática comum que reduz furo",
+            "Só grande empresa pode fazer isso",
+          ],
+          correta: 1,
+          feedbackSucesso: "Isso aí! Pedir sinal é uma prática comum e reduz bastante a chance de furo, especialmente com quem ainda não te conhece.",
+          feedbackErro: "Repensa: não é abusivo nem exclusividade de empresa grande — é uma prática comum e saudável.",
+        },
+        {
+          pergunta: "Ter uma política clara sobre cancelamento (por exemplo, avisar com quantas horas de antecedência):",
+          opcoes: [
+            "Não é necessário combinar isso com o cliente",
+            "Ajuda a evitar mal-entendido e furo de última hora",
+            "Só serve pra afastar cliente",
+          ],
+          correta: 1,
+          feedbackSucesso: "Exato! Deixar a política clara desde o início evita mal-entendido e protege sua agenda.",
+          feedbackErro: "Cuidado: combinar isso não afasta cliente — na verdade, deixa a relação mais profissional e clara.",
+        },
+        {
+          pergunta: "Quando um cliente cancela de última hora com frequência, o ideal é:",
+          opcoes: [
+            "Conversar com clareza sobre isso, sem embaraço",
+            "Nunca comentar nada, mesmo incomodando",
+            "Parar de atender sem nenhuma explicação",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso mesmo! Uma conversa clara e sem embaraço resolve isso melhor do que ficar calada ou sumir sem explicar.",
+          feedbackErro: "Repensa: ficar calada ou sumir sem explicação não resolve — uma conversa direta é o caminho mais saudável.",
+        },
+        {
+          pergunta: "Preencher um horário vago de cancelamento com lista de espera ou aviso rápido pra outros clientes:",
+          opcoes: [
+            "É uma boa forma de não perder o horário parado",
+            "Não vale o esforço",
+            "Só funciona em salão grande",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Preencher o horário vago rapidamente evita que o cancelamento vire prejuízo total.",
+          feedbackErro: "Cuidado: vale o esforço em qualquer tamanho de negócio — é uma forma simples de reduzir a perda.",
+        },
+      ],
+    },
+    {
+      slug: "lidando-atrasos",
+      titulo: "Lidando com atraso com profissionalismo",
+      descricao: "O que fazer quando você ou o cliente atrasa, sem estragar o dia.",
+      icone: "ph-fill ph-clock-countdown",
+      perguntas: [
+        {
+          pergunta: "Se você percebe que vai se atrasar para um atendimento, o melhor é:",
+          opcoes: [
+            "Avisar o cliente assim que perceber, com sinceridade",
+            "Não falar nada e torcer pra dar certo",
+            "Só avisar se o cliente perguntar primeiro",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso aí! Avisar cedo, com sinceridade, é o que mantém a confiança mesmo quando o imprevisto acontece.",
+          feedbackErro: "Repensa: ficar calada ou esperar o cliente perguntar só piora a sensação de descaso.",
+        },
+        {
+          pergunta: "Quando um cliente chega atrasado, uma postura profissional é:",
+          opcoes: [
+            "Explicar com calma como isso afeta o restante da agenda do dia",
+            "Fingir que não tem problema nenhum, mesmo afetando os próximos clientes",
+            "Descontar a irritação na hora",
+          ],
+          correta: 0,
+          feedbackSucesso: "Exato! Explicar com calma o impacto na agenda é mais profissional do que ficar irritada ou fingir que está tudo bem.",
+          feedbackErro: "Cuidado: descontar irritação ou fingir que não afeta nada não resolve — clareza calma é o melhor caminho.",
+        },
+        {
+          pergunta: "Ter uma margem de tolerância combinada para atraso (por exemplo, 10 a 15 minutos) ajuda a:",
+          opcoes: [
+            "Deixar claro pros dois lados o que é razoável, sem crise a cada minuto",
+            "Não serve pra nada na prática",
+            "Só é útil se você atender em clínica",
+          ],
+          correta: 0,
+          feedbackSucesso: "Isso mesmo! Uma margem combinada evita drama a cada minuto de atraso e deixa a relação mais tranquila.",
+          feedbackErro: "Repensa: essa prática funciona em qualquer tipo de atendimento, não só em clínica.",
+        },
+        {
+          pergunta: "Depois de um dia com atraso e imprevisto, revisar o que aconteceu pra ajustar a agenda futura:",
+          opcoes: [
+            "É uma forma de aprender e evitar repetir o mesmo problema",
+            "Não adianta nada, imprevisto sempre vai acontecer",
+            "Só faz sentido se o imprevisto foi grave",
+          ],
+          correta: 0,
+          feedbackSucesso: "Na régua! Revisar o que aconteceu, mesmo em imprevisto pequeno, é o que te ajuda a ajustar e evitar repetição.",
+          feedbackErro: "Cuidado: mesmo imprevisto pequeno vale revisar — é assim que sua agenda vai ficando cada vez mais afiada.",
+        },
+      ],
+    },
+  ],
+};
+
 /** Todas as trilhas disponíveis — a ordem aqui é a ordem de exibição na listagem */
-export const TRILHAS: Trilha[] = [TRILHA_AUTOESTIMA, TRILHA_PRECO_JUSTO, TRILHA_MAOS_SEGURAS];
+export const TRILHAS: Trilha[] = [TRILHA_AUTOESTIMA, TRILHA_PRECO_JUSTO, TRILHA_MAOS_SEGURAS, TRILHA_CLIENTE_FIEL, TRILHA_AGENDA_CHEIA];
 
 export function getTrilha(slug: string): Trilha | undefined {
   return TRILHAS.find((t) => t.slug === slug);
