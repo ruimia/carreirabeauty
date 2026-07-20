@@ -4,6 +4,7 @@ export const metadata = { title: "Suas conquistas" };
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { TRILHA_AUTOESTIMA } from "@/lib/quizContent";
 import { calcularConquistas, checksPerfil } from "@/lib/conquistas";
 import VoltarLink from "@/components/VoltarLink";
@@ -67,42 +68,56 @@ export default async function ConquistasPage() {
           </p>
         </div>
 
-        {/* Lista detalhada */}
+        {/* Lista detalhada — não conquistada + com destino vira link direto
+            pro próximo passo, não só descrição */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {conquistas.map((c) => (
-            <div key={c.slug} className="job-feed-card" style={{
-              display: "flex", alignItems: "center", gap: 14,
-              borderLeft: c.done ? "3px solid var(--color-success-fg)" : "3px solid var(--border-default)",
-            }}>
-              <span style={{
-                width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
-                background: c.done ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
-                color: c.done ? "var(--color-brand-primary)" : "var(--text-tertiary)",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 21,
-                border: c.done ? "1.5px solid var(--brand-magenta-100)" : "1.5px dashed var(--border-default)",
+          {conquistas.map((c) => {
+            const acionavel = !c.done && c.href;
+            const conteudo = (
+              <div className="job-feed-card" style={{
+                display: "flex", alignItems: "center", gap: 14,
+                borderLeft: c.done ? "3px solid var(--color-success-fg)" : "3px solid var(--border-default)",
               }}>
-                <i className={c.done ? c.icon : "ph ph-lock-simple"}></i>
-              </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>{c.nome}</p>
-                  {c.done && (
-                    <span className="status-pill" style={{ background: "var(--color-success-bg)", color: "var(--color-success-fg)" }}>
-                      <i className="ph-fill ph-check-circle"></i> Conquistada
-                    </span>
+                <span style={{
+                  width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
+                  background: c.done ? "var(--brand-magenta-50)" : "var(--surface-sunken)",
+                  color: c.done ? "var(--color-brand-primary)" : "var(--text-tertiary)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 21,
+                  border: c.done ? "1.5px solid var(--brand-magenta-100)" : "1.5px dashed var(--border-default)",
+                }}>
+                  <i className={c.done ? c.icon : "ph ph-lock-simple"}></i>
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <p style={{ font: "600 15px/1.3 var(--font-display)", color: "var(--text-primary)" }}>{c.nome}</p>
+                    {c.done && (
+                      <span className="status-pill" style={{ background: "var(--color-success-bg)", color: "var(--color-success-fg)" }}>
+                        <i className="ph-fill ph-check-circle"></i> Conquistada
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.45 }}>
+                    {c.comoConquistar}
+                  </p>
+                  {!c.done && c.progresso && (
+                    <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--color-brand-primary)", marginTop: 6 }}>
+                      {c.progresso}
+                    </p>
+                  )}
+                  {acionavel && (
+                    <p style={{ font: "700 13px/1 var(--font-body)", color: "var(--color-brand-primary)", marginTop: 8, display: "flex", alignItems: "center", gap: 4 }}>
+                      {c.cta} <i className="ph-bold ph-arrow-right" style={{ fontSize: 12 }}></i>
+                    </p>
                   )}
                 </div>
-                <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.45 }}>
-                  {c.comoConquistar}
-                </p>
-                {!c.done && c.progresso && (
-                  <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--color-brand-primary)", marginTop: 6 }}>
-                    {c.progresso}
-                  </p>
-                )}
+                {acionavel && <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>}
               </div>
-            </div>
-          ))}
+            );
+
+            return acionavel
+              ? <Link key={c.slug} href={c.href!} style={{ textDecoration: "none" }}>{conteudo}</Link>
+              : <div key={c.slug}>{conteudo}</div>;
+          })}
         </div>
       </main>
     </div>

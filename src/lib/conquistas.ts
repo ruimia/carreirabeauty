@@ -12,6 +12,10 @@ export interface Conquista {
   done: boolean;
   /** progresso parcial, quando a conquista é contável (ex: "2 de 5") */
   progresso?: string;
+  /** pra onde o CTA leva enquanto não conquistada — omitido quando done */
+  href?: string;
+  /** rótulo do CTA (ex: "Editar perfil") — omitido quando done */
+  cta?: string;
 }
 
 export interface EntradaConquistas {
@@ -42,6 +46,8 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       icon: "ph-fill ph-camera",
       comoConquistar: "Coloque uma foto sua no perfil",
       done: e.temFoto,
+      href: "/dashboard/profissional/perfil",
+      cta: "Adicionar foto",
     },
     {
       slug: "perfil-completo",
@@ -50,6 +56,8 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       comoConquistar: "Preencha os 6 itens do seu perfil",
       done: e.itensPerfilFeitos >= e.itensPerfilTotal,
       progresso: `${Math.min(e.itensPerfilFeitos, e.itensPerfilTotal)} de ${e.itensPerfilTotal}`,
+      href: "/dashboard/profissional/perfil",
+      cta: "Completar perfil",
     },
     {
       slug: "portfolio",
@@ -58,6 +66,8 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       comoConquistar: `Adicione ${PORTFOLIO_META} fotos do seu trabalho`,
       done: e.portfolioCount >= PORTFOLIO_META,
       progresso: `${Math.min(e.portfolioCount, PORTFOLIO_META)} de ${PORTFOLIO_META}`,
+      href: "/dashboard/profissional/perfil",
+      cta: "Adicionar fotos",
     },
     {
       slug: "primeira-candidatura",
@@ -65,6 +75,8 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       icon: "ph-fill ph-paper-plane-tilt",
       comoConquistar: "Candidate-se a uma vaga",
       done: e.candidaturas >= 1,
+      href: "/dashboard/profissional",
+      cta: "Ver vagas",
     },
     {
       slug: "em-movimento",
@@ -73,6 +85,8 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       comoConquistar: `Candidate-se a ${CANDIDATURAS_META} vagas`,
       done: e.candidaturas >= CANDIDATURAS_META,
       progresso: `${Math.min(e.candidaturas, CANDIDATURAS_META)} de ${CANDIDATURAS_META}`,
+      href: "/dashboard/profissional",
+      cta: "Ver vagas",
     },
     {
       slug: "comecou-estudar",
@@ -80,6 +94,8 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       icon: "ph-fill ph-graduation-cap",
       comoConquistar: "Conclua o primeiro módulo de uma trilha",
       done: e.modulosFeitos >= 1,
+      href: "/dashboard/profissional/quiz",
+      cta: "Ir pra trilha",
     },
     {
       slug: "trilha-concluida",
@@ -88,6 +104,8 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       comoConquistar: "Conclua todos os módulos da trilha e ganhe seu certificado",
       done: e.modulosTotal > 0 && e.modulosFeitos >= e.modulosTotal,
       progresso: `${Math.min(e.modulosFeitos, e.modulosTotal)} de ${e.modulosTotal}`,
+      href: "/dashboard/profissional/quiz",
+      cta: "Continuar trilha",
     },
   ];
 }
