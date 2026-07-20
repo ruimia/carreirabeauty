@@ -116,7 +116,7 @@ export default async function CrescerHubPage() {
               ? "Trilha completa! Resgate seu certificado"
               : certificadosConquistados > 0
                 ? `${certificadosConquistados} de ${trilhasTotal} conquistados`
-                : "Complete trilhas rápidas e ganhe certificados pro seu site"}
+                : "Complete trilhas rápidas e ganhe certificados pro seu perfil"}
             badge={certificadosConquistados > 0 ? `${certificadosConquistados}/${trilhasTotal}` : undefined}
           />
         </div>

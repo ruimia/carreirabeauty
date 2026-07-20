@@ -15,6 +15,7 @@ import TemplateVitrine from "@/components/perfilTemplates/TemplateVitrine";
 import TemplateElegante from "@/components/perfilTemplates/TemplateElegante";
 import TemplateAurora from "@/components/perfilTemplates/TemplateAurora";
 import TemplateEstudio from "@/components/perfilTemplates/TemplateEstudio";
+import { TRILHAS } from "@/lib/quizContent";
 
 const TEMPLATE_COMPONENTES = {
   classico: TemplateClassico,
@@ -40,7 +41,7 @@ interface ExpItem { empresa: string; cargo: string; periodo: string; }
 interface HabilidadeItem { nome: string; profissao: string | null; }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PerfilProfissionalForm({ professional: p, email, profissoes, habilidades }: { professional: any; email: string; profissoes: string[]; habilidades: HabilidadeItem[] }) {
+export default function PerfilProfissionalForm({ professional: p, email, profissoes, habilidades, certificadosSlugs }: { professional: any; email: string; profissoes: string[]; habilidades: HabilidadeItem[]; certificadosSlugs: string[] }) {
   const router = useRouter();
   const supabase = createClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -412,6 +413,44 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
                 <i className="ph ph-caret-right" style={{ color: "var(--text-tertiary)", flexShrink: 0 }}></i>
               </button>
             )}
+
+            {/* Certificados — cada trilha vira uma "figurinha" na coleção; as
+                não conquistadas ficam cinza/cadeado de propósito, pra virar
+                algo que dá vontade de completar (não um espaço vazio triste).
+                Só o dono vê essa vitrine — o perfil público não mostra. */}
+            <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 10 }}>
+              Certificados
+            </p>
+            <Link href="/dashboard/profissional/quiz" style={{ textDecoration: "none" }}>
+              <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+                {TRILHAS.map((t) => {
+                  const ganho = certificadosSlugs.includes(t.slug);
+                  return (
+                    <div key={t.slug} style={{
+                      flex: 1, textAlign: "center", padding: "14px 6px", borderRadius: "var(--radius-md)",
+                      border: ganho ? "1.5px solid var(--brand-magenta-100)" : "1.5px dashed var(--border-default)",
+                      background: ganho ? "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))" : "var(--surface-sunken)",
+                    }}>
+                      <div style={{
+                        width: 40, height: 40, margin: "0 auto 8px", borderRadius: "50%",
+                        background: ganho ? "linear-gradient(135deg, #DC00DC, #ffb020)" : "var(--surface-card)",
+                        color: ganho ? "#fff" : "var(--text-tertiary)",
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
+                        boxShadow: ganho ? "0 4px 12px rgba(220,0,220,0.25)" : "none",
+                      }}>
+                        <i className={ganho ? "ph-fill ph-medal" : "ph ph-lock-simple"}></i>
+                      </div>
+                      <p style={{
+                        font: "600 11px/1.3 var(--font-body)",
+                        color: ganho ? "var(--text-primary)" : "var(--text-tertiary)",
+                      }}>
+                        {t.certificadoNome}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </Link>
 
             <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 10 }}>
               Como as empresas veem seu perfil
