@@ -48,7 +48,7 @@ export default async function DepoimentoPage({ params }: { params: Promise<{ slu
               </div>
           }
           <p style={{ font: "800 20px/1.3 var(--font-display)", color: "var(--text-primary)" }}>
-            Como foi seu atendimento com {p.nome}?
+            Como foi sua experiência com {p.nome}?
           </p>
           <p style={{ font: "var(--text-body-sm)", color: "var(--text-secondary)", marginTop: 6 }}>
             Seu depoimento ajuda outras pessoas a conhecerem o trabalho dela. 💅
