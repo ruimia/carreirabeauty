@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import CandidaturaSection from "./CandidaturaSection";
 import CandidatarFloatingButton from "./CandidatarFloatingButton";
+import VoltarLink from "@/components/VoltarLink";
 import type { Metadata } from "next";
 import { APP_URL, buildJobPostingLd } from "@/lib/seo";
 
@@ -126,6 +127,12 @@ export default async function VagaPage({ params }: Props) {
         padding: "0 var(--space-page-x)", height: 56,
         display: "flex", alignItems: "center", gap: 12,
       }}>
+        {/* Seta só pra quem está logada — é ela quem tem pra onde voltar
+            (o próprio feed). Visitante anônimo (link do Google/redes) não
+            tem dashboard, então só a marca faz sentido aqui. */}
+        {professionalId && (
+          <VoltarLink fallbackHref="/dashboard/profissional" />
+        )}
         <Link href="/" style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--color-brand-primary)", textDecoration: "none" }}>
           CarreiraBeauty
         </Link>
