@@ -568,6 +568,8 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 
 ### a) Quiz-certificado (estilo Duolingo, aplicado à carreira)
 
+> **✅ Implementado e evoluído (jul/2026):** o piloto rodou e a arquitetura foi generalizada de "uma trilha só" pra um **catálogo de 5 certificados** (`src/lib/quizContent.ts`, `TRILHAS[]`): Atendimento Nota 10 (a trilha piloto, renomeada — ver nota abaixo), Preço Justo, Mãos Seguras, Cliente Fiel e Agenda Cheia. Feedback por pergunta foi implementado de verdade estilo Duolingo (certo/errado + explicação imediata, não só no final). O paywall do certificado ficou como planejado (só no resgate), mas o preço avulso saiu diferente do sugerido: **R$29,90**, não R$9,90 — de propósito **acima** da assinatura PRO (R$14,90/mês), pra ancorar o PRO como a escolha óbvia (o doc original sugeria avulso como opção de "baixo compromisso"; na prática decidimos o oposto). Admin ganhou página de funil (`/admin/quiz`) com seletor de trilha. Streak/limite diário continua não implementado (registrado como evolução futura, como já previsto).
+
 **Hipótese:** quiz curto e gamificado sobre temas da profissão (atendimento, técnica, precificação, etc.), com certificado/badge ao final — o valor percebido está no certificado (objeto de status, compartilhável), não necessariamente no conteúdo do quiz em si.
 
 **Modelo proposto (versão evoluída, com limite diário):**
@@ -594,22 +596,22 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 5. **Impondo limites com respeito** — dizer não, cobrar atraso, recusar pedido fora do combinado sem soar rude
 6. **Autoconfiança e superando a insegurança** — lidar com a sensação de "não ser boa o suficiente", reconhecer o próprio valor
 
-**Nome do certificado:** "Atendimento e Postura Profissional Certificado" — nome pensado pra também fazer sentido numa futura tela de recrutamento pro lado empresa, não só como badge de autoestima.
+**Nome do certificado:** ~~"Atendimento e Postura Profissional Certificado"~~ → **renomeado pra "Atendimento Nota 10"** (jul/2026), com tagline própria — nome mais curto e aspiracional que soa como algo que a profissional quer ter, testado junto com os nomes dos 2 certificados novos (Preço Justo, Mãos Seguras).
 
 - [x] Trilha piloto definida e priorizada: Autoestima e Postura Profissional (substitui "Domínio da Profissão" como primeira a construir)
 - [x] **Modelo do teste inicial:** os 6 módulos ficam **todos liberados sem limite** para qualquer pessoa fazer — sem rate-limit diário nessa fase. O paywall acontece **só no resgate do certificado** ao concluir a trilha inteira (PRO ou avulso, a definir no teste)
-- [ ] **Pronto para implementação pelo Claude Code:** construir o módulo de quiz com esses 6 módulos liberados, com paywall apenas no resgate do certificado final (dentro do PRO unificado ou avulso R$9,90), reaproveitando a entidade `Subscription` já existente (seção 4/10) pra verificação de acesso no momento do resgate
-- [ ] Banco de perguntas dos 6 módulos ainda por escrever (conteúdo a produzir antes ou durante a implementação técnica)
-- [ ] Estrutura de dados a detalhar: `Quiz`, `QuizModule`, `QuizAttempt`, `Certificate` (extensão do modelo, seção 10)
+- [x] Implementado: módulo de quiz com paywall no resgate (PRO unificado ou avulso R$29,90)
+- [x] Banco de perguntas dos 6 módulos escrito, com feedback de acerto/erro por pergunta (estilo Duolingo)
+- [x] Estrutura de dados implementada: `quiz_progresso`, `certificados` (multi-trilha, migration 041), `pagamentos_avulsos` (migration 040)
+- [x] **Extensão além do escopo original (jul/2026):** catálogo cresceu de 1 pra 5 certificados — ver nota "✅ Implementado e evoluído" acima
 
 ### b) Depoimentos/recomendações estilo LinkedIn
 
 **Hipótese:** recomendação escrita, nomeada, de cliente/parceiro/ex-empregador é prova social mais forte que uma nota numérica — reforça tanto a credibilidade real do perfil quanto o sinal de status.
 
-- [ ] Diferente da "captura de avaliação de cliente" já prevista na seção 7.9.1 (link enviado pós-atendimento, formato nota/review curto) — aqui é recomendação **nomeada e textual**, no estilo LinkedIn ("Fulano trabalhou comigo em X, recomendo por Y")
-- [ ] Fluxo: profissional envia link de pedido de recomendação pra cliente/parceiro/ex-empregador → pessoa escreve texto curto → aparece no perfil público, com nome e relação (cliente, colega, ex-empregador)
-- [ ] Baixo custo de construção (reaproveita padrão de link de convite já desenhado pra avaliação, seção 7.9.1) — mas é feature nova de exibição, não é o mesmo dado
-- [ ] Posicionamento: recurso do PRO (reforça vitrine), grátis pode ter limite de quantidade exibida (ex: 1 depoimento) vs. PRO ilimitado — mesma lógica de preview aberto + limite no grátis já usada em outras features
+> **✅ Implementado (jul/2026), em formato mais simples que a hipótese original:** construído como avaliação de cliente (estrelas + texto + nome), não como recomendação nomeada por relação (cliente/colega/ex-empregador) — mais próximo da "captura de avaliação de cliente" da seção 7.9.1 do que do formato LinkedIn descrito aqui. Fluxo: profissional compartilha link público `/perfil/{slug}/depoimento` (sem exigir conta do cliente) → cliente avalia com estrelas + texto + WhatsApp (privado, só o profissional vê) → fica **pendente até o profissional aprovar** em `/dashboard/profissional/depoimentos` → só aprovados aparecem no perfil público. **Sem gate de PRO** (diferente do que este item sugeria) — decisão foi deixar grátis pra todo mundo, sem limite de quantidade exibida, pra maximizar adoção da prova social desde já. Unicidade por telefone+profissional evita o mesmo cliente avaliar duas vezes. Painel de stats no admin (`/admin/depoimentos`): adoção, taxa de aprovação, nota média.
+>
+> Formato "recomendação nomeada estilo LinkedIn" (relação cliente/colega/ex-empregador) **continua não implementado** — registrado como possível evolução futura caso o formato atual (nota + texto) não seja suficiente.
 
 ### c) Fotos: portfólio + certificados de curso externo + prints de depoimento
 
@@ -669,6 +671,7 @@ Conceito: o perfil do profissional vira uma página pública própria — funcio
 - [x] **Ancoragem de preço:** "de R$ 29" riscado + selo "🔥 PROMO" no lugar de "Recomendado"
 - [x] **Objeção de fidelidade quebrada no ponto certo** — selo verde "Sem fidelidade. Cancele quando quiser, sem multa." logo abaixo do preço. A ressalva já existia, mas em 11px cinza no rodapé, invisível justamente pra quem tem a dúvida
 - [x] **Mobile sem scroll** — os 2 planos, o CTA e o selo de fidelidade cabem acima da dobra em 375x812 (validado). Cards ficaram lado a lado mesmo no celular, com as mesmas 5 linhas de benefício nos dois, virando comparação direta em vez de duas listas soltas
+- [x] **Experimento (jul/2026) — tag "PRO" tirada da fase de exploração:** temas visuais (aba Visual) e conteúdos PRO deixaram de mostrar aviso antecipado de bloqueio (badge "PRO" no seletor, cadeado na lista de conteúdo) — a pessoa navega/abre tudo livremente, e o paywall real só aparece no momento de aplicar o tema ou tentar ler além do trecho liberado. Hipótese: quem já "viu como fica" sente mais perda ao não poder manter do que quem nunca provou.
 - [ ] **⚠️ Pendência (vira problema no 1º assinante):** não existe cancelamento dentro do app. O cancelamento real acontece na conta do Mercado Pago (o webhook detecta e marca `plano_status: 'cancelado'`) — por isso o rodapé diz isso explicitamente, em vez de prometer "cancele pelo app". Pior: pra quem já é PRO, o card grátis mostra **"Fazer downgrade", que é um `<div>` decorativo sem `onClick`** — é exatamente onde o assinante clicaria pra cancelar, e não faz nada. Hoje é inofensivo (0 assinantes), mas vira ticket de suporte e quebra de confiança no momento mais sensível. Saídas: (a) o botão levar pro MP com instruções, ou (b) implementar cancelamento de verdade via API do MP
 
 ---
@@ -882,9 +885,12 @@ Objetivo: mostrar volume de vagas reais na região do profissional mesmo enquant
 - [x] Matching por função do profissional além da localização — antes qualquer profissional da cidade via as mesmas vagas
 - [x] Card mostra salário, "há X dias" e trecho da descrição. **Salário convertido de anual pra mensal** — a Adzuna sempre retorna anualizado (padrão deles pra comparação entre países), o que exibiria "R$ 24.000" pra uma vaga de R$ 2.000/mês
 - [x] Métrica de validação instrumentada: `vagas_externas_clicks` (clique em vaga agregada), com stats no admin — **aguardando dado real**
-- [x] **Cobertura atual:** ~970 vagas cacheadas em 29 cidades (as que têm profissional cadastrado). Total nacional disponível na Adzuna ≈ 2.650 vagas de beleza — dá pra ampliar pra capitais sem profissional ainda, sem estourar cota (250 chamadas/dia; hoje ~29 por execução)
-- [x] **Decisão (jul/2026): sem cron, atualização manual pelo admin** — botão "Atualizar cache da Adzuna agora" em `/admin/vagas-externas` mostra o resultado na hora (cidades processadas, chamadas feitas, vagas encontradas, erros) e registra em `vagas_externas_atualizacoes`. Usuário optou por rodar ~1x/semana e manter controle, em vez de agendar
-- [ ] **Pendência conhecida:** a Adzuna não reconhece "Embu das Artes" (nome oficial desde 2006) e retorna 0 pra qualquer busca lá — a base de localização deles ainda usa "Embu". Aceito por ora (1 de 29 cidades); se aparecerem mais casos, vale um mapa de nomes alternativos
+- [x] **Cobertura atual (atualizado jul/2026):** ~3.140 vagas cacheadas em 36 cidades (as que têm profissional cadastrado) — cresceu de ~970/29 depois de rodar a busca de novo com o catálogo de profissões ampliado. Ainda assim, ~17% dos profissionais ficam com 0 vaga relevante pra função deles (rate limit do plano free da Adzuna limita quanto uma rodada cobre; rodar de novo tende a fechar mais lacunas, é upsert/idempotente)
+- [x] **Profissões faltantes adicionadas (jul/2026):** Fisioterapeuta e Biomédico(a) existiam na base de profissionais mas nunca entravam nem na busca nem no filtro de "núcleo de beleza" — corrigido em `TERMOS_BELEZA`/`NUCLEO_BELEZA` (`src/lib/adzuna.ts` e `scripts/fetch-vagas-adzuna.mjs`)
+- [x] **Fallback por bairro/CEP (jul/2026):** quando a cidade inteira não rende 5+ vagas relevantes pra função do profissional, refaz a busca ancorada no bairro dele (já resolvido a partir do CEP no cadastro) com raio de 60km — salva sob a mesma `cidade_busca`, aparece transparente na mesma lista
+- [x] **Dedup de reposts (jul/2026):** a Adzuna agrega o mesmo anúncio repostado várias vezes com `external_id` diferente a cada vez (achado real: uma vaga com 11 cópias ocupando quase toda a lista de 5 exibidas). Corrigido com dedup por título+empresa antes de exibir, no lado do app (não no cache)
+- [x] **Decisão (jul/2026): sem cron, atualização manual pelo admin** — botão "Atualizar cache da Adzuna agora" em `/admin/vagas-externas` mostra o resultado na hora (cidades processadas, chamadas feitas, vagas encontradas, vagas de reforço por bairro, erros) e registra em `vagas_externas_atualizacoes`. Usuário optou por rodar manualmente quando quiser, em vez de agendar
+- [ ] **Pendência conhecida:** a Adzuna não reconhece "Embu das Artes" (nome oficial desde 2006) e retorna 0 pra qualquer busca lá — a base de localização deles ainda usa "Embu". Aceito por ora; se aparecerem mais casos, vale um mapa de nomes alternativos
 - [ ] **Pendência:** trocar o selo de texto pela imagem oficial "Jobs by Adzuna" (obrigação contratual de atribuição)
 
 ### ⚠️ Decisão estratégica — NÃO expandir escopo para negócios locais fora de beleza (jul/2026)
