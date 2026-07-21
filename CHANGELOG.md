@@ -2,6 +2,45 @@
 
 Registro da evolução do projeto. Mantido manualmente a cada sessão relevante de trabalho.
 
+## 2026-07-21 — Trilhas/certificados multi-tema, Depoimentos (feature nova), Adzuna e limpeza de UX
+
+### 🔴 Bugs corrigidos
+
+- **Webhook do Mercado Pago nunca liberava PRO de verdade.** Usava o client de sessão (cookie), mas notificação de webhook não tem `auth.uid()` — RLS bloqueava silenciosamente o update em `professionals`/`companies`. Corrigido migrando pra client de service role. Também adicionada validação de assinatura HMAC do webhook (`x-signature`/`x-request-id`).
+- **Contagem de candidatos sempre voltava 1.** Mesma causa-raiz (RLS + client de sessão) em `contarCandidatos()` — cada profissional só enxergava a própria candidatura. Corrigido com client admin nesse ponto específico.
+- **Vagas externas (Adzuna) apareciam duplicadas.** A Adzuna agrega o mesmo anúncio repostado várias vezes com `external_id` diferente (achado real: uma vaga com 11 cópias). A trava do banco não pega isso porque o ID é diferente a cada repost — corrigido com dedup por título+empresa antes de exibir as 5 vagas.
+- **Sem jeito de voltar na página de vaga.** `/vaga/[slug]` é rota pública (link do Google/redes), por isso fica fora do layout do dashboard (sem o menu inferior) — mas o profissional logado ficava sem seta de voltar ao clicar numa vaga do próprio feed. Corrigido: seta aparece só quando tem profissional logado, com fallback pro dashboard.
+
+### ✨ Novidades
+
+- **Quiz estilo Duolingo**: feedback imediato (certo/errado + explicação) a cada pergunta, em vez de só no final.
+- **"Destaque-se entre os candidatos"**: toda candidatura agora mostra 3 caminhos (virar PRO, ganhar certificados, completar perfil), com contagem real de concorrentes (só exibida acima de 10 candidatos).
+- **Certificado avulso (R$29,90)** via Mercado Pago Checkout Pro, precificado de propósito acima da assinatura PRO (R$14,90/mês) pra ancorar o PRO como a escolha óbvia.
+- **Arquitetura multi-trilha**: generalizado de uma trilha única hardcoded pra um catálogo (`TRILHAS[]`). Catálogo atual (5 certificados): Atendimento Nota 10, Preço Justo, Mãos Seguras, Cliente Fiel, Agenda Cheia — os 2 últimos criados nesta sessão, com tema não específico de profissão (fidelização e organização de agenda).
+- **Admin**: página de jornada do quiz agora tem seletor de trilha, com funil e conclusão por módulo específicos de cada uma.
+- **Feature nova — Depoimentos de clientes**: link público (`/perfil/{slug}/depoimento`, sem login) onde o cliente avalia com estrelas + texto + WhatsApp; fica pendente até o profissional aprovar em `/dashboard/profissional/depoimentos`; só aprovados aparecem no perfil público (tema Clássico por enquanto). Inclui mensagens prontas pra copiar e pedir, card de compartilhar link, unicidade por telefone (evita duplicidade do mesmo cliente) e painel de stats no admin (adoção, taxa de aprovação, nota média).
+- **Home do profissional reorganizada**: só "Complete seu perfil" abre a página agora; Certificados e Depoimentos viraram "Continue evoluindo" no final, depois de vagas e conquistas.
+- **Vitrine de certificados no "Meu perfil"**: trilhas conquistadas/pendentes aparecem como "figurinha" (só o dono vê), reposicionada pro fim da página, depois do portfólio.
+- **Certificado — visual da prévia mais aspiracional**: usa a mesma moldura dourada do estado conquistado (antes era cinza/listrado), com dica de "você vai poder compartilhar isso".
+- **Experimento — tags "PRO" removidas da exploração**: seletor de temas visuais e lista de conteúdo não mostram mais aviso antecipado de bloqueio; o aviso real (paywall) só aparece no momento de aplicar o tema ou tentar ler além do trecho liberado.
+- **Adzuna — profissões e cobertura geográfica**: adicionadas Fisioterapeuta e Biomédico(a) (existiam na base mas nunca entravam na busca); novo fallback por bairro (resolvido a partir do CEP no cadastro) quando a cidade inteira não rende 5+ vagas relevantes pra função do profissional.
+- **Conquistas**: "Em movimento" (5 candidaturas) trocada por "Colheu o 1º depoimento" — a oferta de vagas ainda é baixa pra justificar aquela meta.
+
+### 🗄️ Migrations aplicadas (040 → 042)
+
+| # | O que faz |
+|---|---|
+| 040 | Certificado avulso: coluna `certificado_autoestima_origem` + tabela `pagamentos_avulsos` |
+| 041 | Generaliza certificados pra multi-trilha: tabela `certificados` (professional_id, trilha_slug, origem) |
+| 042 | Depoimentos de clientes: tabela `depoimentos` (estrelas, texto, status pendente/aprovado/rejeitado, unique por telefone+profissional) |
+
+### 📌 Decisões
+
+- Certificado avulso **sempre mais caro** que a assinatura PRO mensal — ancoragem de preço proposital.
+- Depoimentos **v1 sem validação do cliente** (não exige conta) — moderação manual do profissional é o único filtro contra spam/abuso.
+- WhatsApp do cliente no depoimento é **privado**, visível só pro profissional dono do perfil — nunca público.
+- Tags "PRO" tiradas só da fase de exploração, nunca do momento em que a pessoa tentaria de fato ficar com o tema/conteúdo — evita parecer pegadinha.
+
 ## 2026-07-10 — Bugs críticos de produção + design system + admin
 
 ### 🔴 Bugs críticos corrigidos
