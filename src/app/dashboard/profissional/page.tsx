@@ -231,6 +231,7 @@ export default async function DashboardProfissionalPage() {
     modulosFeitosTotal,
     trilhasConcluidas,
     trilhasTotal,
+    depoimentosAprovados: depoimentosAprovados ?? 0,
   });
   const conquistasFeitas = conquistas.filter((c) => c.done).length;
 

@@ -29,10 +29,11 @@ export interface EntradaConquistas {
   /** quantas trilhas inteiras já foram concluídas */
   trilhasConcluidas: number;
   trilhasTotal: number;
+  /** depoimentos já aprovados (visíveis no perfil) */
+  depoimentosAprovados: number;
 }
 
 const PORTFOLIO_META = 3;
-const CANDIDATURAS_META = 5;
 
 export function calcularConquistas(e: EntradaConquistas): Conquista[] {
   return [
@@ -82,14 +83,13 @@ export function calcularConquistas(e: EntradaConquistas): Conquista[] {
       cta: "Ver vagas",
     },
     {
-      slug: "em-movimento",
-      nome: "Em movimento",
-      icon: "ph-fill ph-lightning",
-      comoConquistar: `Candidate-se a ${CANDIDATURAS_META} vagas`,
-      done: e.candidaturas >= CANDIDATURAS_META,
-      progresso: `${Math.min(e.candidaturas, CANDIDATURAS_META)} de ${CANDIDATURAS_META}`,
-      href: "/dashboard/profissional",
-      cta: "Ver vagas",
+      slug: "primeiro-depoimento",
+      nome: "Colheu o 1º depoimento",
+      icon: "ph-fill ph-chat-centered-text",
+      comoConquistar: "Peça pra um cliente deixar um depoimento e aprove ele",
+      done: e.depoimentosAprovados >= 1,
+      href: "/dashboard/profissional/depoimentos",
+      cta: "Pedir depoimento",
     },
     {
       slug: "comecou-estudar",

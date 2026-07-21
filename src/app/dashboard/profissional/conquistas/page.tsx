@@ -21,9 +21,10 @@ export default async function ConquistasPage() {
     .single();
   if (!professional) redirect("/onboarding/tipo");
 
-  const [{ count: candidaturas }, { data: quizProgresso }] = await Promise.all([
+  const [{ count: candidaturas }, { data: quizProgresso }, { count: depoimentosAprovados }] = await Promise.all([
     supabase.from("applications").select("*", { count: "exact", head: true }).eq("professional_id", professional.id),
     supabase.from("quiz_progresso").select("trilha_slug, modulo_slug").eq("professional_id", professional.id),
+    supabase.from("depoimentos").select("*", { count: "exact", head: true }).eq("professional_id", professional.id).eq("status", "aprovado"),
   ]);
 
   const { modulosFeitosTotal, trilhasConcluidas, trilhasTotal } = calcularProgressoGeral(quizProgresso ?? []);
@@ -37,6 +38,7 @@ export default async function ConquistasPage() {
     modulosFeitosTotal,
     trilhasConcluidas,
     trilhasTotal,
+    depoimentosAprovados: depoimentosAprovados ?? 0,
   });
 
   const feitas = conquistas.filter((c) => c.done).length;
