@@ -1,5 +1,10 @@
 export const dynamic = "force-dynamic";
 
+// dispararEmailCandidatos envia sequencial com respiro entre cada (limite do
+// Resend) — pode passar bem de 10s com dezenas de candidatos. Server Actions
+// herdam o maxDuration da página (mesmo padrão de admin/vagas-externas).
+export const maxDuration = 60;
+
 export const metadata = { title: "Moderação de vagas — Admin" };
 import { createClient } from "@/lib/supabase/server";
 import { updateJobStatus } from "../actions";

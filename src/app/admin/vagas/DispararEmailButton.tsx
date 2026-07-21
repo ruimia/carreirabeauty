@@ -20,7 +20,7 @@ export default function DispararEmailButton({ id }: { id: string }) {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [assunto, setAssunto] = useState("");
   const [mensagem, setMensagem] = useState("");
-  const [resultado, setResultado] = useState<{ enviados: number; semEmail: number; total: number } | null>(null);
+  const [resultado, setResultado] = useState<{ enviados: number; semEmail: number; total: number; falhas: number } | null>(null);
 
   async function handleAbrir() {
     setAberto(true);
@@ -126,7 +126,8 @@ export default function DispararEmailButton({ id }: { id: string }) {
       {resultado && (
         <p className="text-gray-700">
           ✓ {resultado.enviados} email(s) enviado(s)
-          {resultado.semEmail > 0 && `, ${resultado.semEmail} sem email cadastrado`}.
+          {resultado.semEmail > 0 && `, ${resultado.semEmail} sem email cadastrado`}
+          {resultado.falhas > 0 && <span className="text-rose-600">, {resultado.falhas} falharam ao enviar</span>}.
         </p>
       )}
     </div>

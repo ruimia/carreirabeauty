@@ -218,7 +218,7 @@ export async function previewEmailCandidatos(id: string, mensagemCustom?: string
 export async function dispararEmailCandidatos(id: string, assunto?: string, mensagem?: string) {
   const supabase = await assertAdmin();
   const { job, candidatos } = await buscarCandidatosVaga(id);
-  if (!job || candidatos.length === 0) return { enviados: 0, semEmail: 0, total: 0 };
+  if (!job || candidatos.length === 0) return { enviados: 0, semEmail: 0, total: 0, falhas: 0 };
 
   const userIds = candidatos.map((p) => p.user_id);
   const { data: perfis } = await supabase.from("profiles").select("id, email").in("id", userIds);
@@ -226,12 +226,18 @@ export async function dispararEmailCandidatos(id: string, assunto?: string, mens
 
   let enviados = 0;
   let semEmail = 0;
-  await Promise.allSettled(
-    candidatos.map((prof) => {
-      const email = emailPorUserId[prof.user_id];
-      if (!email) { semEmail++; return Promise.resolve(); }
-      enviados++;
-      return emailNovaVagaProfissional({
+  let falhas = 0;
+
+  // Disparar tudo de uma vez (Promise.allSettled com .map) estourava o limite
+  // do Resend (~2 req/s no plano padrão) — a maioria caía com 429 e era
+  // engolida em silêncio, além do contador de "enviados" somar antes de saber
+  // se o envio deu certo. Envia sequencial com respiro, só conta sucesso de
+  // verdade e loga cada falha.
+  for (const prof of candidatos) {
+    const email = emailPorUserId[prof.user_id];
+    if (!email) { semEmail++; continue; }
+    try {
+      await emailNovaVagaProfissional({
         profissionalEmail: email,
         profissionalNome: prof.nome ?? "",
         tituloVaga: job.titulo || job.funcao || "Vaga",
@@ -242,10 +248,15 @@ export async function dispararEmailCandidatos(id: string, assunto?: string, mens
         assunto,
         mensagem,
       });
-    })
-  );
+      enviados++;
+    } catch (e) {
+      falhas++;
+      console.error(`dispararEmailCandidatos: falha ao enviar pra ${email}`, e instanceof Error ? e.message : e);
+    }
+    await new Promise((r) => setTimeout(r, 600));
+  }
 
-  return { enviados, semEmail, total: candidatos.length };
+  return { enviados, semEmail, total: candidatos.length, falhas };
 }
 
 export async function rejeitarVaga(id: string, motivo: string) {
