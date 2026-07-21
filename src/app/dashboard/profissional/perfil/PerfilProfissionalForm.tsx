@@ -416,10 +416,22 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
               </button>
             )}
 
+            <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 10 }}>
+              Como as empresas veem seu perfil
+            </p>
+            <div style={{
+              borderRadius: "var(--radius-xl)", overflow: "hidden", border: "1px solid var(--border-default)",
+              marginBottom: 14, background: "var(--surface-page)",
+            }}>
+              <ActiveTemplate p={templateData} preview contatosBloqueados={!isPro} />
+            </div>
+
             {/* Certificados — cada trilha vira uma "figurinha" na coleção; as
                 não conquistadas ficam cinza/cadeado de propósito, pra virar
                 algo que dá vontade de completar (não um espaço vazio triste).
-                Só o dono vê essa vitrine — o perfil público não mostra. */}
+                Só o dono vê essa vitrine — o perfil público não mostra. Fica
+                depois do preview/portfólio, não antes — é um extra que reforça
+                o perfil, não o que abre a página. */}
             <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 10 }}>
               Certificados
             </p>
@@ -453,16 +465,6 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
                 })}
               </div>
             </Link>
-
-            <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 10 }}>
-              Como as empresas veem seu perfil
-            </p>
-            <div style={{
-              borderRadius: "var(--radius-xl)", overflow: "hidden", border: "1px solid var(--border-default)",
-              marginBottom: 14, background: "var(--surface-page)",
-            }}>
-              <ActiveTemplate p={templateData} preview contatosBloqueados={!isPro} />
-            </div>
           </>
         )}
 
