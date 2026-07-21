@@ -8,7 +8,7 @@ import { saoPauloStartOfMonthISO } from "@/lib/timezone";
 
 type CandidatarResult =
   | { ok: true; jaAplicou: boolean; totalCandidatos: number; isPro: boolean }
-  | { ok: false; error: "NAO_AUTENTICADO" | "PERFIL_NAO_ENCONTRADO" | "LIMITE_PLANO" | "ERRO_DB" };
+  | { ok: false; error: "NAO_AUTENTICADO" | "PERFIL_NAO_ENCONTRADO" | "PERFIL_INCOMPLETO" | "LIMITE_PLANO" | "ERRO_DB" };
 
 export async function candidatar(jobId: string, mensagem: string | null): Promise<CandidatarResult> {
   const supabase = await createClient();
@@ -17,10 +17,14 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
 
   const { data: prof } = await supabase
     .from("professionals")
-    .select("id, nome, plano")
+    .select("id, nome, plano, slug")
     .eq("user_id", user.id)
     .single();
   if (!prof) return { ok: false, error: "PERFIL_NAO_ENCONTRADO" };
+  // Sem slug = cadastro não terminado (saiu do onboarding antes da etapa
+  // final) — sem isso a empresa nunca consegue abrir o perfil de quem se
+  // candidatou, então bloqueia aqui em vez de deixar a candidatura "manca".
+  if (!prof.slug) return { ok: false, error: "PERFIL_INCOMPLETO" };
 
   // Checa limite de candidaturas do mês
   const limite = limiteCandidaturasMes(prof.plano ?? "gratis");

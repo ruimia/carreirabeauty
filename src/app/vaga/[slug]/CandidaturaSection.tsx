@@ -33,6 +33,7 @@ export default function CandidaturaSection({
       const result = await candidatar(jobId, mensagem.trim() || null);
       if (!result.ok) {
         if (result.error === "LIMITE_PLANO") { setError("LIMITE"); return; }
+        if (result.error === "PERFIL_INCOMPLETO") { setError("PERFIL_INCOMPLETO"); return; }
         setError("Erro ao enviar candidatura. Tente novamente.");
         return;
       }
@@ -143,6 +144,14 @@ export default function CandidaturaSection({
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>Você usou suas 10 candidaturas do mês. Faça upgrade para o plano Pro e candidate-se sem limites.</p>
           <a href="/dashboard/profissional/planos" style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "var(--color-brand-primary)", padding: "8px 18px", borderRadius: "var(--radius-pill)", textDecoration: "none", display: "inline-block" }}>
             Ver plano Pro →
+          </a>
+        </div>
+      ) : error === "PERFIL_INCOMPLETO" ? (
+        <div style={{ marginTop: 10, padding: "12px 14px", background: "var(--brand-magenta-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--brand-magenta-200, #f0abfc)" }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--color-brand-primary)", marginBottom: 4 }}>Falta terminar seu cadastro</p>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>Sem isso a empresa não consegue ver seu perfil. Termine o cadastro pra poder se candidatar.</p>
+          <a href="/onboarding/profissional" style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "var(--color-brand-primary)", padding: "8px 18px", borderRadius: "var(--radius-pill)", textDecoration: "none", display: "inline-block" }}>
+            Terminar cadastro →
           </a>
         </div>
       ) : error ? (

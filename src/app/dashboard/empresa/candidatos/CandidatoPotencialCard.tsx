@@ -141,7 +141,7 @@ export default function CandidatoPotencialCard({ professional: p, vagas, distanc
       </p>
 
       <div style={{ display: "flex", gap: 8 }}>
-        {p.slug && (
+        {p.slug ? (
           <Link href={`/perfil/${p.slug}`} target="_blank" rel="noopener noreferrer" style={{
             flex: 1, height: 40, borderRadius: "var(--radius-pill)",
             border: "1px solid var(--border-default)", background: "var(--surface-card)",
@@ -151,6 +151,17 @@ export default function CandidatoPotencialCard({ professional: p, vagas, distanc
           }}>
             Perfil <i className="ph ph-arrow-square-out"></i>
           </Link>
+        ) : (
+          // Cadastro não terminado (sem slug) — mostra por que não tem link,
+          // em vez de simplesmente sumir com a ação.
+          <span title="Esse profissional ainda não terminou de completar o cadastro" style={{
+            flex: 1, height: 40, borderRadius: "var(--radius-pill)",
+            border: "1px dashed var(--border-default)", background: "var(--surface-sunken)",
+            color: "var(--text-tertiary)", fontFamily: "var(--font-body)", fontWeight: 600,
+            fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+          }}>
+            Perfil incompleto
+          </span>
         )}
         {whatsappUrl && (
           <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" style={{
