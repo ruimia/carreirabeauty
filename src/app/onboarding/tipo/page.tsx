@@ -45,24 +45,28 @@ export default function EscolhaTipoPage() {
           Você pode mudar isso depois, se precisar.
         </p>
 
-        <Opcao
-          icon="ph-fill ph-storefront"
-          iconColor="var(--color-brand-primary)"
-          title="Sou um estabelecimento"
-          desc="Salão, esmalteria, clínica — quero publicar vagas"
-          loading={loading === "empresa"}
-          disabled={!!loading}
-          onClick={() => escolher("empresa")}
-        />
-
+        {/* Título pela ação (contratar/trabalhar), não pela identidade
+            ("Sou um estabelecimento" confundia quem trabalha num salão mas
+            não é dono) — mais difícil de ler errado passando o olho rápido.
+            Profissional vem primeiro por ser a maioria dos cadastros. */}
         <Opcao
           icon="ph-fill ph-user-circle"
           iconColor="var(--brand-cyan-500)"
-          title="Sou profissional"
-          desc="Cabeleireiro, manicure, esteticista — quero encontrar vagas"
+          title="Quero trabalhar"
+          desc="Sou cabeleireiro(a), manicure, esteticista... e quero encontrar vagas"
           loading={loading === "profissional"}
           disabled={!!loading}
           onClick={() => escolher("profissional")}
+        />
+
+        <Opcao
+          icon="ph-fill ph-storefront"
+          iconColor="var(--color-brand-primary)"
+          title="Quero contratar"
+          desc="Sou dono(a)/gerente de salão, esmalteria, clínica... e quero publicar vagas"
+          loading={loading === "empresa"}
+          disabled={!!loading}
+          onClick={() => escolher("empresa")}
         />
       </div>
     </main>
