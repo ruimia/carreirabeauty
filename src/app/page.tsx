@@ -7,6 +7,15 @@ import StickyCTABar from "./StickyCTABar";
 import AtividadeRecente from "@/components/AtividadeRecente";
 import { getAtividadeRecente } from "@/lib/atividadeRecente";
 import { APP_URL } from "@/lib/seo";
+import { checksPerfil } from "@/lib/conquistas";
+
+const FUNCAO_LABEL: Record<string, string> = {
+  cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
+  esteticista: "Esteticista", maquiador: "Maquiador(a)", barbeiro: "Barbeiro",
+  massoterapeuta: "Massoterapeuta", designer_sobrancelha_cilios: "Designer de sobrancelha/cílios",
+  depilador: "Depilador(a)", podologo: "Podólogo(a)", recepcionista: "Recepcionista",
+  auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +54,48 @@ export default async function Home() {
   if (user) redirect("/dashboard");
 
   const atividades = await getAtividadeRecente(supabase);
+
+  const [{ data: vagasAtivas }, { data: candidatosPerfil }] = await Promise.all([
+    supabase
+      .from("jobs")
+      .select("id, titulo, funcao, funcao_outro, slug, tipo_vinculo, cidade, estado, criado_em, companies(nome_estabelecimento, logo_url)")
+      .eq("status", "ativa")
+      .order("criado_em", { ascending: false })
+      .limit(9),
+    supabase
+      .from("professionals")
+      .select("id, nome, slug, foto_perfil_url, cidade, estado, funcoes, funcao_outro, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
+      .not("slug", "is", null),
+  ]);
+
+  // Profissionais em Destaque — perfis mais completos, diversificados por
+  // função (não repete a mesma profissão), pra virar prova social de
+  // qualidade pra quem ainda não se cadastrou.
+  function funcaoPrincipal(p: { funcoes: string[] | null; funcao_outro: string | null }) {
+    const f = p.funcoes?.[0];
+    return f === "Outro" ? (p.funcao_outro || "Outro") : (f ?? "");
+  }
+  const ordenadosPorCompletude = (candidatosPerfil ?? [])
+    .map((p) => ({ p, completude: checksPerfil(p).filter((c) => c.done).length }))
+    .filter((x) => x.completude >= 4)
+    .sort((a, b) => b.completude - a.completude);
+  const vistos = new Set<string>();
+  const profissionaisDestaque: typeof ordenadosPorCompletude[number]["p"][] = [];
+  for (const item of ordenadosPorCompletude) {
+    const chave = funcaoPrincipal(item.p);
+    if (vistos.has(chave)) continue;
+    vistos.add(chave);
+    profissionaisDestaque.push(item.p);
+    if (profissionaisDestaque.length >= 10) break;
+  }
+  // Completa com repetição de função se ainda não tiver 10 (bases pequenas)
+  if (profissionaisDestaque.length < 10) {
+    for (const item of ordenadosPorCompletude) {
+      if (profissionaisDestaque.some((p) => p.id === item.p.id)) continue;
+      profissionaisDestaque.push(item.p);
+      if (profissionaisDestaque.length >= 10) break;
+    }
+  }
 
   return (
     <div style={{ minHeight: "100vh", fontFamily: "var(--font-body)" }}>
@@ -142,6 +193,106 @@ export default async function Home() {
             )}
           </div>
         </section>
+
+        {/* ── Vagas em Destaque — prova de que tem vaga real, agora ── */}
+        {(vagasAtivas ?? []).length > 0 && (
+          <section style={{ padding: "48px 24px" }}>
+            <div style={{ maxWidth: 960, margin: "0 auto" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 24, color: "var(--text-primary)", marginBottom: 6, textAlign: "center" }}>
+                Vagas em destaque
+              </h2>
+              <p style={{ fontSize: 15, color: "var(--text-secondary)", textAlign: "center", marginBottom: 28 }}>
+                Oportunidades reais, publicadas agora — de graça pra se candidatar.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
+                {(vagasAtivas ?? []).map((v) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const empresa = v.companies as any;
+                  const titulo = v.titulo || (v.funcao === "outro" ? (v.funcao_outro || "Outro") : (FUNCAO_LABEL[v.funcao] ?? v.funcao));
+                  return (
+                    <Link key={v.id} href={`/vaga/${v.slug}`} style={{ textDecoration: "none" }}>
+                      <div style={{
+                        background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
+                        border: "1px solid var(--border-default)", boxShadow: "var(--shadow-sm)",
+                        padding: 18, display: "flex", gap: 12, alignItems: "flex-start", height: "100%",
+                      }}>
+                        <div style={{
+                          width: 40, height: 40, borderRadius: "var(--radius-md)", flexShrink: 0, overflow: "hidden",
+                          background: "var(--brand-magenta-50)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
+                        }}>
+                          {empresa?.logo_url
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={empresa.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            : "🏪"
+                          }
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--text-primary)", lineHeight: 1.3 }}>
+                            {titulo}
+                          </p>
+                          <p style={{ fontSize: 13, color: "var(--text-tertiary)", marginTop: 4 }}>
+                            {empresa?.nome_estabelecimento}{v.cidade ? ` · ${v.cidade}${v.estado ? ` - ${v.estado}` : ""}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+              <div style={{ textAlign: "center", marginTop: 24 }}>
+                <Link href="/vagas" style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>Ver todas as vagas</Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── Profissionais em Destaque — perfis completos, prova de qualidade ── */}
+        {profissionaisDestaque.length > 0 && (
+          <section style={{ background: "var(--surface-sunken)", padding: "48px 24px" }}>
+            <div style={{ maxWidth: 960, margin: "0 auto" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 24, color: "var(--text-primary)", marginBottom: 6, textAlign: "center" }}>
+                Profissionais em destaque
+              </h2>
+              <p style={{ fontSize: 15, color: "var(--text-secondary)", textAlign: "center", marginBottom: 28 }}>
+                Perfis completos, prontos pra serem chamados.
+              </p>
+              <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 8, WebkitOverflowScrolling: "touch" }}>
+                {profissionaisDestaque.map((p) => {
+                  const funcao = p.funcoes?.[0] === "Outro" ? (p.funcao_outro || "Outro") : (p.funcoes?.[0] ?? "");
+                  const initials = (p.nome ?? "").split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase();
+                  return (
+                    <Link key={p.id} href={`/perfil/${p.slug}`} style={{
+                      flex: "0 0 auto", width: 140, textDecoration: "none", textAlign: "center",
+                    }}>
+                      <div style={{
+                        width: 72, height: 72, borderRadius: "50%", margin: "0 auto 10px", overflow: "hidden",
+                        background: "var(--brand-blush-100)", color: "var(--brand-magenta-500)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22,
+                        border: "2px solid var(--surface-card)", boxShadow: "var(--shadow-sm)",
+                      }}>
+                        {p.foto_perfil_url
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={p.foto_perfil_url} alt={p.nome} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          : (initials || "?")
+                        }
+                      </div>
+                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {p.nome}
+                      </p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "var(--color-brand-primary)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {funcao}
+                      </p>
+                      <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {p.cidade}{p.estado ? ` - ${p.estado}` : ""}
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── Como funciona — profissionais ── */}
         <section id="profissionais" style={{ padding: "56px 24px" }}>
