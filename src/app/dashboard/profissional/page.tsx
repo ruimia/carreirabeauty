@@ -123,14 +123,14 @@ export default async function DashboardProfissionalPage() {
       .select("*", { count: "exact", head: true })
       .eq("professional_id", professional.id)
       .eq("status", "pendente"),
-    funcoes.length > 0
-      ? supabase
-          .from("professionals")
-          .select("id, nome, slug, foto_perfil_url, cidade, estado, funcoes, funcao_outro, latitude, longitude, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
-          .overlaps("funcoes", funcoes)
-          .not("slug", "is", null)
-          .neq("id", professional.id)
-      : Promise.resolve({ data: [] }),
+    // Sem filtro de função/cidade aqui de propósito — o recorte "mesma função
+    // + raio" e o fallback "exemplos variados" são decididos em JS a partir
+    // do mesmo conjunto, ver profissionaisDestaque abaixo.
+    supabase
+      .from("professionals")
+      .select("id, nome, slug, foto_perfil_url, cidade, estado, funcoes, funcao_outro, latitude, longitude, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
+      .not("slug", "is", null)
+      .neq("id", professional.id),
   ]);
 
   // Casa vaga agregada com a(s) função(ões) do profissional — mesma lógica das
@@ -181,19 +181,49 @@ export default async function DashboardProfissionalPage() {
   // perfil mais completo. O objetivo é dar um "modelo a seguir" concreto pra
   // quem tá começando ou com perfil incompleto, não só mostrar que a
   // plataforma tem atividade.
-  const profissionaisDestaque = (possiveisDestaque ?? [])
-    .map((p) => {
-      const geo = p.latitude && p.longitude ? { latitude: p.latitude, longitude: p.longitude } : null;
-      const dentroDoRaio = profissionalGeo && geo
-        ? distanciaKm(profissionalGeo, geo) <= RAIO_KM_DESTAQUE
-        : (!professional.cidade || !p.cidade || normaliza(professional.cidade) === normaliza(p.cidade));
-      const completude = checksPerfil(p).filter((c) => c.done).length;
-      return { p, dentroDoRaio, completude };
-    })
-    .filter((x) => x.dentroDoRaio && x.completude >= 4)
+  const candidatosComCompletude = (possiveisDestaque ?? []).map((p) => {
+    const geo = p.latitude && p.longitude ? { latitude: p.latitude, longitude: p.longitude } : null;
+    const dentroDoRaio = profissionalGeo && geo
+      ? distanciaKm(profissionalGeo, geo) <= RAIO_KM_DESTAQUE
+      : (!professional.cidade || !p.cidade || normaliza(professional.cidade) === normaliza(p.cidade));
+    const mesmaFuncao = funcoes.length === 0 || (p.funcoes ?? []).some((f: string) => funcoes.includes(f));
+    const completude = checksPerfil(p).filter((c) => c.done).length;
+    return { p, dentroDoRaio, mesmaFuncao, completude };
+  });
+
+  const destaquePrimario = candidatosComCompletude
+    .filter((x) => x.dentroDoRaio && x.mesmaFuncao && x.completude >= 4)
     .sort((a, b) => b.completude - a.completude)
     .slice(0, 6)
     .map(({ p }) => p);
+
+  // Fallback: perto de casa ou com a mesma função ninguém tem perfil
+  // completo o suficiente — em vez de sumir a seção (justo pra quem mais
+  // se beneficiaria de ver um exemplo), mostra os perfis mais completos da
+  // base inteira, diversificados por função pra não repetir a mesma
+  // profissão 6 vezes.
+  function funcaoPrincipal(p: { funcoes: string[] | null; funcao_outro: string | null }) {
+    const f = p.funcoes?.[0];
+    return f === "Outro" ? (p.funcao_outro || "Outro") : (f ?? "");
+  }
+
+  let profissionaisDestaque = destaquePrimario;
+  if (profissionaisDestaque.length === 0) {
+    const ordenadosPorCompletude = [...candidatosComCompletude]
+      .filter((x) => x.completude >= 3)
+      .sort((a, b) => b.completude - a.completude);
+
+    const vistos = new Set<string>();
+    const diversificado: typeof ordenadosPorCompletude = [];
+    for (const item of ordenadosPorCompletude) {
+      const chave = funcaoPrincipal(item.p);
+      if (vistos.has(chave)) continue;
+      vistos.add(chave);
+      diversificado.push(item);
+      if (diversificado.length >= 6) break;
+    }
+    profissionaisDestaque = diversificado.map(({ p }) => p);
+  }
 
   const jobs = (allJobs ?? []).filter((j) => {
     if (appliedJobIds.has(j.id)) return false;
