@@ -6,11 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import VagasExternasLista from "@/components/VagasExternasLista";
-import AtividadeRecente from "@/components/AtividadeRecente";
-import { getAtividadeRecente } from "@/lib/atividadeRecente";
 import { distanciaKm } from "@/lib/geocode";
 import { calcularProgressoGeral } from "@/lib/quizContent";
-import { calcularConquistas } from "@/lib/conquistas";
+import { calcularConquistas, checksPerfil } from "@/lib/conquistas";
+
+const RAIO_KM_DESTAQUE = 30;
 
 const FUNCAO_LABEL: Record<string, string> = {
   cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
@@ -82,7 +82,7 @@ export default async function DashboardProfissionalPage() {
 
   const funcoes: string[] = professional.funcoes ?? [];
 
-  const [{ data: allJobs }, { data: applications }, { data: vagasExternas }, { data: quizProgresso }, { data: certificados }, { count: depoimentosAprovados }, { count: depoimentosPendentes }] = await Promise.all([
+  const [{ data: allJobs }, { data: applications }, { data: vagasExternas }, { data: quizProgresso }, { data: certificados }, { count: depoimentosAprovados }, { count: depoimentosPendentes }, { data: possiveisDestaque }] = await Promise.all([
     supabase
       .from("jobs")
       .select("id, titulo, funcao, funcoes, funcao_outro, slug, faixa_salarial, tipo_vinculo, descricao, criado_em, companies(nome_estabelecimento, bairro, cidade, estado, logo_url, latitude, longitude)")
@@ -123,9 +123,15 @@ export default async function DashboardProfissionalPage() {
       .select("*", { count: "exact", head: true })
       .eq("professional_id", professional.id)
       .eq("status", "pendente"),
+    funcoes.length > 0
+      ? supabase
+          .from("professionals")
+          .select("id, nome, slug, foto_perfil_url, cidade, estado, funcoes, funcao_outro, latitude, longitude, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
+          .overlaps("funcoes", funcoes)
+          .not("slug", "is", null)
+          .neq("id", professional.id)
+      : Promise.resolve({ data: [] }),
   ]);
-
-  const atividades = await getAtividadeRecente(supabase, 10);
 
   // Casa vaga agregada com a(s) função(ões) do profissional — mesma lógica das
   // vagas nativas (se não tem função marcada ou marcou "outro", não filtra)
@@ -169,6 +175,25 @@ export default async function DashboardProfissionalPage() {
     ? { latitude: professional.latitude, longitude: professional.longitude }
     : null;
   const RAIO_KM = 30;
+
+  // Profissionais em Destaque — substitui "Acontecendo agora" por algo
+  // aspiracional: mesma(s) função(ões) da viewer, perto dela, ordenado pelo
+  // perfil mais completo. O objetivo é dar um "modelo a seguir" concreto pra
+  // quem tá começando ou com perfil incompleto, não só mostrar que a
+  // plataforma tem atividade.
+  const profissionaisDestaque = (possiveisDestaque ?? [])
+    .map((p) => {
+      const geo = p.latitude && p.longitude ? { latitude: p.latitude, longitude: p.longitude } : null;
+      const dentroDoRaio = profissionalGeo && geo
+        ? distanciaKm(profissionalGeo, geo) <= RAIO_KM_DESTAQUE
+        : (!professional.cidade || !p.cidade || normaliza(professional.cidade) === normaliza(p.cidade));
+      const completude = checksPerfil(p).filter((c) => c.done).length;
+      return { p, dentroDoRaio, completude };
+    })
+    .filter((x) => x.dentroDoRaio && x.completude >= 4)
+    .sort((a, b) => b.completude - a.completude)
+    .slice(0, 6)
+    .map(({ p }) => p);
 
   const jobs = (allJobs ?? []).filter((j) => {
     if (appliedJobIds.has(j.id)) return false;
@@ -512,9 +537,9 @@ export default async function DashboardProfissionalPage() {
           </div>
         )}
 
-        {atividades.length > 0 && (
+        {profissionaisDestaque.length > 0 && (
           <div style={{ marginBottom: 24 }}>
-            <AtividadeRecente eventos={atividades} maxVisivel={3} />
+            <ProfissionaisDestaque profissionais={profissionaisDestaque} />
           </div>
         )}
 
@@ -630,6 +655,58 @@ export default async function DashboardProfissionalPage() {
         </Link>
 
       </main>
+    </div>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ProfissionaisDestaque({ profissionais }: { profissionais: any[] }) {
+  return (
+    <div style={{
+      background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
+      border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
+      padding: "14px 18px",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <i className="ph-fill ph-sparkle" style={{ fontSize: 14, color: "var(--color-brand-primary)" }}></i>
+        <p style={{ font: "700 12px/1 var(--font-body)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          Profissionais em destaque
+        </p>
+      </div>
+      <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2, WebkitOverflowScrolling: "touch" }}>
+        {profissionais.map((p) => {
+          const funcao = p.funcoes?.[0] === "Outro" ? (p.funcao_outro || "Outro") : (p.funcoes?.[0] ?? "");
+          const initials = (p.nome ?? "").split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase();
+          return (
+            <Link key={p.id} href={`/perfil/${p.slug}`} style={{
+              flex: "0 0 auto", width: 132, textDecoration: "none", textAlign: "center",
+            }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%", margin: "0 auto 8px", overflow: "hidden",
+                background: "var(--brand-blush-100)", color: "var(--brand-magenta-500)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20,
+                border: "2px solid var(--brand-magenta-100)",
+              }}>
+                {p.foto_perfil_url
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={p.foto_perfil_url} alt={p.nome} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : (initials || <i className="ph-fill ph-user-circle"></i>)
+                }
+              </div>
+              <p style={{ font: "700 13px/1.3 var(--font-display)", color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {p.nome}
+              </p>
+              <p style={{ font: "600 11px/1.3 var(--font-body)", color: "var(--color-brand-primary)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {funcao}
+              </p>
+              <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {p.cidade}{p.estado ? ` - ${p.estado}` : ""}
+              </p>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }
