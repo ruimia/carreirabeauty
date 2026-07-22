@@ -239,9 +239,6 @@ export default async function Home() {
                   );
                 })}
               </div>
-              <div style={{ textAlign: "center", marginTop: 24 }}>
-                <Link href="/vagas" style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>Ver todas as vagas</Link>
-              </div>
             </div>
           </section>
         )}
