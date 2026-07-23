@@ -30,7 +30,7 @@ export default function TemplateClassico({ p, preview }: PerfilTemplateProps) {
               )}
               {p.instagram && (
                 <a href={`https://instagram.com/${p.instagram}`} target="_blank" rel="noreferrer" style={{ height: 36, padding: "0 14px", borderRadius: "var(--radius-pill)", border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
-                  <span style={{ fontSize: 15 }}>📷</span> @{p.instagram}
+                  <i className="ph-fill ph-instagram-logo" style={{ fontSize: 16 }}></i> @{p.instagram}
                 </a>
               )}
               {p.email && (
