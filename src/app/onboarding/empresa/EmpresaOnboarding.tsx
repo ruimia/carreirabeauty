@@ -9,6 +9,7 @@ import { geocodeEndereco } from "@/lib/geocode";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { compressImage } from "@/lib/compressImage";
 import { trackCompleteRegistration } from "@/lib/trackLead";
+import { normalizeInstagramHandle } from "@/lib/instagram";
 
 const TOTAL_STEPS = 7;
 
@@ -154,7 +155,7 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
       const base = buildSlug(nomeEstabelecimento, cidade);
       const { data: existing } = await supabase.from("companies").select("id").eq("slug", base).neq("id", companyId ?? "").maybeSingle();
       const slug = existing ? `${base}-${randomSuffix()}` : base;
-      await upsertCompany({ instagram: instagram.replace(/^@/, ""), logo_url: logoUrl, slug, status_cadastro: "completo" });
+      await upsertCompany({ instagram: normalizeInstagramHandle(instagram), logo_url: logoUrl, slug, status_cadastro: "completo" });
       trackCompleteRegistration();
       router.push("/dashboard/empresa");
     } catch { setError("Erro ao salvar. Tente novamente."); }
@@ -354,7 +355,8 @@ export default function EmpresaOnboarding({ companyId: initialCompanyId, initial
               display: "flex", alignItems: "center",
             }}>@</span>
             <input placeholder="seuestablecimento" value={instagram}
-              onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
+              onChange={(e) => setInstagram(e.target.value)}
+              onBlur={(e) => setInstagram(normalizeInstagramHandle(e.target.value))}
               style={{ flex: 1, height: "100%", padding: "0 16px", border: "none", outline: "none",
                 fontFamily: "var(--font-body)", fontSize: 15, color: "var(--text-primary)", background: "transparent" }} />
           </div>

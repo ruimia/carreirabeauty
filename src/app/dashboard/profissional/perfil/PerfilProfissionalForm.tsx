@@ -8,6 +8,7 @@ import { buildSlug, randomSuffix } from "@/lib/slug";
 import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 import { geocodeEndereco } from "@/lib/geocode";
 import { compressImage } from "@/lib/compressImage";
+import { normalizeInstagramHandle } from "@/lib/instagram";
 import TemplateSelector from "./visual/TemplateSelector";
 import { PerfilTemplateData } from "@/components/perfilTemplates/types";
 import TemplateClassico from "@/components/perfilTemplates/TemplateClassico";
@@ -248,7 +249,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         experiencia, disponibilidade,
         tipo_vinculo: tipoVinculo || null,
         data_nascimento: dataNascimento || null, genero: genero || null,
-        instagram: instagram.replace(/^@/, "") || null,
+        instagram: normalizeInstagramHandle(instagram) || null,
         foto_perfil_url: fotoUrl, slug,
         educacao, experiencia_prof: experiencias,
         portfolio_urls: allPortfolioUrls,
@@ -546,7 +547,9 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
             {editing ? (
               <div style={{ display: "flex", alignItems: "center", height: 46, border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
                 <span style={{ padding: "0 12px", background: "var(--surface-sunken)", borderRight: "1px solid var(--border-default)", color: "var(--text-tertiary)", height: "100%", display: "flex", alignItems: "center", fontSize: 15, fontWeight: 600 }}>@</span>
-                <input value={instagram} onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
+                <input value={instagram} onChange={(e) => setInstagram(e.target.value)}
+                  onBlur={(e) => setInstagram(normalizeInstagramHandle(e.target.value))}
+                  placeholder="seuusuario"
                   style={{ flex: 1, height: "100%", padding: "0 14px", border: "none", outline: "none", fontFamily: "var(--font-body)", fontSize: 15, background: "transparent", color: "var(--text-primary)" }} />
               </div>
             ) : <V>{instagram ? `@${instagram}` : "—"}</V>}

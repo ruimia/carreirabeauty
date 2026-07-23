@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { emailVagaAprovada, emailVagaRejeitada, emailNovaVagaProfissional, renderNovaVagaProfissionalHtml, MENSAGEM_PADRAO_NOVA_VAGA } from "@/lib/email";
 import { distanciaKm } from "@/lib/geocode";
+import { normalizeInstagramHandle } from "@/lib/instagram";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -63,7 +64,7 @@ export async function atualizarEmpresaAdmin(id: string, dados: EmpresaEditData) 
     cep: dados.cep,
     categoria_negocio: dados.categoria_negocio || null,
     faixa_funcionarios: dados.faixa_funcionarios || null,
-    instagram: dados.instagram || null,
+    instagram: normalizeInstagramHandle(dados.instagram) || null,
   }).eq("id", id);
   revalidatePath(`/admin/empresas/${id}`);
   revalidatePath("/admin/empresas");

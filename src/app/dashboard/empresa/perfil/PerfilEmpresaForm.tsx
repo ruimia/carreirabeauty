@@ -8,6 +8,7 @@ import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 import { geocodeEndereco } from "@/lib/geocode";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { compressImage } from "@/lib/compressImage";
+import { normalizeInstagramHandle } from "@/lib/instagram";
 
 const FAIXAS: Record<string, string> = {
   "1_5": "1 a 5 funcionários",
@@ -91,7 +92,7 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
         categoria_negocio: categoria || null,
         categoria_outro: categoria === OUTRA_CATEGORIA ? categoriaOutro || null : null,
         faixa_funcionarios: faixa || null,
-        instagram: instagram.replace(/^@/, ""), logo_url: logoUrl,
+        instagram: normalizeInstagramHandle(instagram), logo_url: logoUrl,
       }).eq("id", company.id);
       if (upErr) throw new Error(upErr.message);
       setSuccess(true); setEditing(false); router.refresh();
@@ -210,7 +211,9 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
             {editing ? (
               <div style={{ display: "flex", alignItems: "center", height: 46, border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
                 <span style={{ padding: "0 12px", background: "var(--surface-sunken)", borderRight: "1px solid var(--border-default)", color: "var(--text-tertiary)", height: "100%", display: "flex", alignItems: "center", fontSize: 15, fontWeight: 600 }}>@</span>
-                <input value={instagram} onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
+                <input value={instagram} onChange={(e) => setInstagram(e.target.value)}
+                  onBlur={(e) => setInstagram(normalizeInstagramHandle(e.target.value))}
+                  placeholder="seuestabelecimento"
                   style={{ flex: 1, height: "100%", padding: "0 14px", border: "none", outline: "none", fontFamily: "var(--font-body)", fontSize: 15, background: "transparent", color: "var(--text-primary)" }} />
               </div>
             ) : <V>{instagram ? `@${instagram}` : "—"}</V>}
