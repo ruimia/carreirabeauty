@@ -1,111 +1,22 @@
-import { createPublicClient } from "@/lib/supabase/public";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import StickyCTABar from "./StickyCTABar";
-import AtividadeRecente from "@/components/AtividadeRecente";
-import { getAtividadeRecente } from "@/lib/atividadeRecente";
+import StickyCTABar from "../StickyCTABar";
 import { APP_URL } from "@/lib/seo";
-import { checksPerfil } from "@/lib/conquistas";
 
-const FUNCAO_LABEL: Record<string, string> = {
-  cabeleireiro: "Cabeleireiro(a)", manicure_pedicure: "Manicure/pedicure",
-  esteticista: "Esteticista", maquiador: "Maquiador(a)", barbeiro: "Barbeiro",
-  massoterapeuta: "Massoterapeuta", designer_sobrancelha_cilios: "Designer de sobrancelha/cílios",
-  depilador: "Depilador(a)", podologo: "Podólogo(a)", recepcionista: "Recepcionista",
-  auxiliar_assistente: "Auxiliar/assistente", outro: "Outro",
-};
-
-// Página pública, sem estado de sessão — o redirect pra /dashboard quando
-// logado agora é feito no Middleware (src/middleware.ts), então esta página
-// não precisa mais de cookies()/force-dynamic e pode ser cacheada via ISR.
-export const revalidate = 300;
-
+// Página 100% estática (sem auth, sem query) — destino dos redirects 301 do
+// Cloudflare pra subdomínios antigos, pra não bater na home dinâmica.
 const DESCRIPTION = "Empregos, freelas e diárias em beleza, estética e bem-estar. Cabeleireiro(a), manicure, esteticista, maquiador(a) e mais — cadastro grátis, matching por região.";
 
 export const metadata: Metadata = {
   description: DESCRIPTION,
-  alternates: { canonical: APP_URL },
-  openGraph: { title: "CarreiraBeauty — Empregos e freelas em beleza", description: DESCRIPTION, url: APP_URL, type: "website" },
+  alternates: { canonical: `${APP_URL}/entrada` },
+  openGraph: { title: "CarreiraBeauty — Empregos e freelas em beleza", description: DESCRIPTION, url: `${APP_URL}/entrada`, type: "website" },
 };
 
-const organizationLd = {
-  "@context": "https://schema.org/",
-  "@type": "Organization",
-  name: "CarreiraBeauty",
-  url: APP_URL,
-  logo: `${APP_URL}/logo-square.jpg`,
-  description: DESCRIPTION,
-};
-
-const websiteLd = {
-  "@context": "https://schema.org/",
-  "@type": "WebSite",
-  name: "CarreiraBeauty",
-  url: APP_URL,
-  potentialAction: {
-    "@type": "SearchAction",
-    target: `${APP_URL}/vagas?funcao={search_term_string}`,
-    "query-input": "required name=search_term_string",
-  },
-};
-
-export default async function Home() {
-  const supabase = createPublicClient();
-
-  const atividades = await getAtividadeRecente(supabase);
-
-  const [{ data: vagasAtivas }, { data: candidatosPerfil }] = await Promise.all([
-    supabase
-      .from("jobs")
-      .select("id, titulo, funcao, funcao_outro, slug, tipo_vinculo, cidade, estado, criado_em, companies(nome_estabelecimento, logo_url)")
-      .eq("status", "ativa")
-      .order("criado_em", { ascending: false })
-      .limit(9),
-    // Só precisamos de 10 diversificados no fim — trazer a tabela inteira
-    // (sem limite) só pra calcular completude em JS gastava egress à toa.
-    // 100 já dá pool de sobra pra achar profissões variadas com perfil bom.
-    supabase
-      .from("professionals")
-      .select("id, nome, slug, foto_perfil_url, cidade, estado, funcoes, funcao_outro, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
-      .not("slug", "is", null)
-      .order("criado_em", { ascending: false })
-      .limit(100),
-  ]);
-
-  // Profissionais em Destaque — perfis mais completos, diversificados por
-  // função (não repete a mesma profissão), pra virar prova social de
-  // qualidade pra quem ainda não se cadastrou.
-  function funcaoPrincipal(p: { funcoes: string[] | null; funcao_outro: string | null }) {
-    const f = p.funcoes?.[0];
-    return f === "Outro" ? (p.funcao_outro || "Outro") : (f ?? "");
-  }
-  const ordenadosPorCompletude = (candidatosPerfil ?? [])
-    .map((p) => ({ p, completude: checksPerfil(p).filter((c) => c.done).length }))
-    .filter((x) => x.completude >= 4)
-    .sort((a, b) => b.completude - a.completude);
-  const vistos = new Set<string>();
-  const profissionaisDestaque: typeof ordenadosPorCompletude[number]["p"][] = [];
-  for (const item of ordenadosPorCompletude) {
-    const chave = funcaoPrincipal(item.p);
-    if (vistos.has(chave)) continue;
-    vistos.add(chave);
-    profissionaisDestaque.push(item.p);
-    if (profissionaisDestaque.length >= 10) break;
-  }
-  // Completa com repetição de função se ainda não tiver 10 (bases pequenas)
-  if (profissionaisDestaque.length < 10) {
-    for (const item of ordenadosPorCompletude) {
-      if (profissionaisDestaque.some((p) => p.id === item.p.id)) continue;
-      profissionaisDestaque.push(item.p);
-      if (profissionaisDestaque.length >= 10) break;
-    }
-  }
-
+export default function EntradaPage() {
   return (
     <div style={{ minHeight: "100vh", fontFamily: "var(--font-body)" }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }} />
       {/* ── Header ── */}
       <header style={{
         position: "sticky", top: 0, zIndex: 10,
@@ -136,7 +47,6 @@ export default async function Home() {
               Encontre vagas em salões, clínicas de estética, spas e studios — ou publique a sua e encontre o profissional ideal.
             </p>
 
-            {/* CTAs — logo abaixo do subtítulo, sem scroll */}
             <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
@@ -162,7 +72,6 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Foto hero */}
             <div style={{ width: "100%", maxWidth: 720, borderRadius: "var(--radius-xl)", overflow: "hidden", boxShadow: "var(--shadow-md)", marginTop: 8 }}>
               <Image
                 src="https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?w=1200&q=80&auto=format&fit=crop"
@@ -174,7 +83,6 @@ export default async function Home() {
               />
             </div>
 
-            {/* Categoria cards */}
             <div style={{ width: "100%", maxWidth: 960, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14, textAlign: "left", marginTop: 16 }}>
               <CategoryCard accent="var(--brand-magenta-500)" icon="✂️" title="Beleza" desc="Salões, esmalterias e barbearias"
                 tags={["Cabeleireiro(a)", "Manicure/Pedicure", "Barbeiro(a)", "Maquiador(a)", "Depiladora", "Assistente/Auxiliar", "Recepcionista"]} />
@@ -184,117 +92,13 @@ export default async function Home() {
                 tags={["Fisioterapeuta", "Massoterapeuta", "Podólogo(a)", "Recepcionista"]} />
             </div>
 
-            {/* Praça */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-tertiary)" }}>
                 📍 De capitais a cidades do interior do Brasil — sua região está aqui
               </span>
             </div>
-
-            {atividades.length > 0 && (
-              <div style={{ width: "100%", maxWidth: 480, marginTop: 8, textAlign: "left" }}>
-                <AtividadeRecente eventos={atividades} />
-              </div>
-            )}
           </div>
         </section>
-
-        {/* ── Vagas em Destaque — prova de que tem vaga real, agora ── */}
-        {(vagasAtivas ?? []).length > 0 && (
-          <section style={{ padding: "48px 24px" }}>
-            <div style={{ maxWidth: 960, margin: "0 auto" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 24, color: "var(--text-primary)", marginBottom: 6, textAlign: "center" }}>
-                Vagas em destaque
-              </h2>
-              <p style={{ fontSize: 15, color: "var(--text-secondary)", textAlign: "center", marginBottom: 28 }}>
-                Oportunidades reais, publicadas agora — de graça pra se candidatar.
-              </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
-                {(vagasAtivas ?? []).map((v) => {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  const empresa = v.companies as any;
-                  const titulo = v.titulo || (v.funcao === "outro" ? (v.funcao_outro || "Outro") : (FUNCAO_LABEL[v.funcao] ?? v.funcao));
-                  return (
-                    <Link key={v.id} href={`/vaga/${v.slug}`} style={{ textDecoration: "none" }}>
-                      <div style={{
-                        background: "var(--surface-card)", borderRadius: "var(--radius-lg)",
-                        border: "1px solid var(--border-default)", boxShadow: "var(--shadow-sm)",
-                        padding: 18, display: "flex", gap: 12, alignItems: "flex-start", height: "100%",
-                      }}>
-                        <div style={{
-                          width: 40, height: 40, borderRadius: "var(--radius-md)", flexShrink: 0, overflow: "hidden",
-                          background: "var(--brand-magenta-50)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
-                        }}>
-                          {empresa?.logo_url
-                            // eslint-disable-next-line @next/next/no-img-element
-                            ? <img src={empresa.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                            : "🏪"
-                          }
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--text-primary)", lineHeight: 1.3 }}>
-                            {titulo}
-                          </p>
-                          <p style={{ fontSize: 13, color: "var(--text-tertiary)", marginTop: 4 }}>
-                            {empresa?.nome_estabelecimento}{v.cidade ? ` · ${v.cidade}${v.estado ? ` - ${v.estado}` : ""}` : ""}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── Profissionais em Destaque — perfis completos, prova de qualidade ── */}
-        {profissionaisDestaque.length > 0 && (
-          <section style={{ background: "var(--surface-sunken)", padding: "48px 24px" }}>
-            <div style={{ maxWidth: 960, margin: "0 auto" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 24, color: "var(--text-primary)", marginBottom: 6, textAlign: "center" }}>
-                Profissionais em destaque
-              </h2>
-              <p style={{ fontSize: 15, color: "var(--text-secondary)", textAlign: "center", marginBottom: 28 }}>
-                Perfis completos, prontos pra serem chamados.
-              </p>
-              <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 8, WebkitOverflowScrolling: "touch" }}>
-                {profissionaisDestaque.map((p) => {
-                  const funcao = p.funcoes?.[0] === "Outro" ? (p.funcao_outro || "Outro") : (p.funcoes?.[0] ?? "");
-                  const initials = (p.nome ?? "").split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase();
-                  return (
-                    <Link key={p.id} href={`/perfil/${p.slug}`} style={{
-                      flex: "0 0 auto", width: 140, textDecoration: "none", textAlign: "center",
-                    }}>
-                      <div style={{
-                        width: 72, height: 72, borderRadius: "50%", margin: "0 auto 10px", overflow: "hidden",
-                        background: "var(--brand-blush-100)", color: "var(--brand-magenta-500)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22,
-                        border: "2px solid var(--surface-card)", boxShadow: "var(--shadow-sm)",
-                      }}>
-                        {p.foto_perfil_url
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={p.foto_perfil_url} alt={p.nome} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          : (initials || "?")
-                        }
-                      </div>
-                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {p.nome}
-                      </p>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: "var(--color-brand-primary)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {funcao}
-                      </p>
-                      <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {p.cidade}{p.estado ? ` - ${p.estado}` : ""}
-                      </p>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* ── Como funciona — profissionais ── */}
         <section id="profissionais" style={{ padding: "56px 24px" }}>
