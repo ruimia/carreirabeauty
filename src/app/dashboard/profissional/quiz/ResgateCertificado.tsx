@@ -123,21 +123,24 @@ export default function ResgateCertificado({
               O certificado é um benefício do PRO — mostre no seu perfil que você tem o selo {certificadoNome}.
             </p>
 
-            {/* PRO é o CTA principal: pelo preço da mensalidade, além do
-                certificado vem WhatsApp visível, candidaturas ilimitadas e
-                layouts PRO — o avulso custa mais e dá só o certificado. */}
+            {/* PRO é o CTA principal: a partir do preço do pacote de 30 dias,
+                além do certificado vem WhatsApp visível, candidaturas
+                ilimitadas e layouts PRO — o avulso custa mais e dá só o
+                certificado. Preço pré-pago (não recorrente), por isso "a
+                partir de" em vez de "/mês" — a escolha do pacote é na
+                própria tela de planos. */}
             <Link href="/dashboard/profissional/planos" style={{
               display: "block", height: 48, borderRadius: "var(--radius-pill)",
               background: "var(--color-brand-primary)", color: "#fff",
               fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
               textDecoration: "none", lineHeight: "48px", marginBottom: 10,
             }}>
-              Virar PRO — R$ {formatPreco(PLANOS_PROFISSIONAL.pro.preco)}/mês
+              Virar PRO — a partir de R$ {formatPreco(PLANOS_PROFISSIONAL.pro.preco)}
             </Link>
             <p style={{ font: "var(--text-caption)", color: "var(--text-tertiary)", marginBottom: 10 }}>
               certificado + WhatsApp visível + candidaturas ilimitadas + layouts PRO
               <br />
-              <i className="ph ph-credit-card" style={{ marginRight: 3 }}></i>pagamento no cartão de crédito
+              <i className="ph ph-credit-card" style={{ marginRight: 3 }}></i>sem renovação automática — pagamento único
             </p>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0" }}>

@@ -31,7 +31,7 @@ export default function TermosPage() {
           <ul>
             <li>Seu perfil público fica visível para empresas cadastradas na plataforma.</li>
             <li>Você pode se candidatar a vagas com um clique. Ao se candidatar, autoriza que a empresa visualize seu perfil completo, incluindo telefone.</li>
-            <li>O uso é gratuito para profissionais.</li>
+            <li>O uso é gratuito para profissionais. Recursos extras (PRO) podem ser adquiridos por pacote pré-pago, sem cobrança recorrente — ver seção 6.</li>
           </ul>
         </Section>
 
@@ -46,8 +46,9 @@ export default function TermosPage() {
 
         <Section title="6. Pagamentos e cancelamento">
           <ul>
-            <li>As assinaturas são processadas via Mercado Pago e renovadas automaticamente.</li>
-            <li>Você pode cancelar a qualquer momento pelo painel da conta. O acesso continua até o fim do período pago.</li>
+            <li>Todos os pagamentos são processados via Mercado Pago.</li>
+            <li><strong>Empresas:</strong> a assinatura é recorrente e renovada automaticamente após o trial. Você pode cancelar a qualquer momento pelo painel da conta; o acesso continua até o fim do período já pago.</li>
+            <li><strong>Profissionais (PRO):</strong> o acesso é vendido em pacotes pré-pagos (ex: 30, 90 ou 365 dias), com pagamento único e <strong>sem renovação automática</strong>. Não há o que cancelar — o benefício simplesmente expira na data contratada, e você decide se compra de novo.</li>
             <li>Não realizamos reembolsos de períodos já pagos, exceto em casos previstos em lei.</li>
           </ul>
         </Section>

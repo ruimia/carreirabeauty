@@ -19,6 +19,11 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase.from("profiles").select("email").eq("id", user.id).single();
 
+  // Tracking interno — mesma tabela usada antes pela assinatura recorrente,
+  // pra manter o funil de conversão (visitou Planos -> clicou -> é PRO) sem
+  // um buraco no meio agora que o botão mudou de assinar pra comprar pacote
+  await supabase.from("assinar_clicks").insert({ user_id: user.id, plano_key: "profissional_pro" });
+
   // Mesmo padrão do certificado avulso: a linha de pagamento e a preferência
   // são escritas com service role — RLS só deixa o profissional inserir a
   // linha pendente dele mesmo; a aprovação é só via webhook.

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Conteúdo — Admin" };
 import { createClient } from "@/lib/supabase/server";
+import { isProAtivo } from "@/lib/planos";
 
 export default async function AdminConteudoPage() {
   const supabase = await createClient();
@@ -13,7 +14,7 @@ export default async function AdminConteudoPage() {
     { data: planoViews },
     { count: cliquesProfissionalPro },
     { data: assinarClicks },
-    { count: profissionaisPro },
+    { data: profissionaisComPlanoP },
   ] = await Promise.all([
     supabase.from("conteudos").select("id, titulo, pro, ativo, ordem").order("ordem", { ascending: true }),
     supabase.from("conteudo_views").select("conteudo_id, professional_id, criado_em"),
@@ -21,8 +22,12 @@ export default async function AdminConteudoPage() {
     supabase.from("plano_views").select("professional_id"),
     supabase.from("assinar_clicks").select("*", { count: "exact", head: true }).eq("plano_key", "profissional_pro"),
     supabase.from("assinar_clicks").select("user_id").eq("plano_key", "profissional_pro"),
-    supabase.from("professionals").select("*", { count: "exact", head: true }).eq("plano", "pro"),
+    supabase.from("professionals").select("plano, plano_validade").eq("plano", "pro"),
   ]);
+
+  // PRO pré-pago expira sozinho sem cron que rebaixe o registro — contar só
+  // quem ainda está dentro da validade evita inflar "É PRO hoje" com pacote vencido
+  const profissionaisPro = (profissionaisComPlanoP ?? []).filter((p) => isProAtivo(p.plano, p.plano_validade)).length;
 
   const pessoasQueClicaramAssinar = new Set((assinarClicks ?? []).map((c) => c.user_id)).size;
 
@@ -46,7 +51,7 @@ export default async function AdminConteudoPage() {
   const funil = [
     { label: "Viu algum conteúdo", valor: viuAlgumConteudo, cor: "bg-gray-100 text-gray-700" },
     { label: "Visitou a página de Planos", valor: profissionaisQueVisitaramPlanos, cor: "bg-blue-50 text-blue-600" },
-    { label: "Clicou em Assinar (Pro)", valor: cliquesProfissionalPro ?? 0, cor: "bg-purple-50 text-purple-600" },
+    { label: "Clicou em virar PRO", valor: cliquesProfissionalPro ?? 0, cor: "bg-purple-50 text-purple-600" },
     { label: "É PRO hoje", valor: profissionaisPro ?? 0, cor: "bg-rose-50 text-rose-600" },
   ];
 
