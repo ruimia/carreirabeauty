@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { MercadoPagoConfig, PreApproval, Payment } from "mercadopago";
+import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 
 // Confere que a notificação veio mesmo do Mercado Pago (não de alguém que
@@ -89,7 +90,7 @@ async function tratarAssinatura(preapprovalId: string) {
     .from("profiles").select("id").eq("email", payerEmail).maybeSingle();
   if (!profile) return;
 
-  await supabase
+  const { data: registro } = await supabase
     .from(mapa.tabela)
     .update({
       plano: ativo ? mapa.plano : "gratis",
@@ -97,7 +98,16 @@ async function tratarAssinatura(preapprovalId: string) {
       plano_validade: validade,
       mp_subscription_id: preapprovalId,
     })
-    .eq("user_id", profile.id);
+    .eq("user_id", profile.id)
+    .select("slug")
+    .maybeSingle();
+
+  // /perfil/[slug], /empresa/[slug] e a home usam ISR — sem isso, quem
+  // acabou de pagar veria o perfil sem o upgrade por até 5 minutos.
+  if (registro?.slug) {
+    revalidatePath(mapa.tabela === "companies" ? `/empresa/${registro.slug}` : `/perfil/${registro.slug}`);
+    revalidatePath("/");
+  }
 }
 
 async function tratarPagamento(paymentId: string) {
@@ -143,7 +153,7 @@ async function tratarPagamento(paymentId: string) {
       // vez de perder o que já tinha pago.
       const { data: prof } = await supabase
         .from("professionals")
-        .select("plano, plano_validade")
+        .select("plano, plano_validade, slug")
         .eq("id", pagamento.professional_id)
         .maybeSingle();
 
@@ -155,6 +165,13 @@ async function tratarPagamento(paymentId: string) {
         .from("professionals")
         .update({ plano: "pro", plano_status: "ativo", plano_validade: baseDate.toISOString() })
         .eq("id", pagamento.professional_id);
+
+      // Sem isso, quem acabou de comprar o PRO veria o perfil sem o upgrade
+      // (template, WhatsApp visível) por até 5 minutos — pareceria bugado.
+      if (prof?.slug) {
+        revalidatePath(`/perfil/${prof.slug}`);
+        revalidatePath("/");
+      }
     }
   }
 }

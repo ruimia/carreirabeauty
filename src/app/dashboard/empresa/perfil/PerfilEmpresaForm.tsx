@@ -9,6 +9,7 @@ import { geocodeEndereco } from "@/lib/geocode";
 import { buildSlug, randomSuffix } from "@/lib/slug";
 import { compressImage } from "@/lib/compressImage";
 import { normalizeInstagramHandle } from "@/lib/instagram";
+import { revalidarPerfilEmpresa } from "./actions";
 
 const FAIXAS: Record<string, string> = {
   "1_5": "1 a 5 funcionários",
@@ -95,6 +96,9 @@ export default function PerfilEmpresaForm({ company, email, categorias }: { comp
         instagram: normalizeInstagramHandle(instagram), logo_url: logoUrl,
       }).eq("id", company.id);
       if (upErr) throw new Error(upErr.message);
+
+      if (slug) await revalidarPerfilEmpresa(slug);
+
       setSuccess(true); setEditing(false); router.refresh();
     } catch (e) {
       const isNetworkError = e instanceof TypeError && /fetch/i.test(e.message);

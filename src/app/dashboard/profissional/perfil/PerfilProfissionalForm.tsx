@@ -9,6 +9,7 @@ import { fetchCep, maskCep, maskPhone } from "@/lib/cep";
 import { geocodeEndereco } from "@/lib/geocode";
 import { compressImage } from "@/lib/compressImage";
 import { normalizeInstagramHandle } from "@/lib/instagram";
+import { revalidarPerfilProfissional } from "./actions";
 import TemplateSelector from "./visual/TemplateSelector";
 import { PerfilTemplateData } from "@/components/perfilTemplates/types";
 import TemplateClassico from "@/components/perfilTemplates/TemplateClassico";
@@ -256,6 +257,8 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         habilidades: selectedHabilidades,
       }).eq("id", p.id);
       if (upErr) throw new Error(upErr.message);
+
+      await revalidarPerfilProfissional(slug, p.slug);
 
       setPortfolioUrls(allPortfolioUrls);
       setPortfolioNewFiles([]); setPortfolioPreviews([]);

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 async function getProfessionalId(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
-  const { data: professional } = await supabase.from("professionals").select("id, plano").eq("user_id", user.id).single();
+  const { data: professional } = await supabase.from("professionals").select("id, plano, slug").eq("user_id", user.id).single();
   if (!professional) throw new Error("Perfil não encontrado");
   return professional;
 }
@@ -31,5 +31,6 @@ export async function aplicarTemplate(templateId: string, ehTemplatePro: boolean
 
   await supabase.from("template_eventos").insert({ professional_id: professional.id, template_id: templateId, tipo: "aplicado" });
   revalidatePath("/dashboard/profissional/perfil");
+  if (professional.slug) revalidatePath(`/perfil/${professional.slug}`);
   return { ok: true as const };
 }

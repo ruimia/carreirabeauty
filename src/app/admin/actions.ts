@@ -6,6 +6,16 @@ import { emailVagaAprovada, emailVagaRejeitada, emailNovaVagaProfissional, rende
 import { distanciaKm } from "@/lib/geocode";
 import { normalizeInstagramHandle } from "@/lib/instagram";
 
+// /vagas, /freelas, /empresa/[slug] e a home usam ISR — sem revalidar aqui,
+// uma aprovação/edição/mudança de status de vaga ficaria até 5min defasada
+// pro público, mesmo já valendo no admin.
+function revalidarVitrinesPublicas(companySlug?: string | null) {
+  revalidatePath("/vagas");
+  revalidatePath("/freelas");
+  revalidatePath("/");
+  if (companySlug) revalidatePath(`/empresa/${companySlug}`);
+}
+
 async function assertAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -17,22 +27,26 @@ async function assertAdmin() {
 
 export async function toggleBloqueioEmpresa(id: string, bloqueado: boolean) {
   const supabase = await assertAdmin();
-  await supabase.from("companies").update({ bloqueado }).eq("id", id);
+  const { data: company } = await supabase.from("companies").update({ bloqueado }).eq("id", id).select("slug").maybeSingle();
   revalidatePath("/admin/empresas");
   revalidatePath(`/admin/empresas/${id}`);
+  revalidarVitrinesPublicas(company?.slug);
 }
 
 export async function toggleBloqueadoProfissional(id: string, bloqueado: boolean) {
   const supabase = await assertAdmin();
-  await supabase.from("professionals").update({ bloqueado }).eq("id", id);
+  const { data: prof } = await supabase.from("professionals").update({ bloqueado }).eq("id", id).select("slug").maybeSingle();
   revalidatePath("/admin/profissionais");
   revalidatePath(`/admin/profissionais/${id}`);
+  if (prof?.slug) { revalidatePath(`/perfil/${prof.slug}`); revalidatePath("/"); }
 }
 
 export async function updateJobStatus(id: string, status: string) {
   const supabase = await assertAdmin();
-  await supabase.from("jobs").update({ status }).eq("id", id);
+  const { data: job } = await supabase.from("jobs").update({ status }).eq("id", id).select("company_id, companies(slug)").maybeSingle();
   revalidatePath("/admin/vagas");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  revalidarVitrinesPublicas((job?.companies as any)?.slug);
 }
 
 export interface EmpresaEditData {
@@ -52,7 +66,7 @@ export interface EmpresaEditData {
 
 export async function atualizarEmpresaAdmin(id: string, dados: EmpresaEditData) {
   const supabase = await assertAdmin();
-  const { error } = await supabase.from("companies").update({
+  const { error, data } = await supabase.from("companies").update({
     nome_estabelecimento: dados.nome_estabelecimento,
     responsavel: dados.responsavel,
     telefone: dados.telefone,
@@ -65,9 +79,10 @@ export async function atualizarEmpresaAdmin(id: string, dados: EmpresaEditData) 
     categoria_negocio: dados.categoria_negocio || null,
     faixa_funcionarios: dados.faixa_funcionarios || null,
     instagram: normalizeInstagramHandle(dados.instagram) || null,
-  }).eq("id", id);
+  }).eq("id", id).select("slug").maybeSingle();
   revalidatePath(`/admin/empresas/${id}`);
   revalidatePath("/admin/empresas");
+  revalidarVitrinesPublicas(data?.slug);
   if (error) throw new Error(error.message);
 }
 
@@ -88,7 +103,7 @@ export interface VagaEditData {
 
 export async function atualizarVagaAdmin(id: string, dados: VagaEditData) {
   const supabase = await assertAdmin();
-  const { error } = await supabase.from("jobs").update({
+  const { error, data: job } = await supabase.from("jobs").update({
     titulo: dados.titulo,
     funcao: dados.funcoes[0] ?? "",
     funcoes: dados.funcoes,
@@ -102,9 +117,11 @@ export async function atualizarVagaAdmin(id: string, dados: VagaEditData) {
     cidade: dados.cidade.trim(),
     estado: dados.estado,
     cep: dados.cep,
-  }).eq("id", id);
+  }).eq("id", id).select("company_id, companies(slug)").maybeSingle();
   revalidatePath("/admin/vagas");
   revalidatePath("/admin/empresas");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  revalidarVitrinesPublicas((job?.companies as any)?.slug);
   if (error) throw new Error(error.message);
 }
 
@@ -115,12 +132,13 @@ export async function aprovarVaga(id: string) {
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("titulo, funcao, slug, company_id, companies(nome_estabelecimento, user_id)")
+    .select("titulo, funcao, slug, company_id, companies(nome_estabelecimento, user_id, slug)")
     .eq("id", id).single();
 
   if (job) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const comp = job.companies as any;
+    revalidarVitrinesPublicas(comp?.slug);
     const { data: profile } = await supabase.from("profiles").select("email").eq("id", comp?.user_id ?? "").single();
     if (profile?.email) {
       await emailVagaAprovada({
