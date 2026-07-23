@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { isProAtivo } from "@/lib/planos";
 
 interface Props {
   app: {
@@ -30,6 +31,7 @@ interface Props {
       portfolio_urls: string[] | null;
       instagram: string | null;
       plano: string | null;
+      plano_validade: string | null;
     };
   };
   funcaoVaga: string;
@@ -38,7 +40,7 @@ interface Props {
 export default function CandidatoCard({ app, funcaoVaga }: Props) {
   const [open, setOpen] = useState(false);
   const p = app.professional;
-  const isPro = p.plano === "pro";
+  const isPro = isProAtivo(p.plano, p.plano_validade);
 
   const initials = p.nome?.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase() ?? "?";
   const whatsapp = p.telefone?.replace(/\D/g, "");

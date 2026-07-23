@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailNovaCandidatura } from "@/lib/email";
-import { limiteCandidaturasMes } from "@/lib/planos";
+import { limiteCandidaturasMes, isProAtivo } from "@/lib/planos";
 import { saoPauloStartOfMonthISO } from "@/lib/timezone";
 
 type CandidatarResult =
@@ -17,7 +17,7 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
 
   const { data: prof } = await supabase
     .from("professionals")
-    .select("id, nome, plano, slug")
+    .select("id, nome, plano, plano_validade, slug")
     .eq("user_id", user.id)
     .single();
   if (!prof) return { ok: false, error: "PERFIL_NAO_ENCONTRADO" };
@@ -26,8 +26,10 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
   // candidatou, então bloqueia aqui em vez de deixar a candidatura "manca".
   if (!prof.slug) return { ok: false, error: "PERFIL_INCOMPLETO" };
 
+  const profIsPro = isProAtivo(prof.plano, prof.plano_validade);
+
   // Checa limite de candidaturas do mês
-  const limite = limiteCandidaturasMes(prof.plano ?? "gratis");
+  const limite = limiteCandidaturasMes(profIsPro ? "pro" : "gratis");
   if (limite !== null) {
     const { count } = await supabase
       .from("applications")
@@ -59,7 +61,7 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
   }
 
   if (error) {
-    if (error.code === "23505") return { ok: true, jaAplicou: true, totalCandidatos: await contarCandidatos(), isPro: prof.plano === "pro" };
+    if (error.code === "23505") return { ok: true, jaAplicou: true, totalCandidatos: await contarCandidatos(), isPro: profIsPro };
     return { ok: false, error: "ERRO_DB" };
   }
 
@@ -102,5 +104,5 @@ export async function candidatar(jobId: string, mensagem: string | null): Promis
     }
   }
 
-  return { ok: true, jaAplicou: false, totalCandidatos: await contarCandidatos(), isPro: prof.plano === "pro" };
+  return { ok: true, jaAplicou: false, totalCandidatos: await contarCandidatos(), isPro: profIsPro };
 }

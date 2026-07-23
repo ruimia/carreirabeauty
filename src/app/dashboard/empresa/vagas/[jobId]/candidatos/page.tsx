@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import CandidatoCard from "./CandidatoCard";
+import { isProAtivo } from "@/lib/planos";
 
 export default async function CandidatosPage({ params }: { params: Promise<{ jobId: string }> }) {
   const { jobId } = await params;
@@ -27,7 +28,7 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
       id, nome, telefone, funcoes, funcao, funcao_outro,
       bairro, cidade, estado, experiencia, disponibilidade, tipo_vinculo,
       foto_perfil_url, slug, educacao_basica, habilidades,
-      educacao, experiencia_prof, portfolio_urls, instagram, plano
+      educacao, experiencia_prof, portfolio_urls, instagram, plano, plano_validade
     )`)
     .eq("job_id", jobId)
     .order("criado_em", { ascending: false });
@@ -38,9 +39,11 @@ export default async function CandidatosPage({ params }: { params: Promise<{ job
   // primeiro), que é o comportamento que a empresa já conhecia.
   const ordenadas = [...(applications ?? [])].sort((a, b) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proA = (a.professionals as any)?.plano === "pro" ? 1 : 0;
+    const profA = a.professionals as any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proB = (b.professionals as any)?.plano === "pro" ? 1 : 0;
+    const profB = b.professionals as any;
+    const proA = isProAtivo(profA?.plano, profA?.plano_validade) ? 1 : 0;
+    const proB = isProAtivo(profB?.plano, profB?.plano_validade) ? 1 : 0;
     return proB - proA;
   });
 

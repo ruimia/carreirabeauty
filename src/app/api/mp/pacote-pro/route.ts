@@ -2,34 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { MercadoPagoConfig, Preference } from "mercadopago";
-import { CERTIFICADO_AVULSO_PRECO, isProAtivo } from "@/lib/planos";
-import { getTrilha } from "@/lib/quizContent";
+import { PACOTES_PRO_PROFISSIONAL, PacoteProKey } from "@/lib/planos";
 
 export async function POST(req: NextRequest) {
-  const { trilhaSlug } = await req.json();
-  const trilha = getTrilha(trilhaSlug);
-  if (!trilha) return NextResponse.json({ error: "Trilha inválida" }, { status: 400 });
+  const { pacote } = await req.json();
+  const config = PACOTES_PRO_PROFISSIONAL[pacote as PacoteProKey];
+  if (!config) return NextResponse.json({ error: "Pacote inválido" }, { status: 400 });
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
   const { data: professional } = await supabase
-    .from("professionals").select("id, plano, plano_validade")
-    .eq("user_id", user.id).single();
+    .from("professionals").select("id").eq("user_id", user.id).single();
   if (!professional) return NextResponse.json({ error: "Perfil não encontrado" }, { status: 404 });
-
-  const { data: jaTem } = await supabase
-    .from("certificados").select("id").eq("professional_id", professional.id).eq("trilha_slug", trilhaSlug).maybeSingle();
-  if (isProAtivo(professional.plano, professional.plano_validade) || jaTem) {
-    return NextResponse.json({ error: "Você já tem esse certificado" }, { status: 400 });
-  }
 
   const { data: profile } = await supabase.from("profiles").select("email").eq("id", user.id).single();
 
-  // Escreve o pagamento (pendente) e a preferência do MP com service role —
-  // a linha de pagamento não pode ser criada/aprovada só pelo profissional
-  // (RLS só permite insert dele mesmo; update é só via webhook).
+  // Mesmo padrão do certificado avulso: a linha de pagamento e a preferência
+  // são escritas com service role — RLS só deixa o profissional inserir a
+  // linha pendente dele mesmo; a aprovação é só via webhook.
   const supabaseService = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -39,9 +31,9 @@ export async function POST(req: NextRequest) {
     .from("pagamentos_avulsos")
     .insert({
       professional_id: professional.id,
-      produto: "certificado",
-      trilha_slug: trilhaSlug,
-      valor: CERTIFICADO_AVULSO_PRECO,
+      produto: "pacote_pro",
+      dias: config.dias,
+      valor: config.preco,
       status: "pendente",
     })
     .select("id")
@@ -58,19 +50,19 @@ export async function POST(req: NextRequest) {
     const result = await preference.create({
       body: {
         items: [{
-          id: `certificado_${trilhaSlug}`,
-          title: `Certificado — ${trilha.certificadoNome}`,
+          id: `pacote_pro_${pacote}`,
+          title: `CarreiraBeauty PRO — ${config.nome}`,
           quantity: 1,
-          unit_price: CERTIFICADO_AVULSO_PRECO,
+          unit_price: config.preco,
           currency_id: "BRL",
         }],
         payer: profile?.email ? { email: profile.email } : undefined,
         external_reference: pagamento.id,
         notification_url: `${appUrl}/api/webhooks/mercadopago`,
         back_urls: {
-          success: `${appUrl}/dashboard/profissional/quiz/${trilhaSlug}`,
-          pending: `${appUrl}/dashboard/profissional/quiz/${trilhaSlug}`,
-          failure: `${appUrl}/dashboard/profissional/quiz/${trilhaSlug}`,
+          success: `${appUrl}/dashboard/profissional/planos/sucesso`,
+          pending: `${appUrl}/dashboard/profissional/planos/sucesso`,
+          failure: `${appUrl}/dashboard/profissional/planos`,
         },
         auto_return: "approved",
       },
@@ -83,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ init_point: result.init_point });
   } catch (e) {
-    console.error("[certificado-avulso] erro ao criar preferência", e);
+    console.error("[pacote-pro] erro ao criar preferência", e);
     await supabaseService.from("pagamentos_avulsos").update({ status: "rejeitado" }).eq("id", pagamento.id);
     return NextResponse.json({ error: "Erro ao iniciar pagamento" }, { status: 500 });
   }

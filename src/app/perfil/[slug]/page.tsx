@@ -10,6 +10,7 @@ import TemplateAurora from "@/components/perfilTemplates/TemplateAurora";
 import TemplateEstudio from "@/components/perfilTemplates/TemplateEstudio";
 import { PerfilTemplateData } from "@/components/perfilTemplates/types";
 import { APP_URL, buildPersonLd } from "@/lib/seo";
+import { isProAtivo } from "@/lib/planos";
 
 function funcoesLabel(funcoes: string[] | null, funcaoOutro: string | null): string {
   if (!funcoes?.length) return "Profissional de beleza";
@@ -63,11 +64,12 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
   }
 
   const funcao = funcoesLabel(p.funcoes, p.funcao_outro);
+  const isPro = isProAtivo(p.plano, p.plano_validade);
 
   // Templates PRO mostram contatos (WhatsApp/email) — o email vive em profiles,
   // que o RLS não expõe pra visitante anônimo; service role só pra esse lookup
   let email: string | null = null;
-  if (p.plano === "pro" && p.user_id) {
+  if (isPro && p.user_id) {
     const supabaseService = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -95,7 +97,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
     estado: p.estado,
     fotoUrl: p.foto_perfil_url,
     instagram: p.instagram,
-    whatsapp: p.plano === "pro" ? (p.telefone || null) : null,
+    whatsapp: isPro ? (p.telefone || null) : null,
     email,
     tags,
     apresentacao: p.educacao_basica || null,
@@ -111,7 +113,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
 
   // Templates PRO só renderizam pra quem ainda é PRO — se desceu de plano,
   // volta pro Clássico automaticamente em vez de manter o visual travado
-  const templateId = p.plano === "pro" ? (p.template_id ?? "classico") : "classico";
+  const templateId = isPro ? (p.template_id ?? "classico") : "classico";
 
   const personLd = buildPersonLd({
     nome: p.nome,

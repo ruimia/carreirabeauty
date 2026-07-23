@@ -117,7 +117,7 @@ async function tratarPagamento(paymentId: string) {
 
   const { data: pagamento } = await supabase
     .from("pagamentos_avulsos")
-    .select("id, professional_id, produto, trilha_slug, status")
+    .select("id, professional_id, produto, trilha_slug, dias, status")
     .eq("id", pagamentoId)
     .maybeSingle();
   if (!pagamento) return;
@@ -129,13 +129,33 @@ async function tratarPagamento(paymentId: string) {
 
   // Idempotente: só concede se ainda não tinha sido concedido — evita
   // reprocessar notificação duplicada do MP
-  if (novoStatus === "aprovado" && pagamento.status !== "aprovado" && pagamento.produto === "certificado" && pagamento.trilha_slug) {
-    await supabase
-      .from("certificados")
-      .upsert(
-        { professional_id: pagamento.professional_id, trilha_slug: pagamento.trilha_slug, origem: "avulso" },
-        { onConflict: "professional_id,trilha_slug" }
-      );
+  if (novoStatus === "aprovado" && pagamento.status !== "aprovado") {
+    if (pagamento.produto === "certificado" && pagamento.trilha_slug) {
+      await supabase
+        .from("certificados")
+        .upsert(
+          { professional_id: pagamento.professional_id, trilha_slug: pagamento.trilha_slug, origem: "avulso" },
+          { onConflict: "professional_id,trilha_slug" }
+        );
+    } else if (pagamento.produto === "pacote_pro" && pagamento.dias) {
+      // Estende a partir de hoje, ou da validade atual se ela ainda não
+      // venceu — comprar um pacote novo antes do atual acabar soma dias em
+      // vez de perder o que já tinha pago.
+      const { data: prof } = await supabase
+        .from("professionals")
+        .select("plano, plano_validade")
+        .eq("id", pagamento.professional_id)
+        .maybeSingle();
+
+      const validadeAtual = prof?.plano === "pro" && prof.plano_validade ? new Date(prof.plano_validade) : null;
+      const baseDate = validadeAtual && validadeAtual.getTime() > Date.now() ? validadeAtual : new Date();
+      baseDate.setDate(baseDate.getDate() + pagamento.dias);
+
+      await supabase
+        .from("professionals")
+        .update({ plano: "pro", plano_status: "ativo", plano_validade: baseDate.toISOString() })
+        .eq("id", pagamento.professional_id);
+    }
   }
 }
 

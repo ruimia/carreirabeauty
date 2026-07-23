@@ -7,6 +7,7 @@ import CandidatarFloatingButton from "./CandidatarFloatingButton";
 import VoltarLink from "@/components/VoltarLink";
 import type { Metadata } from "next";
 import { APP_URL, buildJobPostingLd } from "@/lib/seo";
+import { isProAtivo } from "@/lib/planos";
 
 export const dynamic = "force-dynamic";
 
@@ -64,14 +65,14 @@ export default async function VagaPage({ params }: Props) {
   if (user) {
     const { data: prof } = await supabase
       .from("professionals")
-      .select("id, nome, plano")
+      .select("id, nome, plano, plano_validade")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (prof) {
       professionalId = prof.id;
       nomeProfissional = prof.nome;
-      isProInicial = prof.plano === "pro";
+      isProInicial = isProAtivo(prof.plano, prof.plano_validade);
       const { data: app } = await supabase
         .from("applications")
         .select("id")

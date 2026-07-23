@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { convidarPorEmail } from "./actions";
+import { isProAtivo } from "@/lib/planos";
 
 interface Professional {
   id: string;
@@ -21,6 +22,7 @@ interface Professional {
   foto_perfil_url: string | null;
   slug: string | null;
   plano: string | null;
+  plano_validade: string | null;
   criado_em: string;
 }
 
@@ -44,7 +46,7 @@ export default function CandidatoPotencialCard({ professional: p, vagas, distanc
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState("");
 
-  const isPro = p.plano === "pro";
+  const isPro = isProAtivo(p.plano, p.plano_validade);
   const initials = p.nome?.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase() ?? "?";
   const funcao = p.funcoes?.join(", ") || p.funcao || "—";
   const tituloVagas = vagas.map((v) => v.titulo).join(", ");

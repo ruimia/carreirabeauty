@@ -50,7 +50,7 @@ export default async function CandidatosPotenciaisPage() {
     .select(`
       id, user_id, nome, telefone, funcoes, funcao, funcao_outro,
       bairro, cidade, estado, latitude, longitude, experiencia,
-      disponibilidade, tipo_vinculo, foto_perfil_url, slug, plano, bloqueado, criado_em
+      disponibilidade, tipo_vinculo, foto_perfil_url, slug, plano, plano_validade, bloqueado, criado_em
     `)
     .overlaps("funcoes", todasFuncoes);
 

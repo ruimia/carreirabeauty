@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import PdfPageViewer from "@/components/PdfPageViewer";
+import { isProAtivo } from "@/lib/planos";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,7 +18,7 @@ export default async function ConteudoViewerPage({ params }: Props) {
 
   const { data: professional } = await supabase
     .from("professionals")
-    .select("id, plano")
+    .select("id, plano, plano_validade")
     .eq("user_id", user.id)
     .single();
   if (!professional) redirect("/onboarding/tipo");
@@ -30,7 +31,7 @@ export default async function ConteudoViewerPage({ params }: Props) {
     .maybeSingle();
   if (!conteudo) notFound();
 
-  const isPro = professional.plano === "pro";
+  const isPro = isProAtivo(professional.plano, professional.plano_validade);
   const locked = conteudo.pro && !isPro;
 
   // Tracking interno — registra a view mesmo pra quem só vê o preview

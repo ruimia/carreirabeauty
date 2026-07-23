@@ -17,6 +17,7 @@ import TemplateAurora from "@/components/perfilTemplates/TemplateAurora";
 import TemplateEstudio from "@/components/perfilTemplates/TemplateEstudio";
 import { TRILHAS } from "@/lib/quizContent";
 import { Depoimento } from "@/components/perfilTemplates/types";
+import { isProAtivo } from "@/lib/planos";
 
 const TEMPLATE_COMPONENTES = {
   classico: TemplateClassico,
@@ -50,7 +51,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
   const [view, setView] = useState<PerfilView>("visualizar");
   const editing = view === "editar";
-  const isPro = p.plano === "pro";
+  const isPro = isProAtivo(p.plano, p.plano_validade);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -136,7 +137,7 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
 
   const templateData: PerfilTemplateData = {
     nome, funcao: funcaoLabel, bairro, cidade, estado, fotoUrl: avatarPreview, instagram,
-    whatsapp: p.plano === "pro" ? (telefone || null) : null, email: p.plano === "pro" ? (email || null) : null,
+    whatsapp: isPro ? (telefone || null) : null, email: isPro ? (email || null) : null,
     tags: experiencia ? [`${experiencia} de experiência`] : [],
     apresentacao: apresentacao || null, experiencia: experiencia || null,
     disponibilidade: disponibilidade || null, tipoVinculo: VINCULOS[tipoVinculo] || tipoVinculo || null,
@@ -948,26 +949,26 @@ export default function PerfilProfissionalForm({ professional: p, email, profiss
         {view === "visualizar" && (
           <Link href="/dashboard/profissional/planos" style={{ textDecoration: "none", display: "block", marginBottom: 12 }}>
             <div style={{
-              background: p.plano === "pro" ? "var(--brand-magenta-50)" : "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
+              background: isPro ? "var(--brand-magenta-50)" : "linear-gradient(135deg, var(--brand-magenta-50), var(--surface-card))",
               border: "1px solid var(--brand-magenta-100)",
               borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-xs)",
               padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
             }}>
-              <i className={p.plano === "pro" ? "ph-fill ph-star" : "ph-fill ph-rocket-launch"} style={{
+              <i className={isPro ? "ph-fill ph-star" : "ph-fill ph-rocket-launch"} style={{
                 fontSize: 20, color: "var(--color-brand-primary)",
               }}></i>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ font: "700 14px/1.3 var(--font-display)", color: "var(--color-brand-primary)" }}>
-                  {p.plano === "pro" ? "Você é PRO" : "Seja PRO!"}
+                  {isPro ? "Você é PRO" : "Seja PRO!"}
                 </p>
-                <p style={{ font: "var(--text-caption)", color: p.plano === "pro" ? "var(--color-brand-primary)" : "var(--text-secondary)" }}>
-                  {p.plano === "pro"
-                    ? (p.plano_validade ? `Renova em ${new Date(p.plano_validade).toLocaleDateString("pt-BR")}` : "Assinatura ativa")
+                <p style={{ font: "var(--text-caption)", color: isPro ? "var(--color-brand-primary)" : "var(--text-secondary)" }}>
+                  {isPro
+                    ? (p.plano_validade ? `Vale até ${new Date(p.plano_validade).toLocaleDateString("pt-BR")}` : "PRO ativo")
                     : "Certificado, vitrine profissional e contato direto no WhatsApp"}
                 </p>
               </div>
               <span style={{ font: "600 13px/1 var(--font-body)", color: "var(--color-brand-primary)", flexShrink: 0 }}>
-                {p.plano === "pro" ? "Gerenciar" : "Ver PRO"} ›
+                {isPro ? "Comprar mais tempo" : "Ver PRO"} ›
               </span>
             </div>
           </Link>

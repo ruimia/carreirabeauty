@@ -7,6 +7,7 @@ import { getTrilha } from "@/lib/quizContent";
 import ResgateCertificado from "../ResgateCertificado";
 import VoltarLink from "@/components/VoltarLink";
 import CertificadoVisual from "@/components/CertificadoVisual";
+import { isProAtivo } from "@/lib/planos";
 
 interface Props {
   params: Promise<{ trilha: string }>;
@@ -23,10 +24,11 @@ export default async function QuizTrilhaPage({ params }: Props) {
 
   const { data: professional } = await supabase
     .from("professionals")
-    .select("id, nome, plano")
+    .select("id, nome, plano, plano_validade")
     .eq("user_id", user.id)
     .single();
   if (!professional) redirect("/onboarding/tipo");
+  const isPro = isProAtivo(professional.plano, professional.plano_validade);
 
   const [{ data: progresso }, { data: certificado }] = await Promise.all([
     supabase
@@ -100,7 +102,7 @@ export default async function QuizTrilhaPage({ params }: Props) {
           nome={professional.nome}
           trilhaSlug={trilha.slug}
           certificadoNome={trilha.certificadoNome}
-          isPro={professional.plano === "pro"}
+          isPro={isPro}
           jaDesbloqueado={!!certificado}
           todosConcluidos={todosConcluidos}
         />

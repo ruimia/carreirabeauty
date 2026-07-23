@@ -154,6 +154,70 @@ Premissas: TAM nacional ~1,26M estabelecimentos e ~1,25M profissionais formaliza
 - Em relação ao Brasil: ~0,04% dos estabelecimentos nacionais e ~0,08% dos profissionais formalizados — marginal
 - Avaliado como meta de tração inicial bem dimensionada, anterior à meta de R$500 mil/mês acima
 
+### 4.4. Hipótese — Créditos/micro-transações substituindo a assinatura recorrente (jul/2026, a testar)
+
+**Contexto/motivação:** com mais de 200 profissionais cadastrados, **zero conversões** na assinatura PRO (R$14,90/mês) até o momento — mesmo com o certificado avulso (R$29,90, seção 7.9.7) precificado *acima* da assinatura de propósito para ancorar o PRO como "escolha óbvia". O fato de nem isso ter convertido é sinal de que o problema pode não ser preço, e sim o **mecanismo de recorrência em si** não conectar com esse público.
+
+**Checagem recomendada antes de agir sobre a hipótese:** olhar os dados já instrumentados — `template_eventos.paywall_hit` e tentativas de resgate de certificado — para separar "problema de mecanismo" de "problema de volume/exposição" (pouca gente sequer chegou ao paywall ainda).
+
+**Hipótese:** trocar a assinatura recorrente por um sistema de **créditos/moeda interna**, ganho por comportamento (completar perfil, indicar amigo) e gasto em desbloqueios pontuais (conteúdo, certificado), com opção de recarga via Pix/cartão para quem não quiser "ganhar" o crédito fazendo ações. Racional: Pix avulso e moeda de jogo/app (Free Fire, apps de aposta) são modelos mentais muito mais familiares a esse público de baixa renda do que assinatura recorrente estilo SaaS — mais alinhado ao comportamento financeiro real observado (renda variável, desconfiança de cobrança recorrente, sem cancelamento funcional no app hoje).
+
+**⚠️ Cuidado ético deliberado (jul/2026):** a inspiração vem de jogos/apps de aposta ("bets"), mas **sem importar mecânica de sorte/aleatoriedade** (roleta, caixa-surpresa, recompensa variável) — cada ação vale um número fixo e previsível de crédito. Replicar gatilho de recompensa variável (o que torna apps de aposta psicologicamente pesados) num público de baixa renda, numa plataforma de emprego, é um risco ético que não será adotado, além de atrair comparação regulatória indesejada com bets num momento de escrutínio forte desse setor no Brasil.
+
+**Desenho do MVP de teste (enxuto, reaproveitando o que já existe):**
+- [ ] **Moeda:** nome simples, não-financeiro (ex: "Estrelas" ou "Pontos Beauty") — evita soar como cripto/ficha de cassino
+- [ ] **Ganhar (2 ações no teste inicial):**
+  - Completar perfil — pontuação por etapa preenchida (não tudo-ou-nada), ataca de quebra os ~40% de cadastros incompletos já identificados (seção 13)
+  - Indicar profissional que se cadastra **e completa o onboarding** — crédito só libera quando o indicado tem `slug` preenchido (reaproveita o mesmo sinal do feed de atividade, seção 7.10, evita farm de conta fake)
+- [ ] **Gastar (2 superfícies já existentes, sem construir nada novo):**
+  - Desbloquear certificado (seção 7.9.7)
+  - Desbloquear conteúdo PRO / template PRO (seções 7.9.4/7.9.6)
+- [ ] **Modelo híbrido:** mesmo saldo pode vir de comportamento (grátis) ou recarga via Pix (pago) — quem não quer "ganhar" créditos, compra direto
+- [ ] **Sem mecânica de sorte/aleatoriedade** — decisão fechada, ver cuidado ético acima
+
+**Pendência explícita:** esse modelo substitui a base de receita recorrente (MRR) que sustenta os milestones de R$50k/R$500k por mês (seção 4.3) — remodelagem da projeção de receita fica para depois de validar a hipótese com dado real, não é pré-requisito para testar.
+
+- [ ] **Pronto para implementação pelo Claude Code (MVP enxuto):** sistema de créditos com as 2 ações de ganho e 2 superfícies de gasto acima, modelo híbrido com recarga Pix, sem elementos de aleatoriedade
+- [ ] Antes de implementar: checar `template_eventos.paywall_hit` e tentativas de resgate de certificado para confirmar que o problema é de mecanismo e não de volume
+
+#### Estrutura do paywall — como créditos e pacote convivem (jul/2026)
+
+Não são 3 opções com peso igual — é uma **opção primária dinâmica** + assinatura como alternativa secundária, mantendo a lógica de "um sim só" já usada no resto do produto:
+
+- [ ] **Botão principal muda conforme o saldo de créditos da pessoa:**
+  - Saldo suficiente → "Resgatar com X créditos" (1 toque, sem fricção)
+  - Saldo parcial → "Use seus X créditos + complete R$Y no Pix" (calcula desconto automaticamente — mesmo padrão de vale-presente + cartão já familiar no varejo brasileiro)
+  - Sem saldo → "Pague R$Z no Pix" como principal, com link menor abaixo ("ou ganhe créditos completando seu perfil")
+- [ ] **Abaixo do botão principal, sempre visível mas com menos peso visual:** link/card secundário pro pacote PRO por tempo (ver abaixo) — não é um botão do mesmo tamanho, é a opção de quem já percebeu que vai usar mais de uma vez
+- [ ] **Upsell contextual, não repetitivo:** a partir da 2ª compra avulsa no mesmo período, disparar modal específico usando o gasto real da pessoa como argumento (ex: "Você já gastou R$59,80 esse mês em desbloqueios — o pacote de 30 dias sai por R$14,90 e libera tudo") — evita repetir a mesma oferta genérica em todo paywall, e não usa número fabricado (mantém a linha de "sem prova social inventada", seção 7.9.5)
+
+### 4.5. Decisão — Pacote PRO pré-pago substitui assinatura recorrente (jul/2026)
+
+**Contexto:** no fluxo de busca de emprego, o profissional não tem previsibilidade de renda — assinatura recorrente (cobrança automática todo mês) é um modelo de risco pra quem não sabe se vai ter dinheiro no mês seguinte. Paralelo direto e já validado culturalmente no Brasil: a preferência histórica por **celular pré-pago em vez de pós-pago** em público de renda instável, pelo mesmo motivo — controle total, sem risco de cobrança surpresa.
+
+**Decisão: substituir a assinatura recorrente (cobrança automática via Mercado Pago) por pacotes PRO pré-pagos, sem renovação automática.**
+
+| Pacote | Duração | Preço sugerido | Lógica |
+|---|---|---|---|
+| 30 dias | 1 mês | R$14,90 (mantém o preço atual) | Entrada, testa o valor |
+| 3 meses | 90 dias | ~R$39,90 (~R$13,30/mês) | Desconto por comprometer mais tempo |
+| 12 meses | 365 dias | ~R$139,90 (~R$11,65/mês) | Maior desconto, cobre um ciclo real de busca de emprego |
+
+**Por que isso é melhor que a assinatura atual, não só "mais uma opção":**
+- **Resolve o botão de cancelamento quebrado (seção 7.9.5) por construção** — não existe nada pra cancelar, o acesso simplesmente expira na data. Elimina o medo de "esqueci de cancelar e fui cobrado de novo", provável causa parcial do zero de conversão até hoje
+- **Mais simples de construir que assinatura recorrente de verdade** — não precisa da lógica de renovação/webhook de cobrança repetida do Mercado Pago, é pagamento único com data de validade (`plano_validade`, já existe no modelo de dados, seção 10)
+- **Reaproveita o fallback já construído:** quando o pacote expira, a conta volta pro grátis sozinha — mesmo mecanismo já implementado pros templates PRO (seção 7.9.6, "se profissional deixa de ser PRO, a página volta pro Clássico sozinha"), só que disparado por data de expiração em vez de cancelamento
+- **Conecta com a régua de retenção (seção 7.7):** aviso perto do vencimento (ex: 3 dias antes) — "seu PRO expira em breve, renove aqui" — novo gatilho de email, reaproveitando a infraestrutura de régua semanal já desenhada
+
+**Arquitetura final de monetização do profissional (substitui o desenho anterior de assinatura + avulso):**
+1. **Créditos/avulso** (seção 4.4) — pra quem quer **uma coisa específica** (um certificado, um template), ganho por comportamento ou comprado via Pix
+2. **Pacote PRO por tempo** (30/90/365 dias) — pra quem quer **acesso completo por um período**, sem risco de cobrança recorrente
+
+- [x] Decisão: assinatura recorrente (cobrança automática) descontinuada, substituída por pacote pré-pago sem renovação automática
+- [ ] **Pronto para implementação pelo Claude Code:** migrar `MP_PLAN_PROFISSIONAL_PRO` (cobrança recorrente) para checkout único por pacote (30/90/365 dias), usando `plano_validade` como data de expiração; reaproveitar o fallback de downgrade automático já existente (seção 7.9.6)
+- [ ] Adicionar gatilho de email "PRO expira em breve" na régua de retenção (seção 7.7)
+- [ ] Definir se assinantes futuros veem os 3 prazos lado a lado ou se o app sugere um prazo padrão (30 dias) com os outros como alternativa — evitar reintroduzir decisão de 3 opções com peso igual
+
 ---
 
 ## 5. Personas (a detalhar)
