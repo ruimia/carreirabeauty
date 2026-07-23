@@ -1,5 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+
+// Página pública, sem estado de sessão — ISR em vez de renderizar do zero a
+// cada visita. Usa client anônimo sem cookies (createPublicClient) pra não
+// forçar renderização dinâmica; revalida a cada 5 min.
+export const revalidate = 300;
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,7 +24,7 @@ function funcoesLabel(funcoes: string[] | null, funcaoOutro: string | null): str
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: p } = await supabase
     .from("professionals")
     .select("nome, funcoes, funcao_outro, cidade, estado, foto_perfil_url")
@@ -46,7 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function PerfilPublicoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   let { data: p } = await supabase.from("professionals").select("*").eq("slug", slug).single();
 

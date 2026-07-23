@@ -1,10 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { APP_URL, buildOrganizationLd } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+// Página pública, sem estado de sessão — ISR em vez de force-dynamic.
+export const revalidate = 300;
 
 function formatRelativeTime(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -23,7 +24,7 @@ interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("companies").select("nome_estabelecimento, cidade, estado, logo_url").eq("slug", slug).single();
   if (!data) return { title: "Empresa não encontrada" };
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EmpresaPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: company } = await supabase
     .from("companies")

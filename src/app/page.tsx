@@ -62,10 +62,15 @@ export default async function Home() {
       .eq("status", "ativa")
       .order("criado_em", { ascending: false })
       .limit(9),
+    // Só precisamos de 10 diversificados no fim — trazer a tabela inteira
+    // (sem limite) só pra calcular completude em JS gastava egress à toa.
+    // 100 já dá pool de sobra pra achar profissões variadas com perfil bom.
     supabase
       .from("professionals")
       .select("id, nome, slug, foto_perfil_url, cidade, estado, funcoes, funcao_outro, educacao_basica, habilidades, educacao, experiencia_prof, portfolio_urls")
-      .not("slug", "is", null),
+      .not("slug", "is", null)
+      .order("criado_em", { ascending: false })
+      .limit(100),
   ]);
 
   // Profissionais em Destaque — perfis mais completos, diversificados por

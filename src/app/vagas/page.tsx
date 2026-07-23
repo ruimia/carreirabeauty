@@ -1,6 +1,7 @@
-export const dynamic = "force-dynamic";
+// Página pública, sem estado de sessão — ISR em vez de force-dynamic.
+export const revalidate = 300;
 
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -32,7 +33,7 @@ interface Props {
 
 export default async function VagasPage({ searchParams }: Props) {
   const { funcao } = await searchParams;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const [{ data: vagas }, { data: profissoes }] = await Promise.all([
     supabase
@@ -138,16 +139,13 @@ export default async function VagasPage({ searchParams }: Props) {
               })();
 
               return (
-                <Link key={vaga.id} href={`/vaga/${vaga.slug}`} style={{ textDecoration: "none" }}>
-                  <div style={{
+                <Link key={vaga.id} href={`/vaga/${vaga.slug}`} className="vaga-card-link" style={{ textDecoration: "none" }}>
+                  <div className="vaga-card" style={{
                     background: "var(--surface-card)", borderRadius: "var(--radius-xl)",
                     border: "1px solid var(--border-default)", boxShadow: "var(--shadow-xs)",
                     padding: 18, display: "flex", gap: 14, alignItems: "flex-start",
                     transition: "box-shadow 0.15s",
-                  }}
-                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "var(--shadow-md)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "var(--shadow-xs)")}
-                  >
+                  }}>
                     {/* Logo empresa */}
                     <div style={{
                       width: 48, height: 48, borderRadius: "var(--radius-md)", flexShrink: 0,
@@ -194,6 +192,7 @@ export default async function VagasPage({ searchParams }: Props) {
           </div>
         )}
       </main>
+      <style>{`.vaga-card-link:hover .vaga-card { box-shadow: var(--shadow-md); }`}</style>
     </div>
   );
 }

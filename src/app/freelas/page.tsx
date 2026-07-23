@@ -1,6 +1,7 @@
-export const dynamic = "force-dynamic";
+// Página pública, sem estado de sessão — ISR em vez de force-dynamic.
+export const revalidate = 300;
 
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function FreelasPage() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: vagas } = await supabase
     .from("jobs")
