@@ -63,7 +63,7 @@ export default async function VagasPage({ searchParams }: Props) {
             <Image src="/logo-square.jpg" alt="CarreiraBeauty" width={28} height={28} style={{ borderRadius: 6, objectFit: "cover" }} />
             <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>CarreiraBeauty</span>
           </Link>
-          <Link href="/login" style={{
+          <Link href="/login" prefetch={false} style={{
             height: 36, padding: "0 16px", borderRadius: "var(--radius-pill)",
             border: "1px solid var(--border-default)", color: "var(--text-primary)",
             fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", textDecoration: "none",
@@ -84,7 +84,7 @@ export default async function VagasPage({ searchParams }: Props) {
             {total} vaga{total !== 1 ? "s" : ""} ativa{total !== 1 ? "s" : ""}
             {funcao ? ` · ${funcao}` : ""}
             {" · "}
-            <Link href="/freelas" style={{ color: "var(--color-brand-primary)", fontWeight: 600, textDecoration: "none" }}>
+            <Link href="/freelas" prefetch={false} style={{ color: "var(--color-brand-primary)", fontWeight: 600, textDecoration: "none" }}>
               Ver só freelas →
             </Link>
           </p>

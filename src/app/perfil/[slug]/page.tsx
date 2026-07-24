@@ -159,9 +159,9 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
             <img src="/logo.png" alt="CarreiraBeauty" style={{ height: 16, objectFit: "contain" }} />
           </Link>
           <p style={{ fontSize: 12, color: "var(--neutral-400)" }}>
-            <Link href="/termos" style={{ color: "var(--neutral-400)" }}>Termos</Link>
+            <Link href="/termos" prefetch={false} style={{ color: "var(--neutral-400)" }}>Termos</Link>
             {" "}·{" "}
-            <Link href="/privacidade" style={{ color: "var(--neutral-400)" }}>Privacidade</Link>
+            <Link href="/privacidade" prefetch={false} style={{ color: "var(--neutral-400)" }}>Privacidade</Link>
           </p>
         </div>
       </div>

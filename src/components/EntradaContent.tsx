@@ -18,7 +18,7 @@ export default function EntradaContent({ banner }: { banner?: React.ReactNode })
             <Image src="/logo-square.jpg" alt="CarreiraBeauty" width={32} height={32} style={{ borderRadius: 8, objectFit: "cover" }} />
             <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)" }}>CarreiraBeauty</span>
           </a>
-          <Link href="/login" style={{
+          <Link href="/login" prefetch={false} style={{
             height: 40, padding: "0 18px", borderRadius: "var(--radius-pill)",
             border: "1px solid var(--border-default)", background: "transparent",
             color: "var(--text-primary)", fontWeight: 600, fontSize: 14,
@@ -340,7 +340,7 @@ function FooterCol({ title, links }: { title: string; links: { label: string; hr
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{title}</span>
       {links.map((l) => (
-        <Link key={l.href} href={l.href} style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{l.label}</Link>
+        <Link key={l.href} href={l.href} prefetch={false} style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{l.label}</Link>
       ))}
     </div>
   );
