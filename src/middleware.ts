@@ -29,8 +29,16 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Rotas protegidas — redireciona para /login se não autenticado
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  // Rotas protegidas — redireciona para /login se não autenticado. Onboarding
+  // exige login antes de começar (mesma regra que já existia dentro de cada
+  // page.tsx) — mover pra cá evita rodar a Function inteira só pra descobrir
+  // isso, o que importa porque bots batem bastante nesses paths ignorando o
+  // robots.txt.
+  if (!user && (
+    request.nextUrl.pathname.startsWith("/dashboard") ||
+    request.nextUrl.pathname.startsWith("/onboarding/profissional") ||
+    request.nextUrl.pathname.startsWith("/onboarding/empresa")
+  )) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -43,5 +51,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/"],
+  matcher: ["/dashboard/:path*", "/login", "/", "/onboarding/profissional/:path*", "/onboarding/empresa/:path*"],
 };
