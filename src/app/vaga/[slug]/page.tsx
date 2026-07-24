@@ -134,7 +134,7 @@ export default async function VagaPage({ params }: Props) {
         {professionalId && (
           <VoltarLink fallbackHref="/dashboard/profissional" />
         )}
-        <Link href="/" style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--color-brand-primary)", textDecoration: "none" }}>
+        <Link href="/" prefetch={false} style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--color-brand-primary)", textDecoration: "none" }}>
           CarreiraBeauty
         </Link>
       </header>

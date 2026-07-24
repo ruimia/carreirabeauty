@@ -78,7 +78,7 @@ export default async function EmpresaPage({ params }: Props) {
         padding: "0 var(--space-page-x)", height: 56,
         display: "flex", alignItems: "center", gap: 12,
       }}>
-        <Link href="/" style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--color-brand-primary)", textDecoration: "none" }}>
+        <Link href="/" prefetch={false} style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--color-brand-primary)", textDecoration: "none" }}>
           CarreiraBeauty
         </Link>
       </header>

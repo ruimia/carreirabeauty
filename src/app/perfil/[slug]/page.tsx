@@ -139,7 +139,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
         padding: "0 var(--space-page-x)", height: 52,
         display: "flex", alignItems: "center",
       }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+        <Link href="/" prefetch={false} style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="CarreiraBeauty" style={{ height: 20, objectFit: "contain" }} />
         </Link>
@@ -154,7 +154,7 @@ export default async function PerfilPublicoPage({ params }: { params: Promise<{ 
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 var(--space-page-x) 48px" }}>
         {/* Footer */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, marginTop: 32 }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+          <Link href="/" prefetch={false} style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="CarreiraBeauty" style={{ height: 16, objectFit: "contain" }} />
           </Link>

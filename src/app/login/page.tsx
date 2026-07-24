@@ -148,9 +148,9 @@ export default function LoginPage() {
 
         <p style={{ ...styles.caption, marginTop: 24, textAlign: "center" }}>
           Ao entrar, você concorda com nossos{" "}
-          <Link href="/termos" style={{ color: "var(--text-link)" }}>Termos</Link>
+          <Link href="/termos" prefetch={false} style={{ color: "var(--text-link)" }}>Termos</Link>
           {" "}e{" "}
-          <Link href="/privacidade" style={{ color: "var(--text-link)" }}>Privacidade</Link>.
+          <Link href="/privacidade" prefetch={false} style={{ color: "var(--text-link)" }}>Privacidade</Link>.
         </p>
       </div>
     </main>
