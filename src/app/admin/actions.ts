@@ -6,12 +6,11 @@ import { emailVagaAprovada, emailVagaRejeitada, emailNovaVagaProfissional, rende
 import { distanciaKm } from "@/lib/geocode";
 import { normalizeInstagramHandle } from "@/lib/instagram";
 
-// /vagas, /freelas, /empresa/[slug] e a home usam ISR — sem revalidar aqui,
+// /vagas, /empresa/[slug] e a home usam ISR — sem revalidar aqui,
 // uma aprovação/edição/mudança de status de vaga ficaria até 5min defasada
 // pro público, mesmo já valendo no admin.
 function revalidarVitrinesPublicas(companySlug?: string | null) {
   revalidatePath("/vagas");
-  revalidatePath("/freelas");
   revalidatePath("/");
   if (companySlug) revalidatePath(`/empresa/${companySlug}`);
 }

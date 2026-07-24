@@ -83,10 +83,6 @@ export default async function VagasPage({ searchParams }: Props) {
           <p style={{ fontSize: 14, color: "var(--text-tertiary)", margin: 0 }}>
             {total} vaga{total !== 1 ? "s" : ""} ativa{total !== 1 ? "s" : ""}
             {funcao ? ` · ${funcao}` : ""}
-            {" · "}
-            <Link href="/freelas" prefetch={false} style={{ color: "var(--color-brand-primary)", fontWeight: 600, textDecoration: "none" }}>
-              Ver só freelas →
-            </Link>
           </p>
         </div>
 

@@ -19,11 +19,10 @@ async function assertOwnsJob(jobId: string) {
   return { supabase, company };
 }
 
-// /vagas, /freelas e a home usam ISR — sem revalidar aqui, uma vaga
+// /vagas e a home usam ISR — sem revalidar aqui, uma vaga
 // encerrada/reaberta continuaria (des)aparecendo pro público por até 5min.
 function revalidarVitrinesPublicas(companySlug?: string | null) {
   revalidatePath("/vagas");
-  revalidatePath("/freelas");
   revalidatePath("/");
   if (companySlug) revalidatePath(`/empresa/${companySlug}`);
 }

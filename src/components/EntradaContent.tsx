@@ -236,7 +236,7 @@ export default function EntradaContent({ banner }: { banner?: React.ReactNode })
           </div>
           <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
             <FooterCol title="Produto" links={[{ label: "Para profissionais", href: "#profissionais" }, { label: "Para empresas", href: "#empresas" }]} />
-            <FooterCol title="Vagas" links={[{ label: "Todas as vagas", href: "/vagas" }, { label: "Freelas e diárias", href: "/freelas" }]} />
+            <FooterCol title="Vagas" links={[{ label: "Todas as vagas", href: "/vagas" }]} />
             <FooterCol title="Ajuda" links={[{ label: "Perguntas frequentes", href: "/perguntas-frequentes" }, { label: "Termos de uso", href: "/termos" }, { label: "Privacidade", href: "/privacidade" }]} />
           </div>
           <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 20, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>

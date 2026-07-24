@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const FAQ: { pergunta: string; resposta: string }[] = [
   {
     pergunta: "Como encontrar um freela de manicure, cabeleireiro(a) ou esteticista?",
-    resposta: "No CarreiraBeauty, acesse a página de Freelas (carreirabeauty.com/freelas) e veja trabalhos por diária publicados por salões, clínicas e espaços de beleza perto de você. É grátis pra se candidatar.",
+    resposta: "No CarreiraBeauty, acesse a página de Vagas (carreirabeauty.com/vagas) e veja trabalhos por diária publicados por salões, clínicas e espaços de beleza perto de você. É grátis pra se candidatar.",
   },
   {
     pergunta: "O CarreiraBeauty tem vagas CLT e PJ, ou só freela?",
