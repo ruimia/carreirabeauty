@@ -139,7 +139,7 @@ export default async function Home() {
             {/* CTAs — logo abaixo do subtítulo, sem scroll */}
             <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center", marginTop: 4 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
+                <Link href="/onboarding/profissional" prefetch={false} style={{ ...btnStyle, background: "var(--brand-cyan-500)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,170,200,0.28)" }}>
                   👤 Cadastro Profissional Grátis
                 </Link>
                 <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
@@ -150,7 +150,7 @@ export default async function Home() {
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
+                <Link href="/onboarding/empresa" prefetch={false} style={{ ...btnStyle, background: "var(--color-brand-primary)", height: 56, padding: "0 28px", fontSize: 16, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(220,0,220,0.28)" }}>
                   🏪 Anunciar vaga grátis
                 </Link>
                 <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-tertiary)", lineHeight: 1.4, maxWidth: 240 }}>
@@ -312,7 +312,7 @@ export default async function Home() {
                 <Step num={2} title="Ganhe uma página pública" desc="Seu currículo online, indexado no Google, de graça." accent="var(--brand-cyan-500)" />
                 <Step num={3} title="Receba vagas perto de você" desc="Filtro geográfico fino — nada de vaga do outro lado da cidade." accent="var(--brand-cyan-500)" />
               </div>
-              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "var(--brand-cyan-500)" }}>
+              <Link href="/onboarding/profissional" prefetch={false} style={{ ...btnStyle, background: "var(--brand-cyan-500)" }}>
                 Criar meu perfil grátis
               </Link>
             </div>
@@ -353,7 +353,7 @@ export default async function Home() {
                 <Step num={2} title="Publique sua primeira vaga de graça" desc="Sem prazo, sem cartão de crédito — todo estabelecimento tem direito a 1 vaga ativa gratuita." accent="var(--color-brand-primary)" />
                 <Step num={3} title="Converse com candidatos" desc="Veja quem se candidatou e fale direto pelo WhatsApp." accent="var(--color-brand-primary)" />
               </div>
-              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>
+              <Link href="/onboarding/empresa" prefetch={false} style={{ ...btnStyle, background: "var(--color-brand-primary)" }}>
                 Cadastrar minha empresa grátis
               </Link>
             </div>
@@ -419,10 +419,10 @@ export default async function Home() {
               Leva menos de 5 minutos para criar sua conta.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-              <Link href="/onboarding/profissional" style={{ ...btnStyle, background: "#fff", color: "var(--color-brand-primary)" }}>
+              <Link href="/onboarding/profissional" prefetch={false} style={{ ...btnStyle, background: "#fff", color: "var(--color-brand-primary)" }}>
                 Criar meu perfil profissional
               </Link>
-              <Link href="/onboarding/empresa" style={{ ...btnStyle, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.5)" }}>
+              <Link href="/onboarding/empresa" prefetch={false} style={{ ...btnStyle, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.5)" }}>
                 Cadastrar minha empresa
               </Link>
             </div>

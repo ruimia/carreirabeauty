@@ -32,7 +32,7 @@ export default function StickyCTABar() {
           boxShadow: "0 -4px 16px rgba(0,0,0,0.06)",
         }}
       >
-        <Link href="/onboarding/profissional" style={{
+        <Link href="/onboarding/profissional" prefetch={false} style={{
           flex: 1, height: 46, borderRadius: "var(--radius-pill)", border: "none",
           background: "var(--brand-cyan-500)", color: "#fff", fontFamily: "var(--font-body)",
           fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center",
@@ -40,7 +40,7 @@ export default function StickyCTABar() {
         }}>
           👤 Sou profissional
         </Link>
-        <Link href="/onboarding/empresa" style={{
+        <Link href="/onboarding/empresa" prefetch={false} style={{
           flex: 1, height: 46, borderRadius: "var(--radius-pill)", border: "none",
           background: "var(--color-brand-primary)", color: "#fff", fontFamily: "var(--font-body)",
           fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center",
